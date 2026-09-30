@@ -60,7 +60,7 @@
       "refunds"
     ],
     "dataset_version": "mock-v1.0-demo",
-    "sql": "WITH paid AS (\n  SELECT SUM(o.pay_amount) AS paid_amount\n  FROM orders o JOIN customers c ON c.customer_id = o.customer_id\n  WHERE o.pay_status = 'success' AND o.pay_time >= '2026-09-01 00:00:00' AND o.pay_time <= '2026-09-30 23:59:59'\n), refund AS (\n  SELECT SUM(r.refund_amount) AS refund_amount\n  FROM refunds r JOIN orders o ON o.order_id = r.order_id\n       JOIN customers c ON c.customer_id = o.customer_id\n  WHERE r.refund_status = 'success' AND r.refund_time >= '2026-09-01 00:00:00' AND r.refund_time <= '2026-09-30 23:59:59'\n)\nSELECT p.paid_amount, r.refund_amount, p.paid_amount - r.refund_amount AS net_sales\nFROM paid p LEFT JOIN refund q ON 1=1;"
+    "sql": "WITH paid AS (\n  SELECT SUM(o.pay_amount) AS paid_amount\n  FROM orders o JOIN customers c ON c.customer_id = o.customer_id\n  WHERE o.pay_status = 'success' AND o.pay_time >= '2026-09-01 00:00:00' AND o.pay_time <= '2026-09-30 23:59:59'\n), refund_pre AS (\n  SELECT r.order_id, SUM(r.refund_amount) AS refund_amount\n  FROM refunds r JOIN orders o ON o.order_id = r.order_id\n       JOIN customers c ON c.customer_id = o.customer_id\n  WHERE r.refund_status = 'success' AND r.refund_time >= '2026-09-01 00:00:00' AND r.refund_time <= '2026-09-30 23:59:59'\n  GROUP BY r.order_id\n), refund AS (\n  SELECT SUM(refund_amount) AS refund_amount\n  FROM refund_pre\n)\nSELECT COALESCE(p.paid_amount, 0) AS paid_amount, COALESCE(q.refund_amount, 0) AS refund_amount, COALESCE(p.paid_amount, 0) - COALESCE(q.refund_amount, 0) AS net_sales\nFROM paid p FULL OUTER JOIN refund q ON 1=1;"
   },
   "causal": {
     "status": "insufficient_data",

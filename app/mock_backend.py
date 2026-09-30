@@ -442,20 +442,42 @@ def _build_sql(plan: dict) -> str:
                 f"FROM refunds r JOIN orders o ON o.order_id = r.order_id\n"
                 f"     JOIN customers c ON c.customer_id = o.customer_id\n"
                 f"WHERE {' AND '.join(where_r)}{grp};")
-    # 净销售额：两侧各自聚合后按维度外连接，避免一对多重复累计
+    # 净销售额：两条独立聚合。退款侧先按 order_id 预聚合（refund_pre），
+    # 再按维度汇总（refund），最后与支付侧按维度 FULL OUTER JOIN，
+    # 与 pandas 执行逻辑（outer join + fillna(0)）逐段对应，
+    # 结构上杜绝一对多关联导致实付金额重复累计（契约 IS-001 / §3.4）。
+    if dim_col:
+        paid_dim = f"c.{dim_col}, "
+        pre_group = f"r.order_id, c.{dim_col}"
+        final_dim = f"COALESCE(p.{dim_col}, q.{dim_col}) AS {dim_col}, "
+        join_clause = f"FULL OUTER JOIN refund q ON p.{dim_col} = q.{dim_col}"
+    else:
+        paid_dim = ""
+        pre_group = "r.order_id"
+        final_dim = ""
+        # 两个无 GROUP BY 的聚合 CTE 恒为单行，ON 1=1 即一对一
+        join_clause = "FULL OUTER JOIN refund q ON 1=1"
     return (
         f"WITH paid AS (\n"
-        f"  SELECT {sel_group}SUM(o.pay_amount) AS paid_amount\n"
+        f"  SELECT {paid_dim}SUM(o.pay_amount) AS paid_amount\n"
         f"  FROM orders o JOIN customers c ON c.customer_id = o.customer_id\n"
         f"  WHERE {' AND '.join(where_o)}{grp}\n"
-        f"), refund AS (\n"
-        f"  SELECT {sel_group}SUM(r.refund_amount) AS refund_amount\n"
+        f"), refund_pre AS (\n"
+        f"  SELECT {'c.' + dim_col + ', ' if dim_col else ''}r.order_id, "
+        f"SUM(r.refund_amount) AS refund_amount\n"
         f"  FROM refunds r JOIN orders o ON o.order_id = r.order_id\n"
         f"       JOIN customers c ON c.customer_id = o.customer_id\n"
-        f"  WHERE {' AND '.join(where_r)}{grp}\n"
+        f"  WHERE {' AND '.join(where_r)}\n"
+        f"  GROUP BY {pre_group}\n"
+        f"), refund AS (\n"
+        f"  SELECT {sel_group}SUM(refund_amount) AS refund_amount\n"
+        f"  FROM refund_pre{grp}\n"
         f")\n"
-        f"SELECT {sel_group}p.paid_amount, r.refund_amount, p.paid_amount - r.refund_amount AS net_sales\n"
-        f"FROM paid p LEFT JOIN refund q ON 1=1;"
+        f"SELECT {final_dim}"
+        f"COALESCE(p.paid_amount, 0) AS paid_amount, "
+        f"COALESCE(q.refund_amount, 0) AS refund_amount, "
+        f"COALESCE(p.paid_amount, 0) - COALESCE(q.refund_amount, 0) AS net_sales\n"
+        f"FROM paid p {join_clause};"
     )
 
 
