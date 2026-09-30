@@ -61,10 +61,25 @@ st.set_page_config(
 APP_CSS = """
 <style>
   .block-container { padding-top: 1.1rem; padding-bottom: 2rem; max-width: 1240px; }
+
+  /* ---- 动效基调：短、轻、克制；尊重系统「减少动态效果」设置 ---- */
+  @keyframes db-fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes db-shimmer {
+    0%   { background-position: -480px 0; }
+    100% { background-position: 480px 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
   .db-hero {
     background: linear-gradient(135deg, #f4f7ff 0%, #ecf2ff 100%);
     border: 1px solid #d9e2f4; border-radius: 12px;
     padding: 18px 22px; margin-bottom: 16px;
+    animation: db-fade-up .35s ease both;
   }
   .db-hero h1 { font-size: 1.5rem; margin: 0 0 6px 0; color: #12233f; font-weight: 700; }
   .db-hero p  { margin: 0; color: #47546f; font-size: .92rem; line-height: 1.65; }
@@ -72,18 +87,99 @@ APP_CSS = """
   .db-tag {
     background: #fff; border: 1px solid #d3dded; color: #2b3d5c;
     border-radius: 999px; padding: 3px 11px; font-size: .78rem;
+    transition: background .15s ease, border-color .15s ease;
   }
+  .db-tag:hover { background: #eef3ff; border-color: #b9c9e6; }
+
   .db-card {
-    background: #fff; border: 1px solid #e2e7ef; border-radius: 10px;
+    background: rgba(255, 255, 255, .82);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #e2e7ef; border-radius: 10px;
     padding: 13px 16px; margin: 10px 0;
+    transition: box-shadow .18s ease, transform .18s ease;
+    animation: db-fade-up .35s ease both;
   }
+  .db-card:hover { box-shadow: 0 8px 24px rgba(31, 55, 109, .10); transform: translateY(-1px); }
   .db-card h4 { margin: 0 0 6px 0; font-size: .95rem; color: #12233f; }
   .db-card p  { margin: 0; font-size: .86rem; color: #47546f; line-height: 1.7; }
   .db-note { font-size: .82rem; color: #6b7891; }
+
+  /* ---- KPI 指标卡：毛玻璃 + 悬浮抬升 ---- */
+  div[data-testid="stMetric"] {
+    background: rgba(255, 255, 255, .72);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(214, 224, 240, .9); border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 10px rgba(31, 55, 109, .05);
+    transition: transform .18s ease, box-shadow .18s ease;
+    animation: db-fade-up .35s ease both;
+  }
+  div[data-testid="stMetric"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(31, 55, 109, .13);
+  }
   div[data-testid="stMetricValue"] { font-size: 1.35rem; font-weight: 650; }
+
+  /* ---- 结果区：表格、图表卡片化，内容出现时淡入 ----
+     选择器来自真实 DOM 探查：图表是 stVegaLiteChart，表格外框是 stDataFrameResizable。 */
+  [data-testid="stDataFrame"], [data-testid="stVegaLiteChart"] {
+    animation: db-fade-up .4s ease both;
+  }
+  div[data-testid="stDataFrameResizable"],
+  div[data-testid="stVegaLiteChart"] {
+    background: rgba(255, 255, 255, .72) !important;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #e6ecf5 !important; border-radius: 10px !important;
+    padding: 8px 10px; box-shadow: 0 2px 10px rgba(31, 55, 109, .05);
+    transition: box-shadow .18s ease, transform .18s ease;
+  }
+  div[data-testid="stDataFrameResizable"]:hover,
+  div[data-testid="stVegaLiteChart"]:hover {
+    box-shadow: 0 8px 22px rgba(31, 55, 109, .10); transform: translateY(-1px);
+  }
+
+  /* ---- 对话与状态提示淡入 ---- */
+  [data-testid="stChatMessage"] { animation: db-fade-up .3s ease both; }
+  [data-testid="stAlert"] { animation: db-fade-up .3s ease both; }
+  div[data-testid="stHorizontalBlock"] > div { gap: .25rem; }
+
+  /* ---- 查询骨架屏（shimmer）：仅在查询执行期间渲染，不人为制造延迟 ---- */
+  .db-skeleton {
+    background: rgba(255, 255, 255, .8); border: 1px solid #e6ecf5;
+    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+    animation: db-fade-up .2s ease both;
+  }
+  .db-skeleton .sk-bar {
+    height: 14px; border-radius: 7px; margin: 10px 0;
+    background: linear-gradient(90deg, #eef2f8 25%, #e2e9f4 37%, #eef2f8 63%);
+    background-size: 960px 100%;
+    animation: db-shimmer 1.25s linear infinite;
+  }
+  .db-skeleton .sk-title { height: 20px; width: 34%; }
+  .db-skeleton .sk-kpi-row { display: flex; gap: 12px; margin: 12px 0 6px; }
+  .db-skeleton .sk-kpi {
+    flex: 1; height: 64px; border-radius: 10px;
+    background: linear-gradient(90deg, #eef2f8 25%, #e2e9f4 37%, #eef2f8 63%);
+    background-size: 960px 100%; animation: db-shimmer 1.25s linear infinite;
+  }
+  .db-skeleton .sk-w70 { width: 70%; } .db-skeleton .sk-w45 { width: 45%; }
 </style>
 """
 st.markdown(APP_CSS, unsafe_allow_html=True)
+
+SKELETON_HTML = """
+<div class="db-skeleton" aria-busy="true" aria-label="正在查询">
+  <div class="sk-bar sk-title"></div>
+  <div class="sk-kpi-row"><div class="sk-kpi"></div><div class="sk-kpi"></div><div class="sk-kpi"></div></div>
+  <div class="sk-bar sk-w70"></div><div class="sk-bar"></div>
+  <div class="sk-bar sk-w45"></div>
+</div>
+"""
+
+
+def _show_skeleton() -> None:
+    """查询执行期间展示骨架屏；真实耗时多长就显示多长，不注入任何人为延迟。"""
+    st.markdown(SKELETON_HTML, unsafe_allow_html=True)
 
 LABEL_MAP = {code: spec["label"] for code, spec in METRIC_SPEC.items()}
 LABEL_MAP.update({code: spec["label"] for code, spec in DIMENSION_SPEC.items()})
@@ -628,10 +724,12 @@ def render_query_zone() -> None:
     cols = st.columns(5)
     for i, (kind, question, expect) in enumerate(PRESET_EXAMPLES):
         if cols[i % 5].button(question[:12] + "…", key=f"preset_{i}", help=f"{kind}｜预期状态：{STATUS_LABEL[expect]}\n{question}"):
+            _show_skeleton()
             _submit(question)
             st.rerun()
 
     if submitted and q.strip():
+        _show_skeleton()
         _submit(q.strip())
         st.rerun()
 
@@ -662,11 +760,13 @@ def render_query_zone() -> None:
             picked = st.radio("请选择：", labels, key=f"clr_{clr['id']}")
             idx = labels.index(picked)
             if st.button("提交选择", key=f"clr_submit_{clr['id']}"):
+                _show_skeleton()
                 _submit_clarification(options[idx]["value"])
                 st.rerun()
         if clr.get("allow_free_text"):
             free = st.text_input("或直接用文字说明", key=f"clr_free_{clr['id']}")
             if st.button("提交文字说明", key=f"clr_free_btn_{clr['id']}") and free.strip():
+                _show_skeleton()
                 _submit_clarification("", free_text=free.strip())
                 st.rerun()
 
