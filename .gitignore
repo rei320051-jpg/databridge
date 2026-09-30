@@ -22,6 +22,10 @@ data/*.csv
 .env
 config.local.py
 
+# 个人工作笔记 / Agent 记忆
+.workbuddy/
+.gh_tmp
+
 # 编辑器与系统
 .vscode/
 .idea/
