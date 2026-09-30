@@ -61,6 +61,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 .venv\Scripts\python.exe tests\run_testset.py 开发集  # 测试集自动评分（37 题）
 .venv\Scripts\python.exe tests\run_testset.py 保留集  # 只读基线检查（最终测试才正式跑）
 .venv\Scripts\python.exe tests\run_experiment.py      # S1 vs S2 对照实验（37 题 × 2 方案）
+.venv\Scripts\python.exe tests\is001_refund_timing.py # IS-001 退款时间归属两口径对比
 .venv\Scripts\python.exe tests\export_showcase_data.py  # 导出展示页数据
 ```
 
@@ -99,7 +100,9 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
     ├── build_experiment_sheet.py      从开发集生成实验记录表（空表）
     ├── s1_baseline.py                 S1 基线：只看表结构的直接 Text-to-SQL 行为模拟
     ├── run_experiment.py              S1 vs S2 对照实验执行器（填表 + 数值核对 + 归因）
+    ├── is001_refund_timing.py         IS-001 退款时间归属两口径对比（跨月退款变体）
     ├── _对照实验明细.csv               74 行逐题明细（含实际数值与差异归因）
+    ├── _IS001口径对比.csv              月份×地区两口径净销售额差异表
     ├── export_showcase_data.py        导出展示页所需的真实计算结果
     ├── run_testset.py                 测试集自动评分器
     ├── scenario_test.py               §5.2.5 八个异常场景（F01~F08）
@@ -223,6 +226,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 - 实付金额与成功退款金额的月度、地区总量由配置精确控制，因此环比结论稳定可复现；订单数与客户数由实际生成的行推导。
 - 订单表内故意混入 `failed` / `pending` / `cancelled` 订单，退款表内混入 `failed` 退款。**这些行不参与任何指标统计。**
 - 勾选「载入异常测试数据集」可切换到注入了重复主键、缺失值、负金额、脏时间、悬空外键的数据，用于验证数据质量检查能力。
+- `demo_data.cross_month_refund_tables()` 提供独立的**跨月退款变体**：把华东 8 月订单的 5 笔成功退款（4,965.13 元）移到 9 月，用于 IS-001 退款时间归属口径决策（`tests/is001_refund_timing.py`）。它不修改干净数据，基线数字不受影响。
 - 业务基准日：`2026-09-30`；数据集版本：`mock-v1.0-demo`。
 
 ---
@@ -232,5 +236,5 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 1. 后端为页面侧参考实现，正式查询服务由成员 1 交付。
 2. 示例运营 Agent 为页面侧调用回放，正式 Agent 由成员 2 交付。
 3. 首版仅支持 5 个基础指标，不支持退款率、客单价等派生比率指标。
-4. 净销售额中「同期成功退款金额」的时间归属口径待三人确认（议题 IS-001）。
+4. 净销售额中「同期成功退款金额」的时间归属口径待三人确认（议题 IS-001，截止 10-08）；成员 3 已用跨月退款变体完成两口径对比实验并给出推荐结论（按 refund_time 归属），见 `docs/测试集与对照实验说明.md` §4 与 `tests/_IS001口径对比.csv`。
 5. 演示数据为模拟数据，任何结论都不代表真实经营情况。

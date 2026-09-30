@@ -242,6 +242,58 @@ def anomaly_tables(tables: dict | None = None) -> dict:
             "refunds": refunds.reset_index(drop=True)}
 
 
+def _customer_region(customers: pd.DataFrame) -> pd.DataFrame:
+    """小工具：customer_id -> region（供跨月退款变体定位地区）。"""
+    return customers[["customer_id", "region"]]
+
+
+def cross_month_refund_tables(tables: dict | None = None, n_moves: int = 5):
+    """在干净数据上注入「跨月退款」，专供 IS-001 时间归属口径决策（不污染基线）。
+
+    背景：干净演示数据的成功退款全部发生在订单支付当月，
+    「退款按 refund_time 归属」与「按 pay_time 归属」两种口径算不出差异，
+    IS-001（分工文档，截止 2026-10-08）因此无法用数据支撑。
+
+    注入方式（**移动**而非新增，退款总额守恒）：
+      取华东地区 2026-08 支付订单的成功退款中金额最大的 n_moves 笔，
+      把 refund_time 改到 2026-09-03（次月）。
+      - 按 refund_time 归属（S2 现行口径）：这笔退款计入 9 月；
+      - 按 pay_time 归属（S1 直连默认口径）：这笔退款仍计入 8 月。
+      两口径下 8 月、9 月华东净销售额必然不同，差异金额精确等于被移动退款之和。
+
+    注入是确定性的（按金额排序选取，无随机），结果可复现。
+
+    :returns: dict，除 customers/orders/refunds 外，键 ``_cross_month_moves``
+              记录被移动退款的笔数、合计金额与明细，供测试与报告引用。
+    """
+    if tables is None:
+        tables = demo_tables()
+    orders = tables["orders"]
+    refunds = tables["refunds"].copy()
+
+    orders_dim = orders[["order_id", "customer_id", "pay_time"]].merge(
+        _customer_region(tables["customers"]), on="customer_id", how="left")
+    aug_targets = orders_dim[
+        (orders_dim["region"] == "华东")
+        & (orders_dim["pay_time"].str.startswith("2026-08"))
+    ]["order_id"]
+
+    cand = refunds[(refunds["refund_status"] == "success")
+                   & (refunds["order_id"].isin(aug_targets))]
+    picked = cand.nlargest(n_moves, "refund_amount")
+    moved_total = round(float(picked["refund_amount"].sum()), 2)
+    moves = [{"refund_id": r.refund_id, "order_id": r.order_id,
+              "old_refund_time": r.refund_time, "new_refund_time": "2026-09-03 10:00:00",
+              "refund_amount": float(r.refund_amount)}
+             for r in picked.itertuples()]
+    refunds.loc[refunds["refund_id"].isin(picked["refund_id"]),
+                "refund_time"] = "2026-09-03 10:00:00"
+
+    out = {"customers": tables["customers"], "orders": orders, "refunds": refunds}
+    out["_cross_month_moves"] = {"count": len(moves), "amount": moved_total, "moves": moves}
+    return out
+
+
 #: 三张表的字段类型声明，供数据质量检查比对（成员 1 的 /datasets/inspect 应返回同结构）
 TABLE_SCHEMA = {
     "orders": {

@@ -260,6 +260,26 @@ def main() -> None:
     for f, c in sorted(factor_count.items(), key=lambda kv: -kv[1]):
         log(f"  {c:>2} 题  {f}")
 
+    # ---- 装置验证：第三个归因因素在干净数据上 0 命中是数据特性，不是装置缺陷 ----
+    # 在跨月退款变体（demo_data.cross_month_refund_tables）上验证：
+    # 只引入「退款按 pay_time 归属」单缺陷，其余两层全部正确时，净销售额仍会算错。
+    from demo_data import cross_month_refund_tables  # noqa: E402
+    variant = cross_month_refund_tables(tables)
+    mv = variant["_cross_month_moves"]
+    probe_q = "2026年9月华东地区的净销售额是多少"
+    ref_resp = mock_backend.handle(probe_q, tables=variant)
+    ref_val = ref_resp["data"][0]["net_sales"]
+    _, _, _, _, _, _, bad_recs, _ = s1_baseline.execute_s1(
+        probe_q, variant, use_status=True, safe_refund=True)  # 单缺陷：pay_time 归属
+    bad_val = bad_recs[0]["net_sales"]
+    timing_ok = abs(bad_val - ref_val - mv["amount"]) < 0.01
+    log("\n归因装置验证（跨月退款变体，不影响上方 74 行记录）：")
+    log(f"  注入 {mv['count']} 笔跨月退款，合计 {mv['amount']:,.2f} 元（8月订单，9月退款）")
+    log(f"  9月华东净销售额：S2 按 refund_time 归属={ref_val:,.2f}｜"
+        f"单缺陷变体按 pay_time 归属={bad_val:,.2f}")
+    log(f"  [{'PASS' if timing_ok else 'FAIL'}] 仅「退款按支付月归属」单缺陷"
+        f"即造成 {mv['amount']:,.2f} 元偏差 —— 第三因素在含跨月退款的数据上可被观测")
+
     # 编造/错答逐题列出
     log("\nS1 失败题目清单：")
     for d in detail_rows:
