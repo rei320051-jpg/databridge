@@ -31,6 +31,7 @@ from shared.contracts import (  # noqa: E402
     DATASET_COVERAGE,
     DATASET_VERSION,
     DIMENSION_SPEC,
+    MAX_CLARIFICATION_ROUNDS,
     METRIC_SPEC,
     MODULE_VERSION,
     PRESET_EXAMPLES,
@@ -599,6 +600,18 @@ def render_query_zone() -> None:
     st.subheader("智能取数区")
     st.caption("对应分工文档 §5.2.2「智能取数区」与 §5.2.1 的第 4~7 步。")
 
+    # 第 3 步确认状态的温和提醒（不阻断查询；与业务字典区的承诺一致）
+    n_confirmed = len(st.session_state.get("confirmed_metrics") or ())
+    n_total = len(METRIC_SPEC)
+    if n_confirmed == 0:
+        st.info(
+            "你尚未在「② 业务字典」确认任何指标口径。可以直接提问，"
+            "但建议先核对口径 —— 口径理解不一致是取数结果互相矛盾的最常见原因。"
+        )
+    elif n_confirmed < n_total:
+        st.caption(f"已确认 {n_confirmed} / {n_total} 个指标口径，"
+                   "可在「② 业务字典」继续核对。")
+
     queries = [resp for resp in st.session_state["history"] if resp.get("status") == Status.SUCCESS]
     c1, c2 = st.columns([1, 3])
     c1.metric("已完成查询", len(queries))
@@ -631,9 +644,17 @@ def render_query_zone() -> None:
     clr = st.session_state.get("pending_clarification")
     if clr:
         st.divider()
+        round_no = int(clr.get("round", 1))
+        remaining = max(0, MAX_CLARIFICATION_ROUNDS - round_no)
+        round_hint = (
+            f"第 {round_no} / {MAX_CLARIFICATION_ROUNDS} 轮（这是最后一轮，"
+            "若仍无法确定，将降级为「数据不足」而不是猜测一个答案）"
+            if remaining == 0
+            else f"第 {round_no} / {MAX_CLARIFICATION_ROUNDS} 轮（还剩 {remaining} 次机会）"
+        )
         st.warning(
             f"**需要你补充信息**｜{REASON_LABEL.get(clr.get('reason_code'), clr.get('reason_code'))}"
-            f"（第 {clr.get('round', 1)} 轮）\n\n{clr['question']}"
+            f"（{round_hint}）\n\n{clr['question']}"
         )
         options = clr.get("options") or []
         if options:
