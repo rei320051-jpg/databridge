@@ -1,0 +1,29 @@
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 测试产生的中间输出（可随时重新生成）
+tests/_*_out.txt
+tests/_diag*.txt
+tests/_probe.txt
+tests/_cleanup.txt
+
+# 评测结果 CSV 属于交付证据，不忽略，需要提交
+
+# 数据与密钥
+data/*.csv
+*.env
+.env
+config.local.py
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

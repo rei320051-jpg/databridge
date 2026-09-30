@@ -1,0 +1,212 @@
+{
+  "net_sales_by_region": {
+    "2026-09": {
+      "华东": 1156416.0,
+      "华南": 1063488.0,
+      "华北": 695385.0,
+      "华中": 625050.0,
+      "西南": 579363.0
+    },
+    "2026-08": {
+      "华东": 1339510.0,
+      "华南": 1036384.0,
+      "华北": 775482.0,
+      "华中": 650496.0,
+      "西南": 552954.0
+    },
+    "mom_pct": {
+      "华东": -13.67,
+      "华南": 2.62,
+      "华北": -10.33,
+      "华中": -3.91,
+      "西南": 4.78
+    }
+  },
+  "worst_region": "华东",
+  "east_sep": {
+    "net_sales": 1156416.0,
+    "paid_amount": 1268000.0,
+    "refund_amount": 111584.0,
+    "paid_order_count": 4731,
+    "paid_customer_count": 4027
+  },
+  "sep_total_net_sales": 4119702.0,
+  "clarify_round1": {
+    "status": "need_clarification",
+    "question": "你说的「销售额」是指哪一个指标？",
+    "options": [
+      {
+        "value": "net_sales",
+        "label": "净销售额",
+        "definition": "所选期间实付金额减去同期成功退款金额"
+      },
+      {
+        "value": "paid_amount",
+        "label": "实付金额",
+        "definition": "所选期间成功支付订单的实付金额之和，不做退款扣减"
+      }
+    ],
+    "id": "clr_metric_001",
+    "reason_code": "ambiguous_metric"
+  },
+  "clarify_round2": {
+    "status": "success",
+    "metric": "net_sales",
+    "definition": "所选期间实付金额减去同期成功退款金额",
+    "unit": "元",
+    "value": 4119702.0,
+    "source_tables": [
+      "orders",
+      "refunds"
+    ],
+    "dataset_version": "mock-v1.0-demo",
+    "sql": "WITH paid AS (\n  SELECT SUM(o.pay_amount) AS paid_amount\n  FROM orders o JOIN customers c ON c.customer_id = o.customer_id\n  WHERE o.pay_status = 'success' AND o.pay_time >= '2026-09-01 00:00:00' AND o.pay_time <= '2026-09-30 23:59:59'\n), refund AS (\n  SELECT SUM(r.refund_amount) AS refund_amount\n  FROM refunds r JOIN orders o ON o.order_id = r.order_id\n       JOIN customers c ON c.customer_id = o.customer_id\n  WHERE r.refund_status = 'success' AND r.refund_time >= '2026-09-01 00:00:00' AND r.refund_time <= '2026-09-30 23:59:59'\n)\nSELECT p.paid_amount, r.refund_amount, p.paid_amount - r.refund_amount AS net_sales\nFROM paid p LEFT JOIN refund q ON 1=1;"
+  },
+  "causal": {
+    "status": "insufficient_data",
+    "message": "无法支持因果判断",
+    "reason": "causal_reasoning_unsupported",
+    "missing": [
+      "营销活动数据",
+      "竞品数据",
+      "价格调整记录",
+      "库存与履约数据"
+    ],
+    "suggestion": "现有数据只能反映结果指标的变化，缺少活动、价格、竞品等外部变量，无法判断下降原因。可以改为查询「华东地区各月净销售额」观察变化幅度。",
+    "retryable": false
+  },
+  "quality": {
+    "clean": {
+      "errors": 0,
+      "warnings": 2,
+      "tables": [
+        {
+          "name": "customers",
+          "rows": 59490
+        },
+        {
+          "name": "orders",
+          "rows": 85018
+        },
+        {
+          "name": "refunds",
+          "rows": 6703
+        }
+      ]
+    },
+    "dirty": {
+      "errors": 6,
+      "warnings": 6,
+      "issues": [
+        {
+          "level": "warning",
+          "code": "missing_value",
+          "field": "customer_name",
+          "count": 199,
+          "message": "字段 `customer_name` 有 199 条空值（占 0.3%）。",
+          "impact": "缺失值默认被忽略，会导致分组统计口径不一致。",
+          "table": "customers"
+        },
+        {
+          "level": "error",
+          "code": "duplicate_primary_key",
+          "field": "order_id",
+          "count": 1,
+          "message": "主键 `order_id` 存在 1 条重复记录。",
+          "impact": "按主键去重的指标（订单数、支付人数）会被低估，金额类指标会被高估。",
+          "table": "orders"
+        },
+        {
+          "level": "warning",
+          "code": "missing_value",
+          "field": "pay_amount",
+          "count": 1,
+          "message": "字段 `pay_amount` 有 1 条空值（占 0.0%）。",
+          "impact": "缺失值默认被忽略，会导致分组统计口径不一致。",
+          "table": "orders"
+        },
+        {
+          "level": "error",
+          "code": "negative_amount",
+          "field": "pay_amount",
+          "count": 1,
+          "message": "金额字段 `pay_amount` 存在 1 条负值。",
+          "impact": "负金额会被直接求和进入指标，拉低金额类指标。",
+          "table": "orders"
+        },
+        {
+          "level": "warning",
+          "code": "amount_outlier",
+          "field": "pay_amount",
+          "count": 2,
+          "message": "金额字段 `pay_amount` 有 2 条极端大值（> 1,098），最大值为中位数的 483,045 倍。",
+          "impact": "若为测试数据或录入错误，金额类指标会被显著抬高。",
+          "table": "orders"
+        },
+        {
+          "level": "error",
+          "code": "unparsable_time",
+          "field": "pay_time",
+          "count": 1,
+          "message": "时间字段 `pay_time` 有 1 条无法解析，例如 ['2026-13-45 99:99:99']。",
+          "impact": "该批记录会被排除在时间筛选之外，期间指标偏低。",
+          "table": "orders"
+        },
+        {
+          "level": "warning",
+          "code": "duplicate_row",
+          "field": "*",
+          "count": 1,
+          "message": "存在 1 条完全重复的记录。",
+          "impact": "若为脏数据会导致金额重复累计。",
+          "table": "orders"
+        },
+        {
+          "level": "error",
+          "code": "duplicate_primary_key",
+          "field": "refund_id",
+          "count": 1,
+          "message": "主键 `refund_id` 存在 1 条重复记录。",
+          "impact": "按主键去重的指标（订单数、支付人数）会被低估，金额类指标会被高估。",
+          "table": "refunds"
+        },
+        {
+          "level": "error",
+          "code": "negative_amount",
+          "field": "refund_amount",
+          "count": 1,
+          "message": "金额字段 `refund_amount` 存在 1 条负值。",
+          "impact": "负金额会被直接求和进入指标，拉低金额类指标。",
+          "table": "refunds"
+        },
+        {
+          "level": "warning",
+          "code": "amount_outlier",
+          "field": "refund_amount",
+          "count": 1,
+          "message": "金额字段 `refund_amount` 有 1 条极端大值（> 1,268），最大值为中位数的 6 倍。",
+          "impact": "若为测试数据或录入错误，金额类指标会被显著抬高。",
+          "table": "refunds"
+        },
+        {
+          "level": "warning",
+          "code": "duplicate_row",
+          "field": "*",
+          "count": 1,
+          "message": "存在 1 条完全重复的记录。",
+          "impact": "若为脏数据会导致金额重复累计。",
+          "table": "refunds"
+        },
+        {
+          "level": "error",
+          "code": "orphan_foreign_key",
+          "field": "orders.customer_id -> customers.customer_id",
+          "count": 1,
+          "message": "`orders.customer_id` 有 1 条无法在 `customers.customer_id` 中找到对应记录。",
+          "impact": "关联后这些记录的分组维度会变成空值，按地区统计时总额对不上。",
+          "table": "跨表"
+        }
+      ]
+    }
+  }
+}
