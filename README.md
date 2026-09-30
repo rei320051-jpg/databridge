@@ -60,6 +60,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 .venv\Scripts\python.exe tests\scenario_test.py     # §5.2.5 八个异常场景，17 项检查
 .venv\Scripts\python.exe tests\run_testset.py 开发集  # 测试集自动评分（37 题）
 .venv\Scripts\python.exe tests\run_testset.py 保留集  # 只读基线检查（最终测试才正式跑）
+.venv\Scripts\python.exe tests\run_experiment.py      # S1 vs S2 对照实验（37 题 × 2 方案）
 .venv\Scripts\python.exe tests\export_showcase_data.py  # 导出展示页数据
 ```
 
@@ -95,7 +96,10 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
     ├── 测试题_开发集_补充回归7题.csv
     ├── 测试题_保留集_30题.csv
     ├── 对照实验记录表.csv              37 题 × 2 方案 = 74 行
-    ├── build_experiment_sheet.py      从开发集生成实验记录表
+    ├── build_experiment_sheet.py      从开发集生成实验记录表（空表）
+    ├── s1_baseline.py                 S1 基线：只看表结构的直接 Text-to-SQL 行为模拟
+    ├── run_experiment.py              S1 vs S2 对照实验执行器（填表 + 数值核对 + 归因）
+    ├── _对照实验明细.csv               74 行逐题明细（含实际数值与差异归因）
     ├── export_showcase_data.py        导出展示页所需的真实计算结果
     ├── run_testset.py                 测试集自动评分器
     ├── scenario_test.py               §5.2.5 八个异常场景（F01~F08）
