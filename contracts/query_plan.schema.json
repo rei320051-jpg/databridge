@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DataBridge Query Plan 0.1.0 (team review pending)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metric", "date_start", "date_end", "dataset_version"],
+  "properties": {
+    "metric": {"enum": ["paid_orders", "paying_customers", "paid_amount", "successful_refund_amount", "net_sales"]},
+    "date_start": {"type": "string", "format": "date"},
+    "date_end": {"type": "string", "format": "date"},
+    "dataset_version": {"type": "string", "minLength": 1},
+    "group_by": {"type": "array", "items": {"enum": ["region", "customer_type"]}, "uniqueItems": true, "maxItems": 2, "default": []},
+    "filters": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "region": {"type": "array", "items": {"enum": ["华东", "华南", "华北", "西部"]}, "minItems": 1, "uniqueItems": true},
+        "customer_type": {"type": "array", "items": {"enum": ["new", "returning"]}, "minItems": 1, "uniqueItems": true}
+      },
+      "default": {}
+    },
+    "sort": {"enum": ["asc", "desc"], "default": "desc"},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
+    "compare": {
+      "type": "object", "additionalProperties": false, "required": ["date_start", "date_end"],
+      "properties": {"date_start": {"type": "string", "format": "date"}, "date_end": {"type": "string", "format": "date"}}
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "metric": "net_sales",
+  "date_start": "2026-09-01",
+  "date_end": "2026-09-30",
+  "group_by": ["region"],
+  "filters": {},
+  "sort": "desc",
+  "limit": 100,
+  "dataset_version": "small-v0.1"
+}

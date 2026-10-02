@@ -21,7 +21,7 @@ python -m venv .venv
 .venv\Scripts\python.exe -m pip install -r app/requirements.txt
 ```
 
-依赖只有两个：`streamlit` 和 `pandas`。
+上述仅为页面依赖：`streamlit` 和 `pandas`。运行成员 1 正式后端时另需安装仓库根目录的 `requirements.txt`。
 
 ### 1.2 运行
 
@@ -49,7 +49,23 @@ $env:DATABRIDGE_BACKEND = "live"
 $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 ```
 
-> 它不是正式后端。正式查询服务由成员 1 用 FastAPI 实现，但两者请求体与响应体必须逐字段一致。
+> 它不是正式后端。成员 1 的 FastAPI 执行层已独立交付；自然语言入口与页面响应仍须在三方联调时逐字段对齐。
+
+### 1.3.1 成员 1 正式执行层（独立验证，尚未接通页面 live）
+
+成员 1 的 SQLite 数据、质检导入、只读查询执行器和 FastAPI 服务已放在仓库根目录的
+`data/`、`config/`、`contracts/`、`databridge/`、`scripts/` 中。
+它接收**结构化查询计划**，不是自然语言入口。安装根目录 `requirements.txt` 后可独立运行：
+
+```powershell
+python scripts/import_dataset.py data/demo --database outputs/demo-v1.0.sqlite3
+$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.0.sqlite3).Path
+python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
+```
+
+此服务的查询入口为 `POST /v1/query`。页面当前 `live` 模式请求的是 `/agent/query`，
+两者不能直接互换；页面内置 85,018 单的模拟数据与成员 1 的 20,000 单正式后端演示数据也不能混用答案。
+具体对齐项及待三人确认的边界见 `docs/member1_integration_status.md`，请求样例见 `docs/api_usage.md`。
 
 ### 1.4 运行自测
 
@@ -156,7 +172,7 @@ git push
 
 ### 3.1 成员 1（数据与后端）
 
-实现 `docs/接口契约补充_v1.1_澄清与异常结构.md` 第 6 节的三个接口：
+共享契约目标接口如下；成员 1 当前已交付结构化执行接口 `/v1/query`，其与这些对外接口的联调状态见 `docs/member1_integration_status.md`：
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
@@ -235,7 +251,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 
 ## 8. 当前限制
 
-1. 后端为页面侧参考实现，正式查询服务由成员 1 交付。
+1. 页面默认仍使用页面侧参考实现；成员 1 正式查询服务已并入源码，但自然语言入口、数据上传与统一数据集尚未完成三方联调。
 2. 示例运营 Agent 为页面侧调用回放，正式 Agent 由成员 2 交付。
 3. 首版仅支持 5 个基础指标，不支持退款率、客单价等派生比率指标（派生指标契约草案已出，见 `docs/派生指标设计草案_v0.1.md`，待三人确认后实现）。
 4. 净销售额中「同期成功退款金额」的时间归属口径待三人确认（议题 IS-001，截止 10-08）；成员 3 已用跨月退款变体完成两口径对比实验并给出推荐结论（按 refund_time 归属），见 `docs/测试集与对照实验说明.md` §4 与 `tests/_IS001口径对比.csv`。

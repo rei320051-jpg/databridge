@@ -1,0 +1,9 @@
+{
+  "dataset_version": "demo-v1.0",
+  "is_simulated": true,
+  "timezone": "Asia/Shanghai",
+  "coverage_start": "2026-01-01T00:00:00",
+  "coverage_end_exclusive": "2026-10-01T00:00:00",
+  "generation_method": "Deterministic fictional generator; seed=20260929.",
+  "limitations": "Synthetic distributions are for demonstration and performance tests only; they do not represent a real retailer."
+}

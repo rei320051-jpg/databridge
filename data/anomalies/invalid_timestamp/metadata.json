@@ -1,0 +1,9 @@
+{
+  "dataset_version": "small-v0.1",
+  "is_simulated": true,
+  "timezone": "Asia/Shanghai",
+  "coverage_start": "2026-08-01T00:00:00",
+  "coverage_end_exclusive": "2026-11-01T00:00:00",
+  "generation_method": "Hand-authored fictional fixtures, not real business records.",
+  "limitations": "Complete only within this fictional fixture; not representative of real retail distributions or performance."
+}
