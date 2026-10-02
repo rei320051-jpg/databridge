@@ -262,9 +262,9 @@ with st.sidebar:
 
     if backend_mode == "live":
         st.warning(
-            "live 模式需要兼容 `/agent/query` 和 `/datasets/inspect` 的对外服务。"
-            "成员 1 已交付的 `/v1/query` 是结构化执行层，尚不能直接作为本页后端；"
-            "请先完成三方接口及数据集联调。"
+            "成员 2 已提供正式 `/agent/query` 自然语言入口，但当前页面数据版本与正式库不同，"
+            "正式 `/datasets/inspect` 和数据集激活尚未完成。"
+            "切换 live 前请先完成三方数据集联调，避免混用模拟与正式结果。"
         )
 
     api_url = st.text_input("后端地址", value=app_config.API_BASE_URL,

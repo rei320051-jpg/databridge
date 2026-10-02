@@ -51,7 +51,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 
 > 它不是正式后端。成员 1 的 FastAPI 执行层已独立交付；自然语言入口与页面响应仍须在三方联调时逐字段对齐。
 
-### 1.3.1 成员 1 正式执行层（独立验证，尚未接通页面 live）
+### 1.3.1 成员 1 正式执行层与成员 2 智能入口
 
 成员 1 的 SQLite 数据、质检导入、只读查询执行器和 FastAPI 服务已放在仓库根目录的
 `data/`、`config/`、`contracts/`、`databridge/`、`scripts/` 中。
@@ -63,9 +63,15 @@ $env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.0.sqlite3).Path
 python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 ```
 
-此服务的查询入口为 `POST /v1/query`。页面当前 `live` 模式请求的是 `/agent/query`，
-两者不能直接互换；页面内置 85,018 单的模拟数据与成员 1 的 20,000 单正式后端演示数据也不能混用答案。
-具体对齐项及待三人确认的边界见 `docs/member1_integration_status.md`，请求样例见 `docs/api_usage.md`。
+`POST /v1/query` 是成员 1 的结构化只读执行层；`POST /agent/query` 是成员 2 的自然语言入口，
+调用同一个执行层。默认采用可复现的规则解析。可选模型解析需要本机设置
+`DATABRIDGE_AGENT_MODE=model`、`OPENAI_API_KEY`、`DATABRIDGE_MODEL`，目前**没有真实模型调用的验证成绩**。
+示例运营 Agent 可运行 `python scripts/run_operations_agent.py 生成2026年9月经营简报`。
+
+页面内置 85,018 单的模拟数据与正式后端 20,000 单演示数据不能混用答案或版本；
+`/datasets/inspect` 仍未在正式后端实现，页面 live 还不能声称完整联调。
+成员 2 的交付和运行/边界见 `docs/member2_delivery.md`；成员 1 的对齐项见
+`docs/member1_integration_status.md`，结构化请求样例见 `docs/api_usage.md`。
 
 ### 1.4 运行自测
 

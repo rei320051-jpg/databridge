@@ -5,11 +5,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from databridge.service import QueryError, QueryService
+from agent.workflow import AgentWorkflow
+from shared.contracts import API_ENDPOINTS
 
 
 def create_app(service=None):
     app = FastAPI(title='DataBridge 查询接口', version='0.1.0')
     query_service = service if service is not None else QueryService()
+    workflow = AgentWorkflow(query_service)
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, exc):
@@ -27,6 +30,11 @@ def create_app(service=None):
     def query(plan: dict = Body(...)):
         result, http_status = query_service.run(plan)
         return JSONResponse(result, status_code=http_status)
+
+    @app.post(API_ENDPOINTS['query']['path'])
+    def agent_query(payload: dict = Body(...)):
+        """Natural-language gateway; numbers come only from QueryService."""
+        return JSONResponse(workflow.run(payload))
 
     @app.get('/v1/query-records/{query_id}')
     def query_record(query_id: str):
