@@ -54,7 +54,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 ### 1.4 运行自测
 
 ```powershell
-.venv\Scripts\python.exe tests\smoke_test.py        # 链路自测，24 项检查
+.venv\Scripts\python.exe tests\smoke_test.py        # 链路自测，26 项检查
 .venv\Scripts\python.exe tests\page_render_test.py  # 页面渲染冒烟测试
 .venv\Scripts\python.exe tests\live_mode_test.py    # live 模式 HTTP 全链路，15 项检查
 .venv\Scripts\python.exe tests\scenario_test.py     # §5.2.5 八个异常场景，17 项检查
@@ -106,7 +106,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
     ├── export_showcase_data.py        导出展示页所需的真实计算结果
     ├── run_testset.py                 测试集自动评分器
     ├── scenario_test.py               §5.2.5 八个异常场景（F01~F08）
-    ├── smoke_test.py                  链路自测（24 项）
+    ├── smoke_test.py                  链路自测（26 项，含退款不超额/无孤儿退款）
     ├── page_render_test.py            页面渲染冒烟测试
     └── live_mode_test.py              live 模式 HTTP 全链路（15 项）
 ```
@@ -228,7 +228,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 - 实付金额与成功退款金额的月度、地区总量由配置精确控制，因此环比结论稳定可复现；订单数与客户数由实际生成的行推导。
 - 订单表内故意混入 `failed` / `pending` / `cancelled` 订单，退款表内混入 `failed` 退款。**这些行不参与任何指标统计。**
 - 勾选「载入异常测试数据集」可切换到注入了重复主键、缺失值、负金额、脏时间、悬空外键的数据，用于验证数据质量检查能力。
-- `demo_data.cross_month_refund_tables()` 提供独立的**跨月退款变体**：把华东 8 月订单的 5 笔成功退款（4,965.13 元）移到 9 月，用于 IS-001 退款时间归属口径决策（`tests/is001_refund_timing.py`）。它不修改干净数据，基线数字不受影响。
+- `demo_data.cross_month_refund_tables()` 提供独立的**跨月退款变体**：把华东 8 月订单的 5 笔成功退款（2,520.54 元）移到 9 月，用于 IS-001 退款时间归属口径决策（`tests/is001_refund_timing.py`）。它不修改干净数据，基线数字不受影响。
 - 业务基准日：`2026-09-30`；数据集版本：`mock-v1.0-demo`。
 
 ---

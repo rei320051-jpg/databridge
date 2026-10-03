@@ -1,10 +1,10 @@
 ﻿题号,问题,分类,预期状态,实际状态,判定,错误分类,实际指标,实际时间范围,实际分组,实际返回,备注
 H01,2026年9月华中地区净销售额是多少,明确可答·筛选,success,success,正确,,net_sales,2026-09-01~2026-09-30,不分组,net_sales=625050.0,
-H02,2026年7月各地区的支付人数,明确可答·分组,success,success,正确,,paid_customer_count,2026-07-01~2026-07-31,region,region=华东; paid_customer_count=4417,
+H02,2026年7月各地区的支付人数,明确可答·分组,success,success,正确,,paid_customer_count,2026-07-01~2026-07-31,region,region=华东; paid_customer_count=4431,
 H03,2026年9月华北地区的成功退款金额,明确可答·筛选,success,success,正确,,refund_amount,2026-09-01~2026-09-30,不分组,refund_amount=69615.0,
 H04,2026年6月西南地区的支付订单数,明确可答·单值,success,success,正确,,paid_order_count,2026-06-01~2026-06-30,不分组,paid_order_count=2753,
-H05,2026年9月老客户的实付金额,明确可答·筛选,success,success,正确,,paid_amount,2026-09-01~2026-09-30,不分组,paid_amount=2903639.8,
-H06,2026年8月各客户类型的支付订单数,明确可答·分组,success,success,正确,,paid_order_count,2026-08-01~2026-08-31,customer_type,customer_type=老客户; paid_order_count=13813,
+H05,2026年9月老客户的实付金额,明确可答·筛选,success,success,正确,,paid_amount,2026-09-01~2026-09-30,不分组,paid_amount=2914291.23,
+H06,2026年8月各客户类型的支付订单数,明确可答·分组,success,success,正确,,paid_order_count,2026-08-01~2026-08-31,customer_type,customer_type=老客户; paid_order_count=13793,
 H07,2026年9月净销售额最低的地区,排序/排名,success,success,正确,,net_sales,2026-09-01~2026-09-30,region,region=西南; net_sales=579363.0,
 H08,2026年8月各地区实付金额环比,比较·环比,success,success,正确,,paid_amount,2026-08-01~2026-08-31,region,region=华东; paid_amount=1490000.0; prev_value=1420000.0,
 H09,2026年7月到9月华东地区的净销售额合计,明确可答·多期,success,success,正确,,net_sales,2026-07-01~2026-09-30,不分组,net_sales=3782446.0,
@@ -13,7 +13,7 @@ H11,9月华南的实付是多少钱,同义问法,success,success,正确,,paid_am
 H12,9月华南有多少笔订单,同义问法,success,success,正确,,paid_order_count,2026-09-01~2026-09-30,不分组,paid_order_count=4961,
 H13,9月华南一共退了多少,同义问法,success,success,正确,,refund_amount,2026-09-01~2026-09-30,不分组,refund_amount=82512.0,
 H14,今年9月华中地区扣掉退款后卖了多少钱,同义问法,success,success,正确,,net_sales,2026-09-01~2026-09-30,不分组,net_sales=625050.0,
-H15,9月华中有多少客户付过款,同义问法,success,success,正确,,paid_customer_count,2026-09-01~2026-09-30,不分组,paid_customer_count=2919,
+H15,9月华中有多少客户付过款,同义问法,success,success,正确,,paid_customer_count,2026-09-01~2026-09-30,不分组,paid_customer_count=2942,
 H16,9月的营收是多少,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「营收」是指哪一个指标？ | 候选=['net_sales', 'paid_amount']","候选=['net_sales', 'paid_amount']"
 H17,9月收入怎么样,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「收入」是指哪一个指标？ | 候选=['net_sales', 'paid_amount']","候选=['net_sales', 'paid_amount']"
 H18,哪个地区的经营表现最强,需澄清·评价标准,need_clarification,need_clarification,正确,,,,不分组,"用哪一个指标来评价「最好」？ | 候选=['net_sales', 'paid_amount', 'paid_order_count', 'paid_customer_count']","候选=['net_sales', 'paid_amount', 'paid_order_count', 'paid_customer_count']"

@@ -163,6 +163,19 @@ def main() -> None:
     log(f"  存在多条成功退款的订单数：{n_multi}（最多一个订单 {int(multi.max())} 条）")
     check("数据集中确实存在一对多退款场景", n_multi > 0, f"{n_multi} 个订单")
 
+    # 数据质量硬约束：同一订单成功退款累计不得超过其实付金额（成员 1 导入器规则，2026-10-03）
+    orders_pay = tables["orders"]
+    success_orders = orders_pay[orders_pay["pay_status"] == "success"][["order_id", "pay_amount"]]
+    refund_sum = (refunds[refunds["refund_status"] == "success"]
+                  .groupby("order_id")["refund_amount"].sum())
+    cmp_df = refund_sum.to_frame("ref").join(
+        success_orders.set_index("order_id")["pay_amount"], how="left")
+    n_over = int((cmp_df["ref"] > cmp_df["pay_amount"] + 0.005).sum())
+    n_orphan = int(cmp_df["pay_amount"].isna().sum())
+    log(f"  超额退款订单数：{n_over}；成功退款挂不到成功订单的孤儿数：{n_orphan}")
+    check("任何订单的成功退款累计不超过其实付金额", n_over == 0, f"{n_over} 个订单超额")
+    check("成功退款均挂在成功支付订单上", n_orphan == 0, f"{n_orphan} 条孤儿退款")
+
     # 构造极端用例：给同一个订单追加 5 条大额退款，净销售额应等额下降，实付金额不变
     from demo_data import REGIONS, MONTHS  # noqa: F401
     victim = refunds[(refunds["refund_status"] == "success")].iloc[0]["order_id"]

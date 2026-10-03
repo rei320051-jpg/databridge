@@ -90,6 +90,47 @@ def _split_amount(total: float, n: int, rng: np.random.Generator) -> np.ndarray:
     return amts
 
 
+def _split_capped(total: float, caps: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    """把 total 拆成 len(caps) 个正数，每笔不超过 caps 对应上限，总和精确等于 total。
+
+    用于退款分配：第 i 个上限是订单 i 的实付金额，保证「同一订单成功退款累计
+    不超过其实付金额」（成员 1 导入器的硬性质量规则）。
+    要求 caps.sum() >= total。算法：gamma 初始权重 + 水位线法把超额部分
+    反复重分配到仍有空间的格子。
+    """
+    caps = np.asarray(caps, dtype=float)
+    w = rng.gamma(2.0, 1.0, len(caps))
+    x = np.zeros_like(caps)
+    active = np.ones(len(caps), dtype=bool)
+    remaining = total
+    # 精确水位线：按权重分配剩余额度；触顶的格子封到 cap 后退出，
+    # 其额度在其余格子间按权重重分，直到没有格子触顶。
+    while remaining > 1e-9 and active.any():
+        idx = np.where(active)[0]
+        share = remaining * w[idx] / w[idx].sum()
+        hit = share >= caps[idx] - 1e-9
+        if not hit.any():
+            x[idx] = share
+            break
+        hit_idx = idx[hit]
+        x[hit_idx] = caps[hit_idx]
+        active[hit_idx] = False
+        remaining -= float(caps[hit_idx].sum())
+
+    # 舍入到分，尾差逐分放入剩余空间最大的格子（封顶不溢出）
+    x = np.round(x, 2)
+    while True:
+        diff = round(total - float(x.sum()), 2)
+        if abs(diff) < 0.005:
+            break
+        j = int(np.argmax(caps - x))
+        if caps[j] - x[j] < 0.01:
+            break  # 理论不可达（总容量 >= total），防御性退出
+        step = min(0.01 if diff > 0 else -0.01, caps[j] - x[j])
+        x[j] = round(float(x[j]) + step, 2)
+    return x
+
+
 def _make_orders_refunds(rng: np.random.Generator, customers: pd.DataFrame):
     """向量化生成订单与退款表。
 
@@ -97,7 +138,11 @@ def _make_orders_refunds(rng: np.random.Generator, customers: pd.DataFrame):
       - 同一地区同一月的成功订单，其实付金额之和精确等于 BASE_PAID；
       - 退款只挂在**同地区同月**的成功订单上，否则经 orders -> customers 关联后
         退款会错误地落到别的地区；
-      - 退款时间限制在本月内，保证「同期」归属与设计的月度口径一致。
+      - 退款时间限制在本月内，保证「同期」归属与设计的月度口径一致；
+      - **同一订单的成功退款累计不得超过其实付金额**（成员 1 导入器的硬性质量规则，
+        2026-10-03 修复）：被退款订单无放回抽取，金额经水位线法按订单实付金额封顶，
+        同时保留部分订单多笔退款的真实一对多场景；
+      - 退款笔数可变，但退款金额总量仍精确等于 total * rate，保证月度/地区聚合值稳定。
     """
     counts = _order_counts()
     pools = {r: customers.loc[customers["region"] == r, "customer_id"].to_numpy() for r in REGIONS}
@@ -121,13 +166,14 @@ def _make_orders_refunds(rng: np.random.Generator, customers: pd.DataFrame):
             # --- 正常成功订单 ---
             ts = _timestamps(n)
             success_ids = _seq_ids("O", o_seq, n, 7)
+            paid_amts = _split_amount(total, n, rng)
             order_frames.append(pd.DataFrame({
                 "order_id": success_ids,
                 "customer_id": rng.choice(pool, size=n),
                 "order_time": (ts - pd.to_timedelta(rng.integers(1, 240, n), unit="m")).strftime("%Y-%m-%d %H:%M:%S"),
                 "pay_time": ts.strftime("%Y-%m-%d %H:%M:%S"),
                 "pay_status": "success",
-                "pay_amount": _split_amount(total, n, rng),
+                "pay_amount": paid_amts,
             }))
             o_seq += n
 
@@ -146,8 +192,43 @@ def _make_orders_refunds(rng: np.random.Generator, customers: pd.DataFrame):
             o_seq += n_noise
 
             # --- 成功退款：金额总量精确等于 total * rate ---
-            refund_total = round(total * REFUND_RATE[region][month], 2)
+            # 规则：被退款订单无放回抽取；每订单累计退款 <= 其 pay_amount；
+            # 行数略多于被退款订单数，保留「一个订单多笔退款」的真实场景。
+            rate = REFUND_RATE[region][month]
+            refund_total = round(total * rate, 2)
+            # 抽单数需保证其支付金额容量足以承载退款总量（平均退款率的约 2.2 倍余量）
             n_ref = max(1, int(round(n * 0.07)))
+            n_ref = max(n_ref, int(np.ceil(n * rate * 2.2)))
+            n_ref = min(n_ref, n)
+            n_orders_ref = max(1, int(np.ceil(n_ref * 0.75)))  # 其余行叠加到已抽中的订单
+            chosen_pos = list(rng.choice(n, size=min(n_orders_ref, n), replace=False))
+            chosen_set = set(int(p) for p in chosen_pos)
+            # 容量兜底（随机抽样理论余量充足，此循环正常不触发）
+            while float(paid_amts[chosen_pos].sum()) < refund_total and len(chosen_pos) < n:
+                cand = int(rng.integers(0, n))
+                if cand not in chosen_set:
+                    chosen_pos.append(cand)
+                    chosen_set.add(cand)
+            chosen_pos = np.array(chosen_pos, dtype=int)
+            n_orders_ref = len(chosen_pos)
+            n_ref = max(n_ref, n_orders_ref)  # 每单至少一行
+
+            # 订单级退款额（受各自实付金额封顶，总和精确等于 refund_total）
+            order_refund = _split_capped(refund_total, paid_amts[chosen_pos], rng)
+
+            # 行 -> 订单：先每单一行，多出的行随机叠加，形成一对多
+            row_order_pos = list(range(n_orders_ref))
+            row_order_pos.extend(int(rng.integers(0, n_orders_ref))
+                                 for _ in range(n_ref - n_orders_ref))
+            row_order_pos = np.array(row_order_pos, dtype=int)
+
+            # 把每个订单的退款额拆到它名下的各行
+            row_amounts = np.empty(n_ref, dtype=float)
+            for j in range(n_orders_ref):
+                row_idx = np.where(row_order_pos == j)[0]
+                row_amounts[row_idx] = (_split_amount(float(order_refund[j]), len(row_idx), rng)
+                                        if len(row_idx) > 1 else order_refund[j])
+
             rts = pd.DatetimeIndex(
                 np.minimum(
                     (_timestamps(n_ref) + pd.to_timedelta(rng.integers(0, 16, n_ref), unit="D")
@@ -157,10 +238,10 @@ def _make_orders_refunds(rng: np.random.Generator, customers: pd.DataFrame):
             )
             refund_frames.append(pd.DataFrame({
                 "refund_id": _seq_ids("R", r_seq, n_ref, 6),
-                "order_id": rng.choice(success_ids, size=n_ref),
+                "order_id": success_ids[chosen_pos[row_order_pos]],
                 "refund_time": rts.strftime("%Y-%m-%d %H:%M:%S"),
                 "refund_status": "success",
-                "refund_amount": _split_amount(refund_total, n_ref, rng),
+                "refund_amount": np.round(row_amounts, 2),
             }))
             r_seq += n_ref
 

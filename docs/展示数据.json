@@ -28,7 +28,7 @@
     "paid_amount": 1268000.0,
     "refund_amount": 111584.0,
     "paid_order_count": 4731,
-    "paid_customer_count": 4027
+    "paid_customer_count": 3991
   },
   "sep_total_net_sales": 4119702.0,
   "clarify_round1": {
@@ -78,7 +78,7 @@
   "quality": {
     "clean": {
       "errors": 0,
-      "warnings": 2,
+      "warnings": 0,
       "tables": [
         {
           "name": "customers",
@@ -90,13 +90,13 @@
         },
         {
           "name": "refunds",
-          "rows": 6703
+          "rows": 15139
         }
       ]
     },
     "dirty": {
       "errors": 6,
-      "warnings": 6,
+      "warnings": 5,
       "issues": [
         {
           "level": "warning",
@@ -138,8 +138,8 @@
           "level": "warning",
           "code": "amount_outlier",
           "field": "pay_amount",
-          "count": 2,
-          "message": "金额字段 `pay_amount` 有 2 条极端大值（> 1,098），最大值为中位数的 483,045 倍。",
+          "count": 1,
+          "message": "金额字段 `pay_amount` 有 1 条极端大值（> 1,094），最大值为中位数的 482,067 倍。",
           "impact": "若为测试数据或录入错误，金额类指标会被显著抬高。",
           "table": "orders"
         },
@@ -181,15 +181,6 @@
         },
         {
           "level": "warning",
-          "code": "amount_outlier",
-          "field": "refund_amount",
-          "count": 1,
-          "message": "金额字段 `refund_amount` 有 1 条极端大值（> 1,268），最大值为中位数的 6 倍。",
-          "impact": "若为测试数据或录入错误，金额类指标会被显著抬高。",
-          "table": "refunds"
-        },
-        {
-          "level": "warning",
           "code": "duplicate_row",
           "field": "*",
           "count": 1,
@@ -201,8 +192,8 @@
           "level": "error",
           "code": "orphan_foreign_key",
           "field": "orders.customer_id -> customers.customer_id",
-          "count": 1,
-          "message": "`orders.customer_id` 有 1 条无法在 `customers.customer_id` 中找到对应记录。",
+          "count": 3,
+          "message": "`orders.customer_id` 有 3 条无法在 `customers.customer_id` 中找到对应记录。",
           "impact": "关联后这些记录的分组维度会变成空值，按地区统计时总额对不上。",
           "table": "跨表"
         }
