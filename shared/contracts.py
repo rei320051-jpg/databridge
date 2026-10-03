@@ -332,7 +332,10 @@ def clarification_id(target_field: str, seq: int = 1) -> str:
 def clarification_field(clr_id: str) -> str:
     """从澄清 id 反解目标槽位；格式非法时返回空串。"""
     parts = (clr_id or "").split("_")
-    return parts[1] if len(parts) >= 3 and parts[0] == "clr" else ""
+    if len(parts) < 3 or parts[0] != "clr" or not parts[-1].isdigit():
+        return ""
+    field = "_".join(parts[1:-1])
+    return field if field in CLARIFICATION_TARGETS else ""
 
 
 # ---------------------------------------------------------------------------
