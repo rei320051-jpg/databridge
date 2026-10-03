@@ -45,7 +45,7 @@
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/verify_small.py --build-db  # 首次构建；已存在时改为不带此参数
-.\.venv\Scripts\python.exe scripts/import_dataset.py data/demo --database outputs/demo-v1.0.sqlite3  # 首次构建
+.\.venv\Scripts\python.exe scripts/import_dataset.py data/demo --database outputs/demo-v1.1.sqlite3  # 首次构建
 .\.venv\Scripts\python.exe scripts/test_importer.py
 .\.venv\Scripts\python.exe scripts/test_query_api.py
 .\.venv\Scripts\python.exe scripts/validate_demo.py

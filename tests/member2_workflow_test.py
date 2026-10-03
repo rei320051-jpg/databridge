@@ -34,9 +34,9 @@ class FakeModel:
 class WorkflowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.database = ROOT / "outputs" / "demo-v1.0.sqlite3"
+        cls.database = ROOT / "outputs" / "demo-v1.1.sqlite3"
         if not cls.database.exists():
-            raise RuntimeError("先运行 python scripts/import_dataset.py data/demo --database outputs/demo-v1.0.sqlite3")
+            raise RuntimeError("先运行 python scripts/import_dataset.py data/demo --database outputs/demo-v1.1.sqlite3")
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -53,7 +53,7 @@ class WorkflowTests(unittest.TestCase):
         expected = json.loads((ROOT / "data" / "demo" / "expected.json").read_text(encoding="utf-8"))
         self.assertEqual(result["data"][0][Metric.NET_SALES], expected["monthly"]["2026-09"]["net_sales"] / 100)
         self.assertEqual(result["unit"], "元")
-        self.assertEqual(result["dataset_version"], "demo-v1.0")
+        self.assertEqual(result["dataset_version"], "demo-v1.1")
         self.assertTrue(result["generated_sql"])
         self.assertTrue(result["sql_parameters"])
 
@@ -122,13 +122,16 @@ class WorkflowTests(unittest.TestCase):
             ("9月退款率", Status.OUT_OF_SCOPE),
             ("9月净销售额不扣退款", Status.OUT_OF_SCOPE),
             ("2027年9月净销售额", Status.INSUFFICIENT_DATA),
-            ("2026年9月西南净销售额", Status.INSUFFICIENT_DATA),
         ]
         for question, expected in cases:
             with self.subTest(question=question):
                 result = self.agent.run({"question": question})
                 self.assertEqual(result["status"], expected)
                 self.assertNotIn("data", result)
+        # DS-001（D1）：地区词表统一后，西南为契约内地区，应正常返回而非拒答
+        southwest = self.agent.run({"question": "2026年9月西南净销售额"})
+        self.assertEqual(southwest["status"], Status.SUCCESS)
+        self.assertTrue(southwest["data"])
         wrong = self.agent.run({"question": "2026年9月净销售额", "dataset_version": "ds-mock"})
         self.assertEqual(wrong["reason"], "dataset_version_mismatch")
 
@@ -137,10 +140,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(result["status"], Status.SUCCESS)
         self.assertTrue(result["data"])
         self.assertIn("compare_value", result["data"][0])
-        self.assertTrue(any(w["code"] == "contract_region_mismatch" for w in result["warnings"]))
+        # DS-001（D1）：词表统一后不应再出现地区枚举不一致警告
+        self.assertFalse(any(w["code"] == "contract_region_mismatch" for w in result["warnings"]))
         brief = monthly_brief(self.agent, "生成2026年9月经营简报")
         self.assertEqual(brief["status"], Status.SUCCESS)
-        self.assertEqual(brief["dataset_version"], "demo-v1.0")
+        self.assertEqual(brief["dataset_version"], "demo-v1.1")
         self.assertIn("不能推断变化原因", brief["brief"])
 
     def test_model_failure_and_invalid(self):
@@ -184,9 +188,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(criterion["status"], Status.NEED_CLARIFICATION)
 
     def test_member3_development_question_statuses(self):
-        # These two cases assume the page's June-September mock dataset. The
-        # formal backend has January-September and no Southwest region.
-        dataset_specific = {"D10": Status.INSUFFICIENT_DATA, "D24": Status.SUCCESS}
+        # These cases assume the page's June-September mock dataset. The
+        # formal backend covers January-September; since DS-001 (D1) it also
+        # uses the contract five-region vocabulary, so D10 (Southwest) now
+        # succeeds and only D24 (March, outside page coverage) differs.
+        dataset_specific = {"D24": Status.SUCCESS}
         for filename in ("测试题_开发集_30题.csv", "测试题_开发集_补充回归7题.csv"):
             with (ROOT / "tests" / filename).open(encoding="utf-8-sig", newline="") as handle:
                 for case in csv.DictReader(handle):

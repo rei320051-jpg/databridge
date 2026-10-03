@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""正式联调库适配层：把成员 1 的物理数据集（data/demo，demo-v1.0）转成
+"""正式联调库适配层：把成员 1 的物理数据集（data/demo，demo-v1.1）转成
 页面/mock_backend 消费的内存表形态。
 
 为什么需要它
@@ -24,10 +24,10 @@
 | customers.customer_type | new / returning              | 新客户 / 老客户 |
 | customers.register_date | created_at                   | 改名 |
 
-唯一无法机械映射的差异是**地区词表**：正式库为 4 地区（华东/华南/华北/西部），
-shared/contracts.py 冻结的是 5 地区（华东/华南/华北/西南/华中）。
-本适配不擅自改值，保留数据原值并在 FORMAL_DATASET_NOTES 中显式标注
-region_vocab_conflict，最终词表由三人按 DS-001 决策后统一。
+地区词表曾是本适配唯一无法机械映射的差异（正式库 4 地区含「西部」，
+shared/contracts.py 冻结 5 地区）。DS-001（D1，2026-10-03）决定按契约词表
+重生成正式库：demo-v1.1 起地区为华东/华南/华北/西南/华中，与共享枚举一致，
+不再有词表冲突（见 FORMAL_DATASET_NOTES["region_vocab"]）。
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 FORMAL_DEMO_DIR = _ROOT / "data" / "demo"
-FORMAL_VERSION = "demo-v1.0"
+FORMAL_VERSION = "demo-v1.1"
 #: 覆盖月份，来自 data/demo/metadata.json 的显式元数据
 #: （coverage_start=2026-01-01, coverage_end_exclusive=2026-10-01）。
 #: 不按最早/最晚交易推断。
@@ -60,10 +60,10 @@ FORMAL_DATASET_NOTES = {
     "source": "成员 1 正式演示库 data/demo（通过导入器校验，sha256 锁定）",
     "coverage": "2026-01-01 ~ 2026-09-30",
     "unit": "接口金额为整数分，本适配在边界换算为元（/100）",
-    "region_vocab_conflict": (
-        "正式库地区为 华东/华南/华北/西部（4 个），契约词表为 "
-        "华东/华南/华北/西南/华中（5 个）。在 DS-001 决策前保留数据原值，"
-        "两套数据集的数字不得混用或相互比较。"
+    "region_vocab": (
+        "DS-001（D1，2026-10-03）：正式库已按契约五地区（华东/华南/华北/西南/华中）"
+        "重生成，与共享维度枚举一致，无词表冲突。"
+        "本库与内置 85k 演示数据仍是两份独立数据，数字不得混用或相互比较。"
     ),
 }
 
@@ -74,7 +74,7 @@ def _read_csv(name: str) -> pd.DataFrame:
 
 
 def load_formal_demo() -> dict:
-    """读取正式 demo-v1.0 CSV 并转换为页面消费形态 {customers, orders, refunds}。"""
+    """读取正式 demo-v1.1 CSV 并转换为页面消费形态 {customers, orders, refunds}。"""
     orders_raw = pd.read_csv(FORMAL_DEMO_DIR / "orders.csv")
     refunds_raw = pd.read_csv(FORMAL_DEMO_DIR / "refunds.csv")
     customers_raw = pd.read_csv(FORMAL_DEMO_DIR / "customers.csv")

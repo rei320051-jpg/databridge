@@ -25,7 +25,7 @@ def main():
     expected = json.loads((ROOT / 'data' / 'demo' / 'expected.json').read_text(encoding='utf-8'))
     with tempfile.TemporaryDirectory(prefix='demo-http-', dir=ROOT / 'outputs') as temporary:
         environment = os.environ.copy()
-        environment['DATABRIDGE_DATABASE'] = str(ROOT / 'outputs' / 'demo-v1.0.sqlite3')
+        environment['DATABRIDGE_DATABASE'] = str(ROOT / 'outputs' / 'demo-v1.1.sqlite3')
         environment['DATABRIDGE_RECORDS'] = str(Path(temporary) / 'records')
         process = subprocess.Popen(
             [sys.executable, '-m', 'uvicorn', 'databridge.api:app', '--host', '127.0.0.1',
@@ -47,7 +47,7 @@ def main():
                     time.sleep(0.1)
                 require(response is not None and response.status_code == 200, 'Demo API did not become ready')
                 plan = {'metric': 'net_sales', 'date_start': '2026-09-01', 'date_end': '2026-09-30',
-                        'dataset_version': 'demo-v1.0', 'group_by': ['region']}
+                        'dataset_version': 'demo-v1.1', 'group_by': ['region']}
                 current = client.post('/v1/query', json=plan)
                 require(current.status_code == 200, current.text)
                 current_data = current.json()
@@ -62,7 +62,7 @@ def main():
                 record = client.get('/v1/query-records/' + compared.json()['query_id'])
                 require(record.status_code == 200 and record.json()['response'] == compared.json(), 'Trace mismatch')
                 evidence = {'status': 'passed', 'transport': 'actual HTTP over localhost',
-                            'dataset_version': 'demo-v1.0', 'health': response.json(),
+                            'dataset_version': 'demo-v1.1', 'health': response.json(),
                             'september_by_region': current_data, 'comparison': compared.json(),
                             'trace_sql_count': len(record.json()['sql'])}
                 (ROOT / 'outputs' / 'demo-http-smoke.json').write_text(

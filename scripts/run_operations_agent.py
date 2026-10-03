@@ -17,7 +17,7 @@ from databridge.service import QueryService
 
 def main():
     request = " ".join(sys.argv[1:]) or "生成2026年9月经营简报"
-    database = os.environ.get("DATABRIDGE_DATABASE", str(ROOT / "outputs" / "demo-v1.0.sqlite3"))
+    database = os.environ.get("DATABRIDGE_DATABASE", str(ROOT / "outputs" / "demo-v1.1.sqlite3"))
     workflow = AgentWorkflow(QueryService(database=database))
     print(json.dumps(monthly_brief(workflow, request), ensure_ascii=False, indent=2))
 

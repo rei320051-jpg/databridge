@@ -1,4 +1,10 @@
-"""Deterministically generate fictional demo data and isolated anomaly fixtures."""
+"""Deterministically generate fictional demo data and isolated anomaly fixtures.
+
+DS-001（2026-10-03 三人确认 D1）：地区词表统一为共享契约的五地区
+（华东/华南/华北/西南/华中，见 shared/contracts.py DIMENSION_SPEC）。
+词表可通过 --regions / --region-weights 参数化，默认即契约词表。
+"""
+import argparse
 import csv
 import hashlib
 import json
@@ -13,8 +19,16 @@ SMALL = ROOT / 'data' / 'small'
 DEMO = ROOT / 'data' / 'demo'
 ANOMALIES = ROOT / 'data' / 'anomalies'
 SEED = 20260929
-VERSION = 'demo-v1.0'
-REGIONS = ('华东', '华南', '华北', '西部')
+VERSION = 'demo-v1.1'
+#: 默认地区词表 = 共享契约五地区；权重和只需为正数（内部归一化）。
+REGIONS = ('华东', '华南', '华北', '西南', '华中')
+REGION_WEIGHTS = (40, 25, 20, 8, 7)
+
+
+def write_json(path, payload):
+    # newline='\n'：哈希按 LF 计算，Windows 文本模式的 CRLF 会破坏 manifest 校验。
+    with path.open('w', encoding='utf-8', newline='\n') as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False, indent=2) + '\n')
 
 
 def write_csv(path, fields, rows):
@@ -52,7 +66,11 @@ def fresh_bucket():
             'successful_refund_amount': 0}
 
 
-def generate_demo():
+def generate_demo(regions=REGIONS, region_weights=REGION_WEIGHTS, version=VERSION):
+    regions = tuple(regions)
+    region_weights = tuple(region_weights)
+    if len(regions) != len(region_weights):
+        raise SystemExit('regions 与 region-weights 数量必须一致')
     randomizer = random.Random(SEED)
     start = datetime(2026, 1, 1)
     end = datetime(2026, 10, 1)
@@ -61,7 +79,7 @@ def generate_demo():
         created = datetime(2024, 1, 1) + timedelta(days=randomizer.randrange(730), seconds=randomizer.randrange(86400))
         customers.append({'customer_id': f'C{index:05d}',
                           'customer_type': 'new' if index % 4 == 0 else 'returning',
-                          'created_at': stamp(created), 'dataset_version': VERSION})
+                          'created_at': stamp(created), 'dataset_version': version})
     orders = []
     paid_orders = []
     for index in range(1, 20001):
@@ -73,10 +91,10 @@ def generate_demo():
         paid_at = stamp(ordered + timedelta(minutes=randomizer.randint(1, 30))) if status == 'paid' else ''
         row = {'order_id': f'O{index:06d}',
                'customer_id': customers[randomizer.randrange(len(customers))]['customer_id'],
-               'region': randomizer.choices(REGIONS, weights=(40, 25, 20, 15), k=1)[0],
+               'region': randomizer.choices(regions, weights=region_weights, k=1)[0],
                'ordered_at': stamp(ordered), 'paid_at': paid_at,
                'payment_status': status, 'paid_amount_fen': amount,
-               'dataset_version': VERSION}
+               'dataset_version': version}
         orders.append(row)
         if status == 'paid':
             paid_orders.append(row)
@@ -104,17 +122,17 @@ def generate_demo():
                             'requested_at': stamp(requested),
                             'refunded_at': stamp(completed) if status == 'success' else '',
                             'refund_status': status, 'refund_amount_fen': amount,
-                            'dataset_version': VERSION})
+                            'dataset_version': version})
             refund_index += 1
             requested = completed + timedelta(minutes=1)
     metadata = {
-        'dataset_version': VERSION, 'is_simulated': True, 'timezone': 'Asia/Shanghai',
+        'dataset_version': version, 'is_simulated': True, 'timezone': 'Asia/Shanghai',
         'coverage_start': stamp(start), 'coverage_end_exclusive': stamp(end),
-        'generation_method': f'Deterministic fictional generator; seed={SEED}.',
+        'generation_method': f'Deterministic fictional generator; seed={SEED}; regions={",".join(regions)}.',
         'limitations': 'Synthetic distributions are for demonstration and performance tests only; they do not represent a real retailer.'
     }
     DEMO.mkdir(parents=True, exist_ok=True)
-    (DEMO / 'metadata.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    write_json(DEMO / 'metadata.json', metadata)
     write_csv(DEMO / 'customers.csv', ['customer_id', 'customer_type', 'created_at', 'dataset_version'], customers)
     write_csv(DEMO / 'orders.csv', ['order_id', 'customer_id', 'region', 'ordered_at', 'paid_at',
                                     'payment_status', 'paid_amount_fen', 'dataset_version'], orders)
@@ -138,13 +156,13 @@ def generate_demo():
     expected = {
         'calculation': 'Independent aggregation performed while generating rows; amounts are fen.',
         'monthly': {month: finish_expected(all_by_month[month]) for month in sorted(all_by_month)},
-        'september_by_region': {region: finish_expected(by_month_region[('2026-09', region)]) for region in REGIONS},
+        'september_by_region': {region: finish_expected(by_month_region[('2026-09', region)]) for region in regions},
     }
-    (DEMO / 'expected.json').write_text(json.dumps(expected, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    write_json(DEMO / 'expected.json', expected)
     hashes = {}
     for name in ('metadata.json', 'customers.csv', 'orders.csv', 'refunds.csv', 'expected.json'):
         hashes[name] = hashlib.sha256((DEMO / name).read_bytes()).hexdigest()
-    manifest = {'seed': SEED, 'dataset_version': VERSION,
+    manifest = {'seed': SEED, 'dataset_version': version,
                 'row_counts': {'customers': len(customers), 'orders': len(orders), 'refunds': len(refunds)},
                 'status_counts': {
                     'paid_orders': sum(row['payment_status'] == 'paid' for row in orders),
@@ -154,7 +172,7 @@ def generate_demo():
                     'failed_refunds': sum(row['refund_status'] == 'failed' for row in refunds),
                     'pending_refunds': sum(row['refund_status'] == 'pending' for row in refunds),
                 }, 'sha256': hashes}
-    (DEMO / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    write_json(DEMO / 'manifest.json', manifest)
     return manifest
 
 
@@ -200,6 +218,16 @@ def generate_anomalies():
 
 
 if __name__ == '__main__':
-    manifest = generate_demo()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--regions', default=','.join(REGIONS),
+                        help='逗号分隔的地区词表，默认契约五地区')
+    parser.add_argument('--region-weights', default=','.join(str(w) for w in REGION_WEIGHTS),
+                        help='与地区一一对应的抽样权重')
+    parser.add_argument('--version', default=VERSION, help='数据集版本号')
+    args = parser.parse_args()
+    manifest = generate_demo(regions=args.regions.split(','),
+                             region_weights=[float(w) for w in args.region_weights.split(',')],
+                             version=args.version)
     cases = generate_anomalies()
-    print(json.dumps({'demo': manifest['row_counts'], 'anomaly_cases': cases}, ensure_ascii=False))
+    print(json.dumps({'demo': manifest['row_counts'], 'dataset_version': manifest['dataset_version'],
+                      'anomaly_cases': cases}, ensure_ascii=False))

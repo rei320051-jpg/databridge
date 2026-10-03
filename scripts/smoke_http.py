@@ -60,7 +60,7 @@ def main():
             regional = response.json()
             require(response.status_code == 200 and regional['data'] == [
                 {'region': '华东', 'net_sales': 28000}, {'region': '华南', 'net_sales': 18000},
-                {'region': '华北', 'net_sales': 8000}, {'region': '西部', 'net_sales': 5000}], 'Regional HTTP mismatch')
+                {'region': '华北', 'net_sales': 8000}, {'region': '西南', 'net_sales': 5000}], 'Regional HTTP mismatch')
             evidence['responses']['by_region'] = regional
             evidence['display_yuan'] = {row['region']: str(Decimal(row['net_sales']) / regional['display_divisor']) for row in regional['data']}
             print('PASS grouped query and yuan display: ' + json.dumps(evidence['display_yuan'], ensure_ascii=False))

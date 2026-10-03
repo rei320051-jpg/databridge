@@ -19,7 +19,7 @@ CREATE TABLE customers (
 CREATE TABLE orders (
     order_id TEXT PRIMARY KEY NOT NULL,
     customer_id TEXT NOT NULL REFERENCES customers(customer_id),
-    region TEXT NOT NULL CHECK (region IN ('华东', '华南', '华北', '西部')),
+    region TEXT NOT NULL CHECK (region IN ('华东', '华南', '华北', '西南', '华中')),
     ordered_at TEXT NOT NULL,
     paid_at TEXT,
     payment_status TEXT NOT NULL CHECK (payment_status IN ('paid', 'cancelled', 'failed')),

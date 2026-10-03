@@ -1,6 +1,6 @@
 {
   "seed": 20260929,
-  "dataset_version": "demo-v1.0",
+  "dataset_version": "demo-v1.1",
   "row_counts": {
     "customers": 2000,
     "orders": 20000,
@@ -15,10 +15,10 @@
     "pending_refunds": 222
   },
   "sha256": {
-    "metadata.json": "a615c3b79eac0238e014127a23c7f35a83b020f8d8e8241b6b5403456cca13d2",
-    "customers.csv": "e97984c45b88099605eb11061e9459e2f23b5adc69e5f372a455f9ea1140e61c",
-    "orders.csv": "e535ac1a51308cdd4918d2360ec2f6ee4171a9e3230b7af80f216ae4731377b6",
-    "refunds.csv": "7175f4acf4bc33ed11beabd6e5ca8ad076c66a8ffcb50c8f60fd713bbe887399",
-    "expected.json": "ead746c676bc671676f8615ea021936af037b9b75fe047f508d323d16500bce3"
+    "metadata.json": "72fb80f2d2c9a68eaf2e881611eff64a4ba9df8ba4eedcda812f427217280553",
+    "customers.csv": "a684675d6dc0fbbb1849d453690fea6107eb5d7979aee468a5c7e7481b34a063",
+    "orders.csv": "a6657ceaf334ba36a2a91a4d767936278c093aabbb613f763f4eeb1f87c5fb6d",
+    "refunds.csv": "4338bee0761640a9d04e5073bd4b8f806e231225266541864a220a6e9dade797",
+    "expected.json": "dcf8f76d5551db98e770183f5e7b65fc83d91780df6ca5270a5913fdde70cd7a"
   }
 }

@@ -87,12 +87,19 @@
       "successful_refund_amount": 39189509,
       "net_sales": 349731910
     },
-    "西部": {
-      "paid_orders": 301,
-      "paying_customers": 279,
-      "paid_amount": 308357944,
-      "successful_refund_amount": 31763507,
-      "net_sales": 276594437
+    "西南": {
+      "paid_orders": 164,
+      "paying_customers": 155,
+      "paid_amount": 156181362,
+      "successful_refund_amount": 18261262,
+      "net_sales": 137920100
+    },
+    "华中": {
+      "paid_orders": 137,
+      "paying_customers": 134,
+      "paid_amount": 152176582,
+      "successful_refund_amount": 13502245,
+      "net_sales": 138674337
     }
   }
 }

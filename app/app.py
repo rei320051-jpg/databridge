@@ -202,7 +202,7 @@ def _cached_anomaly():
     return {k: v.copy() for k, v in tables.items()}
 
 
-@st.cache_data(show_spinner="正在载入正式联调库 demo-v1.0…")
+@st.cache_data(show_spinner="正在载入正式联调库 demo-v1.1…")
 def _cached_formal():
     return formal_dataset.load_formal_demo()
 
@@ -239,7 +239,7 @@ def _register_dataset(tables: dict, source: str,
 
     版本号由内容哈希生成而非时间戳，因此同一份数据重复上传版本不变，
     查询结果里的数据集版本才是真正可追溯的。
-    :param explicit_version: 正式联调库传入其对外固定版本号（如 demo-v1.0）。
+    :param explicit_version: 正式联调库传入其对外固定版本号（如 demo-v1.1）。
     """
     ss = st.session_state
     rec = registry.make_record(tables, source)
@@ -249,7 +249,7 @@ def _register_dataset(tables: dict, source: str,
     ss["active_dataset"] = rec
     ss["active_tables"] = tables  # 供业务字典区按实际字段渲染确认清单
     _client.set_tables(tables, coverage_months=coverage_months)
-    # 正式联调库对外使用其固定版本号（demo-v1.0），与后端版本协商一致；
+    # 正式联调库对外使用其固定版本号（demo-v1.1），与后端版本协商一致；
     # 内容哈希版本仍保留在注册记录里用于本地追溯
     _client.dataset_version = explicit_version or rec["version"]
     return rec
@@ -355,10 +355,11 @@ def render_data_zone() -> dict:
     source_kind = st.radio(
         "未上传文件时使用的内置数据集",
         ["内置演示数据（8.5 万单，2026 年 6–9 月，5 地区）",
-         "正式联调库 demo-v1.0（2 万单，2026 年 1–9 月，4 地区）"],
+         "正式联调库 demo-v1.1（2 万单，2026 年 1–9 月，5 地区）"],
         index=0, horizontal=True,
         help="两套数据的口径一致（仅成功状态参与、退款按完成时间、防一对多重复累计），"
-             "但规模、单位呈现、地区词表和数字不同，禁止混用或互相比较。",
+             "地区词表已按 DS-001（D1）统一为契约五地区，但规模、单位呈现和数字不同，"
+             "禁止混用或互相比较。",
     )
     use_formal = source_kind.startswith("正式联调库")
     use_anomaly = st.checkbox(
@@ -387,14 +388,14 @@ def render_data_zone() -> dict:
         source = "用户上传：" + "、".join(f"{k}（{v.shape[0]} 行）" for k, v in tables.items())
     elif use_formal:
         tables = _cached_formal()
-        source = ("正式联调库 demo-v1.0（成员 1 交付，sha256 锁定，整数分入库/边界转元；"
+        source = ("正式联调库 demo-v1.1（成员 1 交付，sha256 锁定，整数分入库/边界转元；"
                   "2026-01 ~ 2026-09）")
         explicit_version = formal_dataset.FORMAL_VERSION
         coverage_months = formal_dataset.FORMAL_COVERAGE_MONTHS
-        st.warning(
-            "当前为**正式联调库 demo-v1.0**：地区为 华东/华南/华北/**西部**，"
-            "与契约词表（含西南/华中）尚未统一（议题 DS-001，待三人决策）；"
-            "本库数字与内置演示数据不可混用。页面查询结果与成员 1 执行层 expected.json 逐分一致。"
+        st.info(
+            "当前为**正式联调库 demo-v1.1**：地区词表已按 DS-001（D1）统一为契约五地区"
+            "（华东/华南/华北/西南/华中）。本库数字与内置演示数据相互独立、不可混用；"
+            "页面查询结果与成员 1 执行层 expected.json 逐分一致。"
         )
     elif use_anomaly:
         tables = _cached_anomaly()

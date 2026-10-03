@@ -15,8 +15,8 @@
 在仓库根目录安装根目录 `requirements.txt` 后：
 
 ```powershell
-python scripts/import_dataset.py data/demo --database outputs/demo-v1.0.sqlite3
-$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.0.sqlite3).Path
+python scripts/import_dataset.py data/demo --database outputs/demo-v1.1.sqlite3
+$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.1.sqlite3).Path
 python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 ```
 
@@ -36,18 +36,18 @@ python scripts/run_operations_agent.py 生成2026年9月经营简报
 
 ## 测试与真实边界
 
-`tests/member2_workflow_test.py` 包含正式库数值核对、HTTP 入口、两轮澄清、上下文隔离、模型失败/格式异常、环比及示例 Agent。成员三的 **37 道开发题**只做状态核对，不用页面模拟数据答案与正式库数值交叉评分。其中 35 道状态与页面原预期一致，2 道因数据集不同而合理不同：
+`tests/member2_workflow_test.py` 包含正式库数值核对、HTTP 入口、两轮澄清、上下文隔离、模型失败/格式异常、环比及示例 Agent。成员三的 **37 道开发题**只做状态核对，不用页面模拟数据答案与正式库数值交叉评分。其中 36 道状态与页面原预期一致，1 道因数据集不同而合理不同：
 
-- D10“上个月西南地区实付金额”：页面模拟数据有“西南”，正式库没有，正式入口返回 `insufficient_data`，而不是偷偷转成“西部”。
 - D24“2026 年 3 月净销售额”：页面模拟数据只覆盖 6–9 月，正式库覆盖 1–9 月，因此正式入口可以返回 `success`。
+- （原 D10 差异已消除：DS-001 D1 统一地区词表后，正式库含“西南”，D10 与页面预期一致返回 `success`。）
 
-正式库结果中有“西部”，但共享枚举目前只有“华东、华南、华北、西南、华中”；对外结果会保留实际“西部”并给出 `contract_region_mismatch` 警告。不能将两套数据集数字或评测结论混用。
+正式库地区词表已按 DS-001（D1，2026-10-03）统一为共享契约五地区（华东、华南、华北、西南、华中），`contract_region_mismatch` 警告不再触发。不能将两套数据集数字或评测结论混用。
 
 **尚待三人联调/确认**：
 
 - 页面当前仍会把内置页面数据的 `ds-...` 版本传给 live 入口；正式入口会明确拒绝，避免把正式库结果贴到页面模拟数据版本下。需要成员三实现正式数据集选择/激活路径。
 - `/datasets/inspect` 仍只有参考服务版本，正式后端未实现上传/激活；成员一、三需共同确认流程。
-- 地区枚举及客户类型标签与正式库不一致；当前入口对客户类型做明确映射，对不支持的地区明确拒绝，对结果出现的“西部”加警告。是否统一数据还是修改共享枚举必须由三人确认。
+- 地区枚举已按 DS-001（D1）统一为契约五地区；客户类型标签仍由适配层做 new/returning → 新客户/老客户 的明确映射。
 - IS-001 退款月份归属仍待三人最终确认。当前正式计算和参考实现均按退款完成时间归属。
 - 模型模式真实调用与准确率、成本、时延尚未测量；不能把规则模式测试成绩写成大模型实验成绩。
 

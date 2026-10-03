@@ -13,7 +13,7 @@
     "filters": {
       "type": "object", "additionalProperties": false,
       "properties": {
-        "region": {"type": "array", "items": {"enum": ["华东", "华南", "华北", "西部"]}, "minItems": 1, "uniqueItems": true},
+        "region": {"type": "array", "items": {"enum": ["华东", "华南", "华北", "西南", "华中"]}, "minItems": 1, "uniqueItems": true},
         "customer_type": {"type": "array", "items": {"enum": ["new", "returning"]}, "minItems": 1, "uniqueItems": true}
       },
       "default": {}

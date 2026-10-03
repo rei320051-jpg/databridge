@@ -25,7 +25,7 @@ def percentile(values, percent):
 
 def main():
     demo = ROOT / 'data' / 'demo'
-    database = ROOT / 'outputs' / 'demo-v1.0.sqlite3'
+    database = ROOT / 'outputs' / 'demo-v1.1.sqlite3'
     expected = json.loads((demo / 'expected.json').read_text(encoding='utf-8'))
     manifest = json.loads((demo / 'manifest.json').read_text(encoding='utf-8'))
     actual_hashes = {name: hashlib.sha256((demo / name).read_bytes()).hexdigest()

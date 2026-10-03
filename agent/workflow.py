@@ -337,10 +337,12 @@ class AgentWorkflow:
             if dimension == Dimension.CUSTOMER_TYPE:
                 mapped[dimension] = [CUSTOMER_TYPES[v] for v in values]
             elif dimension == Dimension.REGION:
-                supported = {"华东", "华南", "华北", "西部"}
+                # DS-001（D1）：正式库与共享契约统一为同一份五地区词表，直接取契约枚举
+                supported = set(DIMENSION_SPEC[Dimension.REGION]["values"])
                 if any(v not in supported for v in values):
                     return _failure(Status.INSUFFICIENT_DATA, "所选地区不在正式数据集中。", version,
-                                    "unsupported_region", ["该地区的正式数据"], "当前正式数据只覆盖华东、华南、华北、西部。")
+                                    "unsupported_region", ["该地区的正式数据"],
+                                    "当前正式数据覆盖：" + "、".join(sorted(supported)) + "。")
                 mapped[dimension] = values
         plan = {"metric": METRIC_TO_EXECUTOR[metric], "date_start": slots["date_start"],
                 "date_end": slots["date_end"], "dataset_version": version,

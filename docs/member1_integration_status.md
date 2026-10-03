@@ -3,6 +3,8 @@
 本文件记录成员 1 的正式数据与查询服务并入共享仓库后的状态。它不宣称当前 Streamlit `live` 模式已与正式后端贯通，也不把页面模拟数据的评测成绩当作正式系统成绩。
 
 > 后续进展（2026-10-02，成员 2 分支）：`POST /agent/query` 的自然语言入口与成员 1 执行层映射已实现并测试；下表保留成员 1 刚并入时的基线状态。正式上传/激活、统一数据集及页面 live 的端到端联调仍未完成，详见 `docs/member2_delivery.md`。
+>
+> 后续进展（2026-10-03，DS-001 D1）：正式联调库已按契约五地区（华东/华南/华北/西南/华中）重生成为 **demo-v1.1**，地区词表冲突消除；内置 85k 演示数据的 3,132 单超额退款也已修复归零（无放回抽单 + 累计退款≤实付封顶）。下表「数据集」行仍保留并入时的基线描述。
 
 ## 已并入的成员 1 成果
 
@@ -25,15 +27,15 @@
 | 退款时间 | `shared/contracts.py` 的当前参考实现按 `refund_time` 归属月份，IS-001 尚待三人确认 | 成功退款按 `refunded_at`（完成时间）归属月份 | 计算方向一致；三人仍须共同确认并冻结口径。 |
 | 状态与追溯 | 页面要求六种结果状态和统一信封 | 执行层另有 `invalid_plan`、`dataset_not_found` 等状态及查询记录 | 由三人确认入口层如何映射，不能把后端失败伪装成成功或空数据。 |
 
-页面内置模拟数据不能直接当作成员 1 的正式演示库：按“同一订单成功退款总额不得超过原订单实付金额”的既定导入规则核对，当前生成数据中有 **3,132** 个订单超额退款。成员 1 导入器正确地会阻止这类数据入库。此发现不否定页面现有 mock 演示，但在修正数据或经三人重新确认规则之前，不能用它宣称正式后端通过质量检查。
+页面内置模拟数据不能直接当作成员 1 的正式演示库：按“同一订单成功退款总额不得超过原订单实付金额”的既定导入规则核对，并入时生成数据中有 **3,132** 个订单超额退款。该缺陷已于 2026-10-03 修复（生成器改为无放回抽单并按实付水位线封顶），当前数据超额退款为 0，可通过成员 1 导入器质检。
 
 ## 当前可复现的后端运行方式
 
 在仓库根目录安装根目录 `requirements.txt` 后：
 
 ```powershell
-python scripts/import_dataset.py data/demo --database outputs/demo-v1.0.sqlite3
-$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.0.sqlite3).Path
+python scripts/import_dataset.py data/demo --database outputs/demo-v1.1.sqlite3
+$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.1.sqlite3).Path
 python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 ```
 

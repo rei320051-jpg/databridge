@@ -59,7 +59,7 @@ class QueryApiTests(unittest.TestCase):
         result = self.query(group_by=['region'])
         self.assertEqual(result['data'], [
             {'region': '华东', 'net_sales': 28000}, {'region': '华南', 'net_sales': 18000},
-            {'region': '华北', 'net_sales': 8000}, {'region': '西部', 'net_sales': 5000}])
+            {'region': '华北', 'net_sales': 8000}, {'region': '西南', 'net_sales': 5000}])
         self.assertEqual(self.query(group_by=['region'], sort='asc')['data'], result['data'][::-1])
 
     def test_03_refund_only_group_and_negative_net(self):
@@ -122,7 +122,7 @@ class QueryApiTests(unittest.TestCase):
         self.assertEqual(grouped['data'], [
             {'region': '华东', 'net_sales': 7000, 'compare_value': 28000, 'difference': -21000, 'growth_rate': -0.75},
             {'region': '华北', 'net_sales': 0, 'compare_value': 8000, 'difference': -8000, 'growth_rate': -1.0},
-            {'region': '西部', 'net_sales': 0, 'compare_value': 5000, 'difference': -5000, 'growth_rate': -1.0},
+            {'region': '西南', 'net_sales': 0, 'compare_value': 5000, 'difference': -5000, 'growth_rate': -1.0},
             {'region': '华南', 'net_sales': -8000, 'compare_value': 18000, 'difference': -26000, 'growth_rate': -1.444444}])
 
     def test_08b_zero_comparison_base_returns_null_and_warning(self):
@@ -203,7 +203,7 @@ class QueryApiTests(unittest.TestCase):
         shutil.copyfile(self.database, changed)
         with closing(sqlite3.connect(changed)) as writer:
             with writer:
-                writer.execute("UPDATE orders SET region='西部' WHERE order_id='O010'")
+                writer.execute("UPDATE orders SET region='华中' WHERE order_id='O010'")
         service = QueryService(changed, self.work / 'cross-region-records')
         grouped, _ = service.run(self.plan(metric='paying_customers', group_by=['region']))
         total, _ = service.run(self.plan(metric='paying_customers'))

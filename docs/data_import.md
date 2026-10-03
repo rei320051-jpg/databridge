@@ -13,7 +13,7 @@
 检查通过后创建一个新的数据库：
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/import_dataset.py data\demo --database outputs\demo-v1.0.sqlite3 --report outputs\demo-quality.json
+.\.venv\Scripts\python.exe scripts/import_dataset.py data\demo --database outputs\demo-v1.1.sqlite3 --report outputs\demo-quality.json
 ```
 
 退出码0表示没有错误，退出码2表示存在错误。目标数据库已经存在时会拒绝覆盖。导入先在临时文件中完成全部事务和外键检查，成功后才移动到目标路径；失败不留下可误用的半成品数据库。
@@ -34,7 +34,7 @@
 ## 现有数据
 
 - data/small：人工可核对的小型数据，版本small-v0.1。
-- data/demo：固定种子生成的演示数据，版本demo-v1.0，包含2,000名客户、20,000个订单和3,492条退款。
+- data/demo：固定种子生成的演示数据，版本demo-v1.1（DS-001 D1 起地区为契约五地区），包含2,000名客户、20,000个订单和3,492条退款。
 - data/anomalies：9个彼此隔离的异常场景；8类错误应阻止导入，1个异常大额场景应带警告导入。
 
 运行 `scripts/generate_datasets.py` 会按固定种子重新生成demo和anomalies目录；manifest.json记录行数和文件SHA-256，便于确认数据没有意外变化。

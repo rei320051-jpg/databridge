@@ -3,7 +3,7 @@
   "timezone": "Asia/Shanghai",
   "amount_warning_threshold_fen": 5000000,
   "max_reported_issues": 500,
-  "allowed_regions": ["华东", "华南", "华北", "西部"],
+  "allowed_regions": ["华东", "华南", "华北", "西南", "华中"],
   "allowed_customer_types": ["new", "returning"],
   "allowed_payment_statuses": ["paid", "cancelled", "failed"],
   "allowed_refund_statuses": ["success", "failed", "pending"]

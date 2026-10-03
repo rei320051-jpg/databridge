@@ -29,7 +29,7 @@
 | --- | --- | --- |
 | order_id | TEXT | 主键；一个订单一行 |
 | customer_id | TEXT | 外键，必须存在于 customers |
-| region | TEXT | 下单时业务地区快照：华东/华南/华北/西部 |
+| region | TEXT | 下单时业务地区快照：华东/华南/华北/西南/华中 |
 | ordered_at | TEXT | 下单时间 |
 | paid_at | TEXT / NULL | 成功支付时间；未成功支付时必须为空 |
 | payment_status | TEXT | paid / cancelled / failed |

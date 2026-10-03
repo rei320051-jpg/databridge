@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""跨团队一致性测试：页面 mock 管线在成员 1 正式联调库（data/demo, demo-v1.0）上的
+"""跨团队一致性测试：页面 mock 管线在成员 1 正式联调库（data/demo, demo-v1.1）上的
 计算结果，必须与成员 1 随库交付的 expected.json 标准答案逐分一致。
 
 这是 F07「页面与外部 Agent 对同一问题得到相同结果」在数据集统一（DS-001）过程中的
@@ -54,7 +54,7 @@ def _yuan(v_fen) -> float:
 
 def main() -> None:
     log("=" * 78)
-    log("正式联调库 demo-v1.0 × 页面管线一致性测试（F07 锚点）")
+    log("正式联调库 demo-v1.1 × 页面管线一致性测试（F07 锚点）")
     log("=" * 78)
 
     tables = load_formal_demo()
@@ -151,7 +151,7 @@ def main() -> None:
     if ERRORS:
         log("结论：发现 " + str(len(ERRORS)) + " 项不一致：" + "；".join(ERRORS))
         raise SystemExit(1)
-    log("结论：页面管线与成员 1 正式库 expected.json 全部一致（含分地区 20 项核对）。")
+    log("结论：页面管线与成员 1 正式库 expected.json 全部一致（含分地区 25 项核对）。")
     log("=" * 78)
 
 

@@ -26,7 +26,7 @@
 }
 ```
 
-结果应包含华东28000、华南18000、华北8000、西部5000，单位是分。页面应除以响应中的display_divisor=100，再显示元。不要把28000直接显示成28000元。
+结果应包含华东28000、华南18000、华北8000、西南5000，单位是分。页面应除以响应中的display_divisor=100，再显示元。不要把28000直接显示成28000元。
 
 演示完回到启动终端按Ctrl+C即可停止。服务默认只监听本机，尚未提供其他电脑接入、账号权限或公网部署方案。
 
@@ -64,7 +64,7 @@ python -m venv .venv
 默认使用outputs/small-v0.1.sqlite3。运行演示库前，可在当前PowerShell设置：
 
 ```powershell
-$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.0.sqlite3).Path
+$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.1.sqlite3).Path
 $env:DATABRIDGE_RECORDS = (Join-Path (Get-Location) 'outputs/demo-query-records')
 ```
 
