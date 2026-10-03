@@ -82,6 +82,7 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 .venv\Scripts\python.exe tests\scenario_test.py     # §5.2.5 八个异常场景，17 项检查
 .venv\Scripts\python.exe tests\run_testset.py 开发集  # 测试集自动评分（37 题）
 .venv\Scripts\python.exe tests\run_testset.py 保留集  # 只读基线检查（最终测试才正式跑）
+.venv\Scripts\python.exe tests\formal_dataset_test.py # 正式库 demo-v1.0 × 页面管线一致性（35 项）
 .venv\Scripts\python.exe tests\run_experiment.py      # S1 vs S2 对照实验（37 题 × 2 方案）
 .venv\Scripts\python.exe tests\is001_refund_timing.py # IS-001 退款时间归属两口径对比
 .venv\Scripts\python.exe tests\export_showcase_data.py  # 导出展示页数据
@@ -231,6 +232,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 | `docs/展示数据.json` | 展示页所用的数据，由 `tests/export_showcase_data.py` 从平台真实计算导出 |
 | `docs/测试集与对照实验说明.md` | 测试集分类、判定规则与实验执行方法 |
 | `docs/派生指标设计草案_v0.1.md` | 退款率/客单价/支付人均消费的契约草案（待三人 10-08 前确认，未改现有行为） |
+| `docs/联调数据集统一方案_DS-001.md` | 两套演示数据的差异量化、地区词表三选项与统一落地清单（待三人确认） |
 
 展示页**不替代**可运行产品，它只是让评委在 30 秒内看懂产品价值。
 重新生成展示数据：

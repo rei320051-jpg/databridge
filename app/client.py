@@ -33,11 +33,14 @@ class QueryClient:
         self._tables = None
         #: 当前数据集版本。由页面从 dataset_registry 写入，随每次结果返回，用于追溯。
         self.dataset_version: str | None = None
+        #: 当前数据集覆盖月份（YYYY-MM）；None 时用 mock 参考实现的内置覆盖区间。
+        self.coverage_months: list | None = None
 
     # -- 数据源 ------------------------------------------------------------
-    def set_tables(self, tables: dict) -> None:
+    def set_tables(self, tables: dict, coverage_months: list | None = None) -> None:
         """mock 模式下注入数据表（用户上传或内置演示数据）。"""
         self._tables = tables
+        self.coverage_months = coverage_months
 
     def _mock_tables(self) -> dict:
         if self._tables is not None:
@@ -80,7 +83,8 @@ class QueryClient:
             import mock_backend
             return mock_backend.handle(question, context=context,
                                        tables=self._mock_tables(),
-                                       dataset_version=self.dataset_version)
+                                       dataset_version=self.dataset_version,
+                                       coverage_months=self.coverage_months)
         payload = {"question": question, "context": context or {}}
         if self.dataset_version:
             payload["dataset_version"] = self.dataset_version
@@ -102,7 +106,8 @@ class QueryClient:
             return mock_backend.handle(question, context=ctx,
                                        clarification=payload_clr,
                                        tables=self._mock_tables(),
-                                       dataset_version=self.dataset_version)
+                                       dataset_version=self.dataset_version,
+                                       coverage_months=self.coverage_months)
         body = {"question": question, "context": ctx, "clarification": payload_clr}
         if self.dataset_version:
             body["dataset_version"] = self.dataset_version

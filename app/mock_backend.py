@@ -174,8 +174,22 @@ def _detect_metric(question: str, context: dict):
     return "missing", None
 
 
-def _detect_period(question: str, context: dict):
+def _coverage(coverage_months: list | None) -> dict:
+    """生效的数据覆盖区间。默认取契约常量；正式联调库可显式传入其元数据区间。
+
+    覆盖范围必须来自显式元数据，不能按数据最早/最晚交易推断（成员 1 数据字典规则）。
+    """
+    if not coverage_months:
+        return DATASET_COVERAGE
+    return {"months": list(coverage_months),
+            "start": f"{coverage_months[0]}-01",
+            "end": _month_end(coverage_months[-1])}
+
+
+def _detect_period(question: str, context: dict, coverage_months: list | None = None):
     import re
+
+    cov = _coverage(coverage_months)
 
     if context.get("date_start") and context.get("date_end"):
         return "ok", context["date_start"], context["date_end"]
@@ -195,7 +209,7 @@ def _detect_period(question: str, context: dict):
         lo, hi = min(a, b), max(a, b)
         start_m, end_m = f"{year:04d}-{lo:02d}", f"{year:04d}-{hi:02d}"
         ds_r, de_r = _month_start(start_m), _month_end(end_m)
-        if ds_r >= DATASET_COVERAGE["start"] and de_r <= DATASET_COVERAGE["end"]:
+        if ds_r >= cov["start"] and de_r <= cov["end"]:
             return "ok", ds_r, de_r
         return "out_of_coverage", ds_r, de_r
 
@@ -221,7 +235,7 @@ def _detect_period(question: str, context: dict):
             month_no = CN_MONTH.get(m2.group(1))
     if month_no and 1 <= month_no <= 12:
         mm = f"2026-{month_no:02d}"
-        if mm in DATASET_COVERAGE["months"]:
+        if mm in cov["months"]:
             return "ok", _month_start(mm), _month_end(mm)
         return "out_of_coverage", _month_start(mm), _month_end(mm)
 
@@ -337,6 +351,21 @@ def _normalize_choice(target_field: str, raw: str) -> str:
 # 查询执行（真正的 pandas 计算）
 # ---------------------------------------------------------------------------
 
+def _attach_dimensions(frame: pd.DataFrame, customers: pd.DataFrame) -> pd.DataFrame:
+    """补 region / customer_type 维度。
+
+    若订单行自带维度快照列（成员 1 正式库约定：地区为订单产生时快照，
+    同一客户可跨地区下单），直接采用；否则回退到从 customers 关联
+    （内置演示数据客户↔地区为 1:1，两种取法等价）。
+    """
+    dims = ["region", "customer_type"]
+    missing = [d for d in dims if d not in frame.columns]
+    if missing:
+        frame = frame.merge(customers[["customer_id", *missing]],
+                            on="customer_id", how="left")
+    return frame
+
+
 def _slice_period(tables: dict, ds: str, de: str):
     orders = tables["orders"].copy()
     refunds = tables["refunds"].copy()
@@ -348,17 +377,19 @@ def _slice_period(tables: dict, ds: str, de: str):
     orders["pay_time"] = pd.to_datetime(orders["pay_time"], errors="coerce")
     o = orders[orders["pay_status"] == "success"]
     o = o[o["pay_time"].between(ds_ts, de_ts)]
-    o = o.merge(customers[["customer_id", "region", "customer_type"]],
-                on="customer_id", how="left")
+    o = _attach_dimensions(o, customers)
 
     refunds["refund_time"] = pd.to_datetime(refunds["refund_time"], errors="coerce")
     r = refunds[refunds["refund_status"] == "success"]
     r = r[r["refund_time"].between(ds_ts, de_ts)]
     # 关键：先按 order_id 预聚合，避免一个订单多条退款导致实付金额重复累计
     r_agg = r.groupby("order_id", as_index=False)["refund_amount"].sum()
-    r_agg = r_agg.merge(orders[["order_id", "customer_id"]], on="order_id", how="left")
-    r_agg = r_agg.merge(customers[["customer_id", "region", "customer_type"]],
-                        on="customer_id", how="left")
+    # 退款的地区/客户类型继承原订单（订单快照），不从客户表现取，
+    # 否则跨地区下单客户的退款会被归错地区
+    order_dims = orders[["order_id", "customer_id", *[d for d in ("region", "customer_type")
+                                                       if d in orders.columns]]]
+    r_agg = r_agg.merge(order_dims, on="order_id", how="left")
+    r_agg = _attach_dimensions(r_agg, customers)
     return o, r_agg
 
 
@@ -481,11 +512,12 @@ def _build_sql(plan: dict) -> str:
     )
 
 
-def _run_plan(plan: dict, tables: dict) -> dict:
+def _run_plan(plan: dict, tables: dict, coverage_months: list | None = None) -> dict:
     metric = plan["metric"]
     dims = plan.get("group_by") or []
     dim_col = DIMENSION_SPEC[dims[0]]["column"] if dims else None
     filters = plan.get("filters") or {}
+    cov = _coverage(coverage_months)
 
     o, r_agg = _slice_period(tables, plan["date_start"], plan["date_end"])
     o = _apply_filters(o, filters)
@@ -514,7 +546,7 @@ def _run_plan(plan: dict, tables: dict) -> dict:
         if len(prev):
             prev.columns = ["prev_value"]
             result = result.join(prev, how="left")
-            if p_start < DATASET_COVERAGE["start"]:
+            if p_start < cov["start"]:
                 warnings.append({
                     "level": "info",
                     "code": "previous_period_partial",
@@ -533,11 +565,11 @@ def _run_plan(plan: dict, tables: dict) -> dict:
     result = result.head(limit)
 
     coverage_warn = []
-    if plan["date_start"] < DATASET_COVERAGE["start"] or plan["date_end"] > DATASET_COVERAGE["end"]:
+    if plan["date_start"] < cov["start"] or plan["date_end"] > cov["end"]:
         coverage_warn.append({
             "level": "warning",
             "code": "out_of_coverage",
-            "message": f"查询区间超出数据覆盖范围 {DATASET_COVERAGE['start']} ~ {DATASET_COVERAGE['end']}。",
+            "message": f"查询区间超出数据覆盖范围 {cov['start']} ~ {cov['end']}。",
             "impact": "区间外的部分按 0 计入，指标可能被低估。",
         })
     warnings.extend(coverage_warn)
@@ -558,8 +590,10 @@ def _run_plan(plan: dict, tables: dict) -> dict:
 
 def _handle_inner(question: str, context: dict | None = None,
                   clarification: dict | None = None,
-                  tables: dict | None = None) -> dict:
+                  tables: dict | None = None,
+                  coverage_months: list | None = None) -> dict:
     """生成结果信封（内部实现，不涉及数据集版本）。"""
+    cov = _coverage(coverage_months)
     if tables is None:
         from demo_data import demo_tables
         tables = demo_tables()
@@ -657,7 +691,7 @@ def _handle_inner(question: str, context: dict | None = None,
             context=ctx)
 
     # ---- 时间 ----
-    p_state, ds, de = _detect_period(q, ctx)
+    p_state, ds, de = _detect_period(q, ctx, coverage_months)
     if p_state in ("ambiguous", "missing"):
         if rounds >= MAX_CLARIFICATION_ROUNDS:
             return _envelope(Status.INSUFFICIENT_DATA, "连续澄清后仍未确定时间范围。",
@@ -674,7 +708,7 @@ def _handle_inner(question: str, context: dict | None = None,
                 ask,
                 [{"value": m, "label": m.replace("-", " 年 ") + " 月",
                   "definition": f"数据覆盖 {_month_start(m)} ~ {_month_end(m)}"}
-                 for m in DATASET_COVERAGE["months"]], ctx),
+                 for m in cov["months"]], ctx),
             context=ctx)
 
     if p_state == "out_of_coverage":
@@ -683,7 +717,7 @@ def _handle_inner(question: str, context: dict | None = None,
             f"数据未覆盖 {ds} 至 {de}。",
             reason="period_out_of_coverage",
             missing=[f"{ds} ~ {de} 的业务数据"],
-            suggestion=f"当前数据覆盖范围为 {DATASET_COVERAGE['start']} ~ {DATASET_COVERAGE['end']}，"
+            suggestion=f"当前数据覆盖范围为 {cov['start']} ~ {cov['end']}，"
                        f"请改为该区间内的时间。",
             retryable=False, context=ctx)
 
@@ -706,7 +740,7 @@ def _handle_inner(question: str, context: dict | None = None,
     }
 
     try:
-        out = _run_plan(plan, tables)
+        out = _run_plan(plan, tables, coverage_months)
     except Exception as exc:  # noqa: BLE001
         return _envelope(Status.EXECUTION_FAILED, "查询执行失败。",
                          reason="execution_error", missing=[],
@@ -739,7 +773,8 @@ def _handle_inner(question: str, context: dict | None = None,
 
 def handle(question: str, context: dict | None = None,
            clarification: dict | None = None, tables: dict | None = None,
-           dataset_version: str | None = None) -> dict:
+           dataset_version: str | None = None,
+           coverage_months: list | None = None) -> dict:
     """完整处理一次提问，返回契约定义的结果信封。
 
     :param question: 用户原话（澄清二次提交时，仍传原始问题）
@@ -749,9 +784,11 @@ def handle(question: str, context: dict | None = None,
     :param dataset_version: 数据集版本号。由调用方从 dataset_registry 取，
                             使每次查询的来源可追溯，而不是一个写死的常量。
                             这是 §5.4「每次成功查询都能查看口径和来源」的前提。
+    :param coverage_months: 数据覆盖月份（YYYY-MM），取自数据集显式元数据；
+                            为空时用契约内置演示数据的覆盖区间。
     """
     resp = _handle_inner(question, context=context, clarification=clarification,
-                         tables=tables)
+                         tables=tables, coverage_months=coverage_months)
     if dataset_version:
         resp["dataset_version"] = dataset_version
     return resp

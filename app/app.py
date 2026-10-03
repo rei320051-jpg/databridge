@@ -44,6 +44,7 @@ import config as app_config  # noqa: E402
 import client as client_mod  # noqa: E402
 import quality as quality_mod  # noqa: E402
 import dataset_registry as registry  # noqa: E402
+import formal_dataset  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # 页面基础
@@ -201,6 +202,11 @@ def _cached_anomaly():
     return {k: v.copy() for k, v in tables.items()}
 
 
+@st.cache_data(show_spinner="正在载入正式联调库 demo-v1.0…")
+def _cached_formal():
+    return formal_dataset.load_formal_demo()
+
+
 def _init_state() -> None:
     ss = st.session_state
     ss.setdefault("chat_log", [])
@@ -226,11 +232,14 @@ def _reset_query() -> None:
     ss["history"] = []
 
 
-def _register_dataset(tables: dict, source: str) -> dict:
+def _register_dataset(tables: dict, source: str,
+                      explicit_version: str | None = None,
+                      coverage_months: list | None = None) -> dict:
     """把当前数据注册成一个有版本号的数据集。
 
     版本号由内容哈希生成而非时间戳，因此同一份数据重复上传版本不变，
     查询结果里的数据集版本才是真正可追溯的。
+    :param explicit_version: 正式联调库传入其对外固定版本号（如 demo-v1.0）。
     """
     ss = st.session_state
     rec = registry.make_record(tables, source)
@@ -239,8 +248,10 @@ def _register_dataset(tables: dict, source: str) -> dict:
         ss["datasets"] = [rec] + ss["datasets"][:9]  # 只保留最近 10 条，避免内存膨胀
     ss["active_dataset"] = rec
     ss["active_tables"] = tables  # 供业务字典区按实际字段渲染确认清单
-    _client.set_tables(tables)
-    _client.dataset_version = rec["version"]
+    _client.set_tables(tables, coverage_months=coverage_months)
+    # 正式联调库对外使用其固定版本号（demo-v1.0），与后端版本协商一致；
+    # 内容哈希版本仍保留在注册记录里用于本地追溯
+    _client.dataset_version = explicit_version or rec["version"]
     return rec
 
 
@@ -341,14 +352,31 @@ def render_data_zone() -> dict:
         "上传业务数据（CSV，可多选）", type=["csv"], accept_multiple_files=True,
         help="文件名需包含 order / refund / customer 之一，用于识别订单表、退款表、客户表。",
     )
+    source_kind = st.radio(
+        "未上传文件时使用的内置数据集",
+        ["内置演示数据（8.5 万单，2026 年 6–9 月，5 地区）",
+         "正式联调库 demo-v1.0（2 万单，2026 年 1–9 月，4 地区）"],
+        index=0, horizontal=True,
+        help="两套数据的口径一致（仅成功状态参与、退款按完成时间、防一对多重复累计），"
+             "但规模、单位呈现、地区词表和数字不同，禁止混用或互相比较。",
+    )
+    use_formal = source_kind.startswith("正式联调库")
     use_anomaly = st.checkbox(
         "载入异常测试数据集（人为注入重复主键、缺失值、负金额、脏时间、悬空外键）",
-        value=False,
-        help="对应分工文档 §5.2.5 要求的异常场景测试。",
+        value=False, disabled=use_formal,
+        help="对应分工文档 §5.2.5；异常数据基于内置演示数据生成，正式库请使用 data/anomalies 九类异常集。",
     )
+
+    # 切换内置数据源时清空历史查询，避免把旧数据集的结论当成新数据集的
+    source_key = ("formal" if use_formal else "demo") + ("-anomaly" if use_anomaly else "")
+    if st.session_state.get("active_source_key") != source_key:
+        _reset_query()
+        st.session_state["active_source_key"] = source_key
 
     tables: dict = {}
     source = ""
+    explicit_version = None
+    coverage_months = None
     if uploaded:
         for f in uploaded:
             name = quality_mod.infer_table_name(f.name)
@@ -357,6 +385,17 @@ def render_data_zone() -> dict:
             except Exception as exc:  # noqa: BLE001
                 st.error(f"读取 `{f.name}` 失败：{exc}")
         source = "用户上传：" + "、".join(f"{k}（{v.shape[0]} 行）" for k, v in tables.items())
+    elif use_formal:
+        tables = _cached_formal()
+        source = ("正式联调库 demo-v1.0（成员 1 交付，sha256 锁定，整数分入库/边界转元；"
+                  "2026-01 ~ 2026-09）")
+        explicit_version = formal_dataset.FORMAL_VERSION
+        coverage_months = formal_dataset.FORMAL_COVERAGE_MONTHS
+        st.warning(
+            "当前为**正式联调库 demo-v1.0**：地区为 华东/华南/华北/**西部**，"
+            "与契约词表（含西南/华中）尚未统一（议题 DS-001，待三人决策）；"
+            "本库数字与内置演示数据不可混用。页面查询结果与成员 1 执行层 expected.json 逐分一致。"
+        )
     elif use_anomaly:
         tables = _cached_anomaly()
         source = "内置异常测试数据（模拟数据，用于验证质量检查能力，不参与演示）"
@@ -369,8 +408,9 @@ def render_data_zone() -> dict:
         return tables
 
     # 分工文档 §5.2.1 第 1 步：上传后注册为数据集，并生成内容感知的版本号
-    rec = _register_dataset(tables, source)
-    report = quality_mod.inspect_datasets(tables, version=rec["version"])
+    rec = _register_dataset(tables, source, explicit_version=explicit_version,
+                            coverage_months=coverage_months)
+    report = quality_mod.inspect_datasets(tables, version=explicit_version or rec["version"])
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("数据表数量", len(tables))
