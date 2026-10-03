@@ -1,0 +1,98 @@
+{
+  "calculation": "Independent aggregation performed while generating rows; amounts are fen.",
+  "monthly": {
+    "2026-01": {
+      "paid_orders": 2026,
+      "paying_customers": 1263,
+      "paid_amount": 2048157346,
+      "successful_refund_amount": 87460702,
+      "net_sales": 1960696644
+    },
+    "2026-02": {
+      "paid_orders": 1775,
+      "paying_customers": 1184,
+      "paid_amount": 1750094382,
+      "successful_refund_amount": 160565414,
+      "net_sales": 1589528968
+    },
+    "2026-03": {
+      "paid_orders": 1961,
+      "paying_customers": 1258,
+      "paid_amount": 1932034375,
+      "successful_refund_amount": 144147620,
+      "net_sales": 1787886755
+    },
+    "2026-04": {
+      "paid_orders": 1966,
+      "paying_customers": 1262,
+      "paid_amount": 1980929728,
+      "successful_refund_amount": 136026397,
+      "net_sales": 1844903331
+    },
+    "2026-05": {
+      "paid_orders": 1985,
+      "paying_customers": 1249,
+      "paid_amount": 1971588242,
+      "successful_refund_amount": 157011607,
+      "net_sales": 1814576635
+    },
+    "2026-06": {
+      "paid_orders": 1892,
+      "paying_customers": 1214,
+      "paid_amount": 1874699901,
+      "successful_refund_amount": 143939760,
+      "net_sales": 1730760141
+    },
+    "2026-07": {
+      "paid_orders": 1996,
+      "paying_customers": 1258,
+      "paid_amount": 2043370761,
+      "successful_refund_amount": 163121538,
+      "net_sales": 1880249223
+    },
+    "2026-08": {
+      "paid_orders": 1994,
+      "paying_customers": 1252,
+      "paid_amount": 1981041310,
+      "successful_refund_amount": 142087375,
+      "net_sales": 1838953935
+    },
+    "2026-09": {
+      "paid_orders": 1954,
+      "paying_customers": 1242,
+      "paid_amount": 1941434399,
+      "successful_refund_amount": 221550808,
+      "net_sales": 1719883591
+    }
+  },
+  "september_by_region": {
+    "华东": {
+      "paid_orders": 766,
+      "paying_customers": 627,
+      "paid_amount": 778623139,
+      "successful_refund_amount": 95588784,
+      "net_sales": 683034355
+    },
+    "华南": {
+      "paid_orders": 483,
+      "paying_customers": 425,
+      "paid_amount": 465531897,
+      "successful_refund_amount": 55009008,
+      "net_sales": 410522889
+    },
+    "华北": {
+      "paid_orders": 404,
+      "paying_customers": 367,
+      "paid_amount": 388921419,
+      "successful_refund_amount": 39189509,
+      "net_sales": 349731910
+    },
+    "西部": {
+      "paid_orders": 301,
+      "paying_customers": 279,
+      "paid_amount": 308357944,
+      "successful_refund_amount": 31763507,
+      "net_sales": 276594437
+    }
+  }
+}

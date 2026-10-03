@@ -1,0 +1,21 @@
+{
+  "dictionary_version": "0.1.0",
+  "approval_status": "team_review_pending",
+  "owner_rule_confirmation": {
+    "status": "accepted",
+    "date": "2026-09-29",
+    "scope": "amount_in_fen_display_in_yuan; refunds_by_completion_time; region_from_order_snapshot; customer_type_from_fixed_dataset_label"
+  },
+  "timezone": "Asia/Shanghai",
+  "amount_storage_unit": "fen",
+  "customer_type_semantics": "fixed_dataset_label",
+  "date_input": "inclusive_dates",
+  "execution_interval": "start_inclusive_end_exclusive",
+  "metrics": [
+    {"id": "paid_orders", "name": "支付订单数", "unit": "单", "definition": "所选期间成功支付的订单编号去重数，包含零元支付和之后退款的订单", "time_field": "orders.paid_at", "status_filter": "payment_status=paid", "aggregation": "count_distinct(order_id)", "source_tables": ["orders"]},
+    {"id": "paying_customers", "name": "支付人数", "unit": "人", "definition": "所选期间成功支付的客户编号去重数；跨组人数不可直接相加", "time_field": "orders.paid_at", "status_filter": "payment_status=paid", "aggregation": "count_distinct(customer_id)", "source_tables": ["orders", "customers"]},
+    {"id": "paid_amount", "name": "实付金额", "unit": "分", "display_unit": "元", "display_divisor": 100, "definition": "所选期间成功支付订单的原始实付金额之和，不因退款扣减", "time_field": "orders.paid_at", "status_filter": "payment_status=paid", "aggregation": "sum(paid_amount_fen)", "source_tables": ["orders"]},
+    {"id": "successful_refund_amount", "name": "成功退款金额", "unit": "分", "display_unit": "元", "display_divisor": 100, "definition": "所选期间成功完成的退款金额之和，可包含往期支付订单的退款", "time_field": "refunds.refunded_at", "status_filter": "refund_status=success", "aggregation": "sum(refund_amount_fen)", "source_tables": ["refunds", "orders"]},
+    {"id": "net_sales", "name": "净销售额", "unit": "分", "display_unit": "元", "display_divisor": 100, "definition": "所选期间实付金额减去同期成功退款金额，两部分独立按各自事件时间计算；允许负数", "time_fields": ["orders.paid_at", "refunds.refunded_at"], "aggregation": "paid_amount-successful_refund_amount", "source_tables": ["orders", "refunds"]}
+  ]
+}

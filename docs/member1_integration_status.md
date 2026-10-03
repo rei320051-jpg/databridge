@@ -1,0 +1,45 @@
+# 成员 1 后端交付与三方联调边界（2026-10-02）
+
+本文件记录成员 1 的正式数据与查询服务并入共享仓库后的状态。它不宣称当前 Streamlit `live` 模式已与正式后端贯通，也不把页面模拟数据的评测成绩当作正式系统成绩。
+
+## 已并入的成员 1 成果
+
+- `schema.sql`、`databridge/importer.py`：客户、订单、退款表；CSV 审核与原子导入，拒绝主键、类型、时间、外键、金额和超额退款等严重错误。
+- `config/metrics.json`、`databridge/service.py`：五个指标、只读参数化 SQL、时间比较、分组筛选、超时与行数限制、查询记录。
+- `databridge/api.py`：`GET /health`、结构化查询 `POST /v1/query`、`GET /v1/query-records/{query_id}`。这是成员 1 的**执行层**，不负责自然语言理解。
+- `data/small`、`data/demo`、`data/anomalies`：人工核对数据、2 万订单正式后端演示数据、九类异常数据；均为虚构模拟数据。
+- `scripts/`、`docs/member1_delivery.md`：重建、核对、导入、HTTP 验证及交接说明。
+
+成员 1 的本地测试结果见 `docs/member1_delivery.md`。合入共享仓库后仍须在新环境重新运行测试和三方联调。
+
+## 与成员 3 当前页面的对应关系
+
+| 事项 | 当前页面/共享契约 | 成员 1 执行层 | 联调前必须处理 |
+| --- | --- | --- | --- |
+| 入口 | 页面 `live` 调用 `POST /agent/query`，传自然语言问题；数据上传拟调用 `/datasets/inspect` | `POST /v1/query` 接收**结构化计划**；CSV 目前经命令行审核导入 | 成员 2 实现自然语言入口及计划转换；成员 1、3 确认上传接口与激活数据集的流程。不要把页面直接指向 `/v1/query`。 |
+| 指标编码 | `paid_order_count`、`paid_customer_count`、`refund_amount` 等 | `paid_orders`、`paying_customers`、`successful_refund_amount` 等 | 在入口/执行层之间做明确映射，并以 `shared/contracts.py` 的对外编码为准；不得静默换指标。 |
+| 金额 | 页面接口以“元”、两位小数展示 | 数据库和执行层以整数“分”保存与返回，另带 `display_divisor=100` | 在对外响应边界转换为元；禁止把分的整数直接当元显示，也不要改成浮点存储。 |
+| 数据集 | 页面内置 85,018 条订单，五个地区，客户类型为“新客户/老客户”，版本为内容哈希 | 成员 1 演示集 20,000 条订单，地区含“西部”，客户类型为 `new/returning`，版本为 `demo-v1.0` | 先选定联调的唯一数据集及维度词汇，再重算标准答案与展示数字；不得把两套数据的结果混用。 |
+| 退款时间 | `shared/contracts.py` 的当前参考实现按 `refund_time` 归属月份，IS-001 尚待三人确认 | 成功退款按 `refunded_at`（完成时间）归属月份 | 计算方向一致；三人仍须共同确认并冻结口径。 |
+| 状态与追溯 | 页面要求六种结果状态和统一信封 | 执行层另有 `invalid_plan`、`dataset_not_found` 等状态及查询记录 | 由三人确认入口层如何映射，不能把后端失败伪装成成功或空数据。 |
+
+页面内置模拟数据不能直接当作成员 1 的正式演示库：按“同一订单成功退款总额不得超过原订单实付金额”的既定导入规则核对，当前生成数据中有 **3,132** 个订单超额退款。成员 1 导入器正确地会阻止这类数据入库。此发现不否定页面现有 mock 演示，但在修正数据或经三人重新确认规则之前，不能用它宣称正式后端通过质量检查。
+
+## 当前可复现的后端运行方式
+
+在仓库根目录安装根目录 `requirements.txt` 后：
+
+```powershell
+python scripts/import_dataset.py data/demo --database outputs/demo-v1.0.sqlite3
+$env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.0.sqlite3).Path
+python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
+```
+
+`docs/api_usage.md` 给出结构化请求与验证方法。**目前不要把成员 3 页面的 `live` 地址直接填为 `http://127.0.0.1:8001`**：自然语言入口、上传/激活流程及对外单位尚未统一；页面继续使用 mock 模式演示，不得把 mock 成绩写成三方正式联调结果。
+
+## 下一步验收顺序
+
+1. 三人确认对外契约和联调数据集；保留成员 1 数据库整数分及质量约束。
+2. 成员 2 接入自然语言解析和澄清，将共享指标编码映射为成员 1 可执行的结构化计划。
+3. 成员 1 实现或确认 `/datasets/inspect` 与数据集激活协议；成员 3 页面改为使用同一版本的数据集并按元展示。
+4. 用同一份数据分别从页面和外部 Agent 调用，核对数值、口径、版本、SQL/查询记录，再重跑开发集与真正保留的测试集。

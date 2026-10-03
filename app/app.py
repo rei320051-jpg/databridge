@@ -260,6 +260,13 @@ with st.sidebar:
     )
     backend_mode = "mock" if mode_label.startswith("mock") else "live"
 
+    if backend_mode == "live":
+        st.warning(
+            "live 模式需要兼容 `/agent/query` 和 `/datasets/inspect` 的对外服务。"
+            "成员 1 已交付的 `/v1/query` 是结构化执行层，尚不能直接作为本页后端；"
+            "请先完成三方接口及数据集联调。"
+        )
+
     api_url = st.text_input("后端地址", value=app_config.API_BASE_URL,
                             disabled=(backend_mode == "mock"))
 
@@ -464,8 +471,8 @@ def render_dictionary_zone() -> None:
     st.subheader("业务字典区")
     st.caption(
         "对应分工文档 §5.2.2「业务字典区」。"
-        "本页内容直接来自 `shared/contracts.py`，与成员 1 的指标计算、成员 2 的提示词同源，"
-        "保证三方使用同一套口径。"
+        "本页内容直接来自 `shared/contracts.py`。成员 1 的正式执行层已独立交付，"
+        "但其对外编码、金额单位及数据集仍须与本页对齐；成员 2 的提示词尚待接入。"
     )
 
     st.markdown("**核心指标（首版固定 5 个）**")

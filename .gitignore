@@ -22,6 +22,9 @@ data/*.csv
 .env
 config.local.py
 
+# 成员 1 后端构建数据库、查询记录与 HTTP 验证输出；源 CSV 在 data/ 子目录中需入库
+outputs/
+
 # 个人工作笔记 / Agent 记忆
 .workbuddy/
 .gh_tmp

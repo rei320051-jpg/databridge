@@ -1,0 +1,15 @@
+{
+  "note": "Manual expectations, reviewed against docs/manual_check.md; money values in fen.",
+  "cases": [
+    {"name": "September totals", "date_start": "2026-09-01", "date_end": "2026-09-30", "expected": {"paid_orders": 8, "paying_customers": 6, "paid_amount": 79000, "successful_refund_amount": 20000, "net_sales": 59000}},
+    {"name": "September east", "date_start": "2026-09-01", "date_end": "2026-09-30", "region": "华东", "expected": {"paid_orders": 2, "paying_customers": 2, "paid_amount": 35000, "successful_refund_amount": 7000, "net_sales": 28000}},
+    {"name": "September south", "date_start": "2026-09-01", "date_end": "2026-09-30", "region": "华南", "expected": {"paid_orders": 2, "paying_customers": 1, "paid_amount": 18000, "successful_refund_amount": 0, "net_sales": 18000}},
+    {"name": "September north", "date_start": "2026-09-01", "date_end": "2026-09-30", "region": "华北", "expected": {"paid_orders": 3, "paying_customers": 2, "paid_amount": 21000, "successful_refund_amount": 13000, "net_sales": 8000}},
+    {"name": "September west", "date_start": "2026-09-01", "date_end": "2026-09-30", "region": "西部", "expected": {"paid_orders": 1, "paying_customers": 1, "paid_amount": 5000, "successful_refund_amount": 0, "net_sales": 5000}},
+    {"name": "August", "date_start": "2026-08-01", "date_end": "2026-08-31", "expected": {"paid_orders": 1, "paying_customers": 1, "paid_amount": 10000, "successful_refund_amount": 0, "net_sales": 10000}},
+    {"name": "October boundary", "date_start": "2026-10-01", "date_end": "2026-10-31", "expected": {"paid_orders": 1, "paying_customers": 1, "paid_amount": 7000, "successful_refund_amount": 8000, "net_sales": -1000}},
+    {"name": "October south refund only", "date_start": "2026-10-01", "date_end": "2026-10-31", "region": "华南", "expected": {"paid_orders": 0, "paying_customers": 0, "paid_amount": 0, "successful_refund_amount": 8000, "net_sales": -8000}},
+    {"name": "Zero-price paid order", "date_start": "2026-09-26", "date_end": "2026-09-26", "expected": {"paid_orders": 1, "paying_customers": 1, "paid_amount": 0, "successful_refund_amount": 0, "net_sales": 0}},
+    {"name": "Empty covered day", "date_start": "2026-09-07", "date_end": "2026-09-07", "expected": {"paid_orders": 0, "paying_customers": 0, "paid_amount": 0, "successful_refund_amount": 0, "net_sales": 0}}
+  ]
+}

@@ -1,0 +1,7 @@
+customer_id,customer_type,created_at,dataset_version
+C001,returning,2026-07-01T09:00:00,small-v0.1
+C002,new,2026-08-20T09:00:00,small-v0.1
+C003,returning,2026-07-02T09:00:00,small-v0.1
+C004,new,2026-09-01T09:00:00,small-v0.1
+C005,returning,2026-07-03T09:00:00,small-v0.1
+C006,returning,2026-07-04T09:00:00,small-v0.1
