@@ -1,0 +1,4 @@
+# 统一换行符：成员 1 的数据集校验和按 LF 计算，
+# Windows 默认 CRLF 检出会导致 validate_demo / test_importer 失败。
+# 所有文本文件在仓库中与工作区都使用 LF（对齐 F08：换电脑可直接运行）。
+* text=auto eol=lf
