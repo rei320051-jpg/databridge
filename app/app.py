@@ -202,7 +202,7 @@ def _cached_anomaly():
     return {k: v.copy() for k, v in tables.items()}
 
 
-@st.cache_data(show_spinner="正在载入正式联调库 demo-v1.1…")
+@st.cache_data(show_spinner=f"正在载入正式联调库 {formal_dataset.FORMAL_VERSION}…")
 def _cached_formal():
     return formal_dataset.load_formal_demo()
 
@@ -354,8 +354,8 @@ def render_data_zone() -> dict:
     )
     source_kind = st.radio(
         "未上传文件时使用的内置数据集",
-        ["内置演示数据（8.5 万单，2026 年 6–9 月，5 地区）",
-         "正式联调库 demo-v1.1（2 万单，2026 年 1–9 月，5 地区）"],
+        [f"内置演示数据（8.5 万单，2026 年 6–9 月，5 地区）",
+         f"正式联调库 {formal_dataset.FORMAL_VERSION}（2 万单，2026 年 1–9 月，5 地区）"],
         index=0, horizontal=True,
         help="两套数据的口径一致（仅成功状态参与、退款按完成时间、防一对多重复累计），"
              "地区词表已按 DS-001（D1）统一为契约五地区，但规模、单位呈现和数字不同，"
@@ -388,14 +388,14 @@ def render_data_zone() -> dict:
         source = "用户上传：" + "、".join(f"{k}（{v.shape[0]} 行）" for k, v in tables.items())
     elif use_formal:
         tables = _cached_formal()
-        source = ("正式联调库 demo-v1.1（成员 1 交付，sha256 锁定，整数分入库/边界转元；"
-                  "2026-01 ~ 2026-09）")
+        source = (f"正式联调库 {formal_dataset.FORMAL_VERSION}（成员 1 交付，sha256 锁定，"
+                  "整数分入库/边界转元；2026-01 ~ 2026-09）")
         explicit_version = formal_dataset.FORMAL_VERSION
         coverage_months = formal_dataset.FORMAL_COVERAGE_MONTHS
         st.info(
-            "当前为**正式联调库 demo-v1.1**：地区词表已按 DS-001（D1）统一为契约五地区"
-            "（华东/华南/华北/西南/华中）。本库数字与内置演示数据相互独立、不可混用；"
-            "页面查询结果与成员 1 执行层 expected.json 逐分一致。"
+            f"当前为**正式联调库 {formal_dataset.FORMAL_VERSION}**：地区词表已按 DS-001（D1）"
+            "统一为契约五地区（华东/华南/华北/西南/华中）。本库数字与内置演示数据相互独立、"
+            "不可混用；页面查询结果与成员 1 执行层 expected.json 逐分一致。"
         )
     elif use_anomaly:
         tables = _cached_anomaly()
