@@ -98,40 +98,60 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 .
 ├── README.md                          本文件：安装与运行说明
 ├── AI智能体校园黑客松_A赛题_三人分工.md    团队分工主文档
+├── schema.sql                         正式库建表与 CHECK 约束（地区五地区）
+├── requirements.txt / requirements.lock.txt   正式后端依赖
 │
 ├── shared/
 │   └── contracts.py                   ★ 三方共享接口契约（唯一事实来源）
-├── app/
-│   ├── app.py                         Streamlit 产品页面（成员 3 主责）
+│
+├── app/                               【成员 3】Streamlit 产品页面
+│   ├── app.py                         五标签页（数据接入/业务字典/智能取数/结果依据/Agent 回放）
 │   ├── client.py                      后端适配层：mock / live 双模式
-│   ├── config.py                      运行配置
+│   ├── formal_dataset.py              正式联调库 demo-v1.1 适配层（分→元、码值映射）
 │   ├── mock_backend.py                页面侧参考实现（解析 + 执行）
 │   ├── mock_server.py                 契约参考服务：把参考实现暴露成 HTTP
-│   ├── demo_data.py                   演示数据与异常数据生成
+│   ├── demo_data.py                   演示数据与异常数据生成（含无放回抽单/退款封顶）
 │   ├── dataset_registry.py            数据集注册：内容哈希版本号
-│   ├── quality.py                     数据质量检查（对照实现）
+│   ├── quality.py / config.py
 │   └── requirements.txt
-├── docs/
-│   ├── 接口契约补充_v1.1_澄清与异常结构.md
-│   ├── 测试集与对照实验说明.md
-│   └── 成员3交付说明_20260930.md
-└── tests/
-    ├── 测试题_开发集_30题.csv
-    ├── 测试题_开发集_补充回归7题.csv
-    ├── 测试题_保留集_30题.csv
-    ├── 对照实验记录表.csv              37 题 × 2 方案 = 74 行
-    ├── build_experiment_sheet.py      从开发集生成实验记录表（空表）
-    ├── s1_baseline.py                 S1 基线：只看表结构的直接 Text-to-SQL 行为模拟
-    ├── run_experiment.py              S1 vs S2 对照实验执行器（填表 + 数值核对 + 归因）
-    ├── is001_refund_timing.py         IS-001 退款时间归属两口径对比（跨月退款变体）
-    ├── _对照实验明细.csv               74 行逐题明细（含实际数值与差异归因）
-    ├── _IS001口径对比.csv              月份×地区两口径净销售额差异表
-    ├── export_showcase_data.py        导出展示页所需的真实计算结果
-    ├── run_testset.py                 测试集自动评分器
-    ├── scenario_test.py               §5.2.5 八个异常场景（F01~F08）
-    ├── smoke_test.py                  链路自测（26 项，含退款不超额/无孤儿退款）
-    ├── page_render_test.py            页面渲染冒烟测试
-    └── live_mode_test.py              live 模式 HTTP 全链路（15 项）
+│
+├── databridge/                        【成员 1】正式后端：service.py（查询执行）/ importer.py（质检导入）/ api.py（FastAPI）
+│
+├── agent/                             【成员 2】自然语言工作流：workflow.py（规则/模型双模式）+ prompts/
+│
+├── scripts/                           【成员 1】数据与后端工具链
+│   ├── generate_datasets.py           确定性生成 demo-v1.1 / small / 九类异常固件（--regions 参数化）
+│   ├── import_dataset.py              CSV → SQLite 质检导入
+│   ├── validate_demo.py               manifest sha256 校验 + 70 项一致性检查
+│   ├── verify_small.py                最小手工数据集核对（--build-db 建库）
+│   ├── test_importer.py / test_query_api.py   导入器与查询接口回归
+│   └── smoke_http.py / smoke_demo_http.py / run_operations_agent.py   HTTP 冒烟
+│
+├── data/
+│   ├── demo/                          正式联调库 demo-v1.1（20k 订单，sha256 锁定）
+│   ├── small/                         最小手工数据集 small-v0.1（含 expected.json）
+│   └── anomalies/                     九类异常固件（负面用例）
+│
+├── config/data_quality.json           数据质量规则（allowed_regions 等）
+├── contracts/query_plan.schema.json   查询计划 JSON Schema
+├── examples/                          查询计划示例
+│
+├── tests/                             三方测试与实验（详见 docs/测试集与对照实验说明.md）
+│   ├── member2_workflow_test.py        成员 2 工作流 11 项
+│   ├── formal_dataset_test.py         正式库 × 页面管线一致性 35 项（F07 锚点）
+│   ├── smoke_test.py（26 项）/ scenario_test.py（F01~F08）/ page_render_test.py / live_mode_test.py（15 项）
+│   ├── run_testset.py                 测试集自动评分器（开发集 37 / 保留集 30）
+│   ├── run_experiment.py / s1_baseline.py / is001_refund_timing.py   S1-S2 对照与 IS-001 口径实验
+│   ├── build_experiment_sheet.py / export_showcase_data.py
+│   ├── 测试题_*.csv                    37 + 30 题测试集
+│   └── 对照实验记录表.csv / _对照实验明细.csv / _IS001口径对比.csv / _评测结果_*.csv
+│
+├── docs/                              全部文档：契约（query_contract/接口契约补充）、
+│                                      口径（派生指标草案/测试集说明）、决策（DS-001）、
+│                                      交付（member1/2_delivery、成员3交付说明）、
+│                                      展示（演示脚本大纲/产品展示页.html/展示数据.json）、
+│                                      数据（data_dictionary/data_import/manual_check）
+└── outputs/                           本地构建产物（数据库/质检报告，gitignore，仅留 .gitkeep）
 ```
 
 ---
