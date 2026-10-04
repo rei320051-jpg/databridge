@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数桥 DataBridge · 可信取数平台 — 产品展示（正式联调库 demo-v1.1）</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#fff; --ink:#12233f; --ink2:#47546f; --ink3:#6b7891;
+    --line:#e3e8ef; --accent:#2f5fd0; --accent-soft:#eef3ff;
+    --up:#c62828; --down:#2e7d32; --warn:#b26a00; --warn-bg:#fff6e5;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+    line-height:1.7; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 64px}
+  h1,h2,h3{margin:0}
+  .hero{
+    background:linear-gradient(135deg,#f2f6ff 0%,#e8efff 100%);
+    border:1px solid #d6e0f4;border-radius:14px;padding:30px 32px;margin-bottom:26px;
+  }
+  .hero h1{font-size:29px;font-weight:700;letter-spacing:-.01em}
+  .hero .sub{margin-top:10px;font-size:16px;color:var(--ink2);max-width:760px}
+  .tags{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+  .tag{background:#fff;border:1px solid #d2dcee;color:#2b3d5c;border-radius:999px;padding:4px 13px;font-size:13px}
+  .meta{margin-top:16px;font-size:12.5px;color:var(--ink3)}
+
+  section{margin-top:34px}
+  h2{font-size:19px;font-weight:700;margin-bottom:4px}
+  h2 .n{color:var(--accent);margin-right:8px;font-variant-numeric:tabular-nums}
+  .lead{color:var(--ink2);font-size:14.5px;margin:0 0 16px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .kpi .k{font-size:12.5px;color:var(--ink3)}
+  .kpi .v{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+  .kpi .u{font-size:12.5px;color:var(--ink3);font-weight:400;margin-left:3px}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12.5px;color:var(--ink3);font-weight:600;background:#fafbfd}
+  tr:last-child td{border-bottom:none}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+
+  .cmp-head{font-weight:700;font-size:14.5px;margin-bottom:8px}
+  .cmp-bad{border-top:3px solid #e0a3a3}
+  .cmp-good{border-top:3px solid var(--accent)}
+  .cmp-bad .cmp-head{color:#a33}
+  .cmp-good .cmp-head{color:var(--accent)}
+  .cmp ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink2)}
+  .cmp li{margin-bottom:7px}
+  .cmp li b{color:var(--ink)}
+
+  .bar-row{display:grid;grid-template-columns:64px 1fr 108px 84px;align-items:center;gap:12px;margin-bottom:11px}
+  .bar-name{font-size:14px;color:var(--ink)}
+  .bar-track{background:#eef1f6;border-radius:6px;height:22px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#4a7be0,#2f5fd0)}
+  .bar-val{font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .bar-mom{font-size:13.5px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .up{color:var(--up)} .down{color:var(--down)}
+  .legend{font-size:12px;color:var(--ink3);margin-top:10px}
+
+  .chat{background:#fafbfd;border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .bubble{max-width:78%;border-radius:12px;padding:11px 15px;font-size:14px;margin-bottom:12px}
+  .bu{background:var(--accent-soft);border:1px solid #d3ddf8;margin-right:auto}
+  .ba{background:#fff;border:1px solid var(--line);margin-left:auto}
+  .role{font-size:11.5px;color:var(--ink3);margin-bottom:3px;display:block}
+  .opts{margin:8px 0 0;padding:0;list-style:none}
+  .opts li{background:#fff;border:1px solid #d3ddf8;border-radius:8px;padding:7px 11px;font-size:13.5px;margin-bottom:6px}
+  .opts li b{color:var(--accent)}
+  .opts li span{display:block;color:var(--ink3);font-size:12.5px;margin-top:2px}
+
+  pre{background:#0f1729;color:#dbe5f5;border-radius:10px;padding:15px 17px;
+      font-size:12.5px;line-height:1.6;overflow-x:auto;margin:0;
+      font-family:ui-monospace,Consolas,"Courier New",monospace}
+  .evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+  .ev{background:#fafbfd;border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .ev .k{font-size:11.5px;color:var(--ink3)}
+  .ev .v{font-size:13.5px;margin-top:2px;color:var(--ink);word-break:break-all}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0}
+  .step{flex:1 1 110px;min-width:110px;background:#fff;border:1px solid var(--line);
+        border-radius:10px;padding:12px 10px;text-align:center;position:relative}
+  .step .sn{display:inline-block;width:21px;height:21px;line-height:21px;border-radius:50%;
+            background:var(--accent);color:#fff;font-size:12px;margin-bottom:6px}
+  .step .st{font-size:13px;color:var(--ink);line-height:1.5}
+  .arrow{display:flex;align-items:center;padding:0 5px;color:#b9c2d2;font-size:15px}
+
+  .qlist{margin:0;padding:0;list-style:none}
+  .qlist li{display:grid;grid-template-columns:76px 1fr;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .qlist li:last-child{border-bottom:none}
+  .lv{font-size:11.5px;border-radius:5px;text-align:center;padding:2px 0;height:20px;line-height:16px}
+  .lv-e{background:#fdeaea;color:#a33;border:1px solid #f2c7c7}
+  .lv-w{background:var(--warn-bg);color:var(--warn);border:1px solid #f0dcb4}
+  .imp{display:block;color:var(--ink3);font-size:12.5px;margin-top:2px}
+
+  .note{background:var(--warn-bg);border:1px solid #f0dcb4;border-radius:10px;padding:14px 17px;
+        font-size:13.5px;color:#6b4e12;margin-top:20px}
+  .note b{color:#5a3f08}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);
+         font-size:12.5px;color:var(--ink3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>数桥 DataBridge · 可信取数平台</h1>
+    <div class="sub">
+      面向 AI Agent 的可信取数平台。每一个数字都附带<b>指标口径、来源表、数据集版本与可追溯的查询记录</b>；
+      当数据无法支持结论时，明确说明缺什么，而不是编一个答案。
+    </div>
+    <div class="tags">
+      <span class="tag">只读 · 不修改任何业务数据</span>
+      <span class="tag">5 个固定指标口径</span>
+      <span class="tag">口径不明确时先澄清</span>
+      <span class="tag">最多澄清 2 轮</span>
+      <span class="tag">零售订单分析场景</span>
+    </div>
+    <div class="meta">
+      本页为静态展示页，用于答辩与演示；可运行的真实产品为 <code>app/app.py</code>（Streamlit）。
+      页面内所有数字均由平台真实计算得出，取自 <code>tests/export_showcase_data.py</code> 的导出结果。
+    </div>
+  </div>
+
+  <!-- ============ 1. 对比 ============ -->
+  <section>
+    <h2><span class="n">01</span>与普通 Text-to-SQL 的区别</h2>
+    <p class="lead">同样是「问一句话拿到数字」，差别在于：这个数字能不能被信任、能不能被追溯。</p>
+    <div class="grid2">
+      <div class="card cmp cmp-bad">
+        <div class="cmp-head">普通方案：大模型根据表结构直接生成 SQL</div>
+        <ul>
+          <li>指标口径由模型<b>临场理解</b>，同一问题换个说法可能得到不同结果</li>
+          <li>遇到「销售额」这类歧义词，<b>直接猜一个口径</b>就返回</li>
+          <li>通常<b>不返回来源与版本</b>，无法回答「这个数从哪来」</li>
+          <li>看不到执行的 SQL，<b>错了也不知道错在哪</b></li>
+          <li>数据有重复、缺失、负金额时<b>照算不误</b></li>
+          <li>数据不支持时，容易<b>编一个听起来合理的原因</b></li>
+        </ul>
+      </div>
+      <div class="card cmp cmp-good">
+        <div class="cmp-head">数桥：业务字典 + 查询计划 + 澄清 + 结果检查</div>
+        <ul>
+          <li>5 个指标写进<b>业务字典</b>，页面、查询服务、Agent 共用同一份定义</li>
+          <li>命中歧义词表<b>必须先澄清</b>，并列出候选口径供选择</li>
+          <li>每次查询都返回<b>来源表 + 数据集版本</b></li>
+          <li>返回<b>可追溯的查询记录 SQL</b>，只读三张表，不含写操作</li>
+          <li>每条数据质量问题都带<b>「对查询结果的影响」</b>说明</li>
+          <li>数据不足时<b>列出缺什么</b>，并给出可替代的问法</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. 真实查询结果 ============ -->
+  <section>
+    <h2><span class="n">02</span>一次真实查询，数字与依据一起给出</h2>
+    <p class="lead">问题：<b>2026年9月各地区的净销售额环比</b></p>
+
+    <div class="grid3">
+      <div class="kpi"><div class="k">净销售额合计（2026-09）</div><div class="v">17,198,835.91<span class="u">元</span></div></div>
+      <div class="kpi"><div class="k">覆盖地区</div><div class="v">5<span class="u">个</span></div></div>
+      <div class="kpi"><div class="k">环比降幅最大</div><div class="v">华南<span class="u">-15.72%</span></div></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <table>
+        <thead><tr><th>地区</th><th>净销售额（元）</th><th class="num">2026-09</th><th class="num">2026-08</th><th class="num">环比</th></tr></thead>
+        <tbody>
+          <tr><td>华东</td>
+            <td><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div></td>
+            <td class="num">6,830,343.55</td><td class="num">7,077,999.19</td><td class="num down">▼ 3.50%</td></tr>
+          <tr><td>华南</td>
+            <td><div class="bar-track"><div class="bar-fill" style="width:60.1%"></div></div></td>
+            <td class="num">4,105,228.89</td><td class="num">4,870,736.31</td><td class="num down">▼ 15.72%</td></tr>
+          <tr><td>华北</td>
+            <td><div class="bar-track"><div class="bar-fill" style="width:51.2%"></div></div></td>
+            <td class="num">3,497,319.10</td><td class="num">3,587,014.12</td><td class="num down">▼ 2.50%</td></tr>
+          <tr><td>华中</td>
+            <td><div class="bar-track"><div class="bar-fill" style="width:20.3%"></div></div></td>
+            <td class="num">1,386,743.37</td><td class="num">1,365,832.09</td><td class="num up">▲ 1.53%</td></tr>
+          <tr><td>西南</td>
+            <td><div class="bar-track"><div class="bar-fill" style="width:20.2%"></div></div></td>
+            <td class="num">1,379,201.00</td><td class="num">1,487,957.64</td><td class="num down">▼ 7.31%</td></tr>
+        </tbody>
+      </table>
+      <div class="legend">▲ 增长　▼ 下降　（按国内惯例：红涨绿跌）　·　五个地区加总等于不分地区的汇总值 17,198,835.91 元，分组不丢行也不重复。华中是唯一正增长地区。</div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="cmp-head" style="color:var(--accent)">这次查询同时返回的依据</div>
+      <div class="evidence">
+        <div class="ev"><div class="k">指标口径</div><div class="v">所选期间实付金额减去同期成功退款金额</div></div>
+        <div class="ev"><div class="k">单位</div><div class="v">元（接口单位：分，display_divisor=100）</div></div>
+        <div class="ev"><div class="k">来源表</div><div class="v">orders、refunds（地区为订单快照）</div></div>
+        <div class="ev"><div class="k">数据集版本</div><div class="v">demo-v1.1（sha256 锁定）</div></div>
+        <div class="ev"><div class="k">时间范围</div><div class="v">2026-09-01 ~ 2026-09-30</div></div>
+        <div class="ev"><div class="k">对比期</div><div class="v">2026-08（上一自然月）</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 口径拆解 ============ -->
+  <section>
+    <h2><span class="n">03</span>净销售额不是估算，而是可校验的等式</h2>
+    <p class="lead">华东 2026-09 的四个基础指标（全部由平台真实计算，接口单位为整数分，边界除以 100 转元）</p>
+    <div class="grid2">
+      <div class="card">
+        <table>
+          <tbody>
+            <tr><td>实付金额</td><td class="num">7,786,231.39</td></tr>
+            <tr><td>成功退款金额</td><td class="num">955,887.84</td></tr>
+            <tr><td><b>净销售额</b></td><td class="num"><b>6,830,343.55</b></td></tr>
+            <tr><td>支付订单数</td><td class="num">766</td></tr>
+            <tr><td>支付人数</td><td class="num">627</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="cmp-head" style="color:var(--accent)">为什么不会出现「重复累计」</div>
+        <p style="font-size:14px;color:var(--ink2);margin:0">
+          一个订单可能对应多条退款。如果直接把 <code>orders</code> 与 <code>refunds</code>
+          做明细连接再求和，实付金额会被<b>按退款条数放大</b>。
+        </p>
+        <p style="font-size:14px;color:var(--ink2);margin:10px 0 0">
+          数桥的做法是：实付金额与退款金额<b>两侧各自独立聚合</b>，结构上不可能重复累计；
+          正式库的地区是订单快照（<code>orders.region</code>），退款侧先按
+          <code>order_id</code> 预聚合，再连接 <code>orders</code> 取地区。
+        </p>
+        <p style="font-size:13.5px;color:var(--ink3);margin:12px 0 0">
+          导入器硬性校验「同一订单累计成功退款 ≤ 实付金额」，违反即拒绝入库：
+          demo-v1.1 全库 20,000 单<b>超额退款 0 例</b>；
+          另经不变量验证：追加 5 条各 1000 元退款，净销售额精确下降 5000 元，实付金额<b>完全不变</b>。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. 澄清 ============ -->
+  <section>
+    <h2><span class="n">04</span>口径不明确时，先问清楚，不猜</h2>
+    <p class="lead">「销售额」在业务字典里是一个<b>歧义词</b>——它可能指净销售额，也可能指实付金额。2026 年 9 月全平台两个数相差 2,215,508.08 元（即当月成功退款总额）。</p>
+    <div class="chat">
+      <div class="bubble bu"><span class="role">用户</span>9月的销售额是多少</div>
+      <div class="bubble ba">
+        <span class="role">数桥 · 需要你补充信息（ambiguous_metric）</span>
+        你说的「销售额」是指哪一个指标？
+        <ul class="opts">
+          <li><b>净销售额</b><span>所选期间实付金额减去同期成功退款金额</span></li>
+          <li><b>实付金额</b><span>所选期间成功支付订单的实付金额之和，不做退款扣减</span></li>
+        </ul>
+      </div>
+      <div class="bubble bu"><span class="role">用户（选择）</span>净销售额</div>
+      <div class="bubble ba">
+        <span class="role">数桥 · 查询成功</span>
+        净销售额 = <b>17,198,835.91 元</b>（接口返回 1,719,883,591 分，display_divisor=100）；口径、来源表、数据集版本与查询记录 SQL 一并返回。
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="cmp-head" style="color:var(--accent)">查询记录（SQL，可追溯）</div>
+      <pre>-- 成员 1 正式执行层真实 SQL（金额为整数分，半开时间区间，地区取订单快照）
+-- ① 实付侧：只计 payment_status='paid'，直接按 orders.region 聚合
+SELECT o.region AS region,
+       COALESCE(SUM(o.paid_amount_fen), 0) AS value
+FROM orders o
+WHERE o.payment_status = 'paid'
+  AND o.paid_at >= '2026-09-01T00:00:00'
+  AND o.paid_at <  '2026-10-01T00:00:00'
+GROUP BY o.region;
+
+-- ② 退款侧：只计 refund_status='success'，按退款完成时间；
+--    先按 order_id 预聚合（防一对多扇出），再连接 orders 取地区
+SELECT o.region AS region,
+       COALESCE(SUM(r.refund_amount_fen), 0) AS value
+FROM refunds r JOIN orders o ON o.order_id = r.order_id
+WHERE r.refund_status = 'success'
+  AND r.refunded_at >= '2026-09-01T00:00:00'
+  AND r.refunded_at <  '2026-10-01T00:00:00'
+GROUP BY o.region;
+-- 净销售额 = (① - ②) / display_divisor(100)，只读，不含任何写操作</pre>
+      <div class="legend">平台只读取 orders / refunds / customers 三张表，生成的 SQL 不含任何写操作。最多澄清 2 轮，超过即降级为「当前数据不足」，不会反复追问。</div>
+    </div>
+  </section>
+
+  <!-- ============ 5. 数据不足 ============ -->
+  <section>
+    <h2><span class="n">05</span>数据不支持时，说明缺什么，不编原因</h2>
+    <p class="lead">问「为什么下降」是最容易让模型编造的场景。数桥的回答是明确拒绝，并列出缺什么。</p>
+    <div class="grid2">
+      <div class="chat">
+        <div class="bubble bu"><span class="role">用户</span>为什么华东地区9月净销售额下降了</div>
+        <div class="bubble ba">
+          <span class="role">数桥 · 当前数据不足（causal_reasoning_unsupported）</span>
+          现有数据只能反映结果指标的变化，缺少活动、价格、竞品等外部变量，无法判断下降原因。
+          可以改为查询「华东地区各月净销售额」观察变化幅度。
+        </div>
+      </div>
+      <div class="card">
+        <div class="cmp-head" style="color:var(--accent)">系统明确列出缺少的信息</div>
+        <ul style="margin:0;padding-left:18px;font-size:14px;color:var(--ink2)">
+          <li>营销活动数据</li>
+          <li>竞品数据</li>
+          <li>价格调整记录</li>
+          <li>库存与履约数据</li>
+        </ul>
+        <div class="legend" style="margin-top:12px">
+          接口字段：<code>status=insufficient_data</code>、<code>reason</code>、
+          <code>missing</code>、<code>suggestion</code>、<code>retryable=false</code>。
+          <code>missing</code> 必须具体列出缺什么，而不是笼统写「数据不足」。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. 数据质量 ============ -->
+  <section>
+    <h2><span class="n">06</span>取数之前，先告诉这份数据能不能用</h2>
+    <p class="lead">每一条数据质量问题都附带<b>「对查询结果的影响」</b>——只报「有重复值」而不说后果，对取数平台没有价值。</p>
+    <div class="grid2">
+      <div class="card">
+        <div class="cmp-head">正式联调库（demo-v1.1，导入质检通过）</div>
+        <table>
+          <tbody>
+            <tr><td>customers</td><td class="num">2,000 行</td></tr>
+            <tr><td>orders</td><td class="num">20,000 行</td></tr>
+            <tr><td>refunds</td><td class="num">3,492 行</td></tr>
+            <tr><td><b>严重问题</b></td><td class="num"><b>0</b></td></tr>
+            <tr><td>警告</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+        <div class="legend" style="margin-top:10px">
+          入库经导入器质检 + manifest sha256 校验（70 项一致性检查全过）；同一订单累计退款超过实付金额的数据会被拒绝入库。
+        </div>
+      </div>
+      <div class="card">
+        <div class="cmp-head" style="color:#a33">异常固件数据集（九类人为注入）</div>
+        <table>
+          <tbody>
+            <tr><td><b>严重问题</b></td><td class="num"><b>6</b></td></tr>
+            <tr><td>警告</td><td class="num">5</td></tr>
+          </tbody>
+        </table>
+        <ul class="qlist" style="margin-top:8px">
+          <li><span class="lv lv-e">严重</span><span>主键 <code>order_id</code> 存在 1 条重复<span class="imp">订单数被低估、金额被高估</span></span></li>
+          <li><span class="lv lv-e">严重</span><span>金额字段存在负值<span class="imp">直接求和，拉低金额指标</span></span></li>
+          <li><span class="lv lv-e">严重</span><span>时间字段无法解析<span class="imp">该批记录被排除在时间筛选外</span></span></li>
+          <li><span class="lv lv-e">严重</span><span>外键悬空（跨表）<span class="imp">分组维度变空值，总额对不上</span></span></li>
+          <li><span class="lv lv-w">警告</span><span>金额极端大值<span class="imp">录入错误会显著抬高指标</span></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="note">
+      <b>产品红线：</b>存在严重问题时，页面会明确提示「在这些问题解决前，任何查询结果都不能作为正确结论使用」。
+      这是「可信取数」的最低要求，也是本平台与普通取数工具的分界线。
+    </div>
+  </section>
+
+  <!-- ============ 7. 流程 ============ -->
+  <section>
+    <h2><span class="n">07</span>完整操作流程（分工文档 §5.2.1）</h2>
+    <p class="lead">八步，每一步在页面上都有对应的可见结果。</p>
+    <div class="card">
+      <div class="flow">
+        <div class="step"><div class="sn">1</div><div class="st">上传业务数据</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">2</div><div class="st">查看数据质量检查结果</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">3</div><div class="st">确认字段与指标含义</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">4</div><div class="st">输入自然语言问题</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">5</div><div class="st">回答系统澄清问题</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">6</div><div class="st">查看结果与图表</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">7</div><div class="st">查看口径、来源与查询记录</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="sn">8</div><div class="st">查看其他 Agent 调用结果</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. 限制 ============ -->
+  <section>
+    <h2><span class="n">08</span>当前限制（如实说明）</h2>
+    <div class="card">
+      <ul style="margin:0;padding-left:18px;font-size:14px;color:var(--ink2)">
+        <li>演示数据为<b>模拟业务数据</b>，由 <code>scripts/generate_datasets.py</code> 固定种子生成（demo-v1.1），覆盖 2026-01-01 ~ 2026-09-30，订单 20,000 条。任何结论都不代表真实经营情况。</li>
+        <li>本页数字来自成员 1 正式执行层（FastAPI + SQLite，整数分入库）与成员 2 Agent 工作流（<code>/agent/query</code>）；页面 live 模式与之直连，mock 模式为现场保底。</li>
+        <li>首版仅支持 5 个基础指标，<b>不支持</b>退款率、客单价等派生比率指标——遇到这类问题会明确拒绝并引导查询分子与分母（派生指标草案待 10-08 前确认）。</li>
+        <li>口径议题 <b>IS-001</b> 双方现行实现均为「退款按退款完成时间归属」；正式库实测跨月退款占比 44.28%（金额占比 45.55%），该口径将历史月份漂移降为 0，待三人最终签字确认。</li>
+        <li>订单表内含 paid / cancelled / failed 订单，退款表内含 success / failed / pending 退款；非成功行<b>不参与任何指标统计</b>。地区为订单下单时快照，同一客户跨地区下单时不做客户维度归并。</li>
+        <li>S1 对照基线目前是确定性行为模拟（无真实 LLM 调用）；成员 2 真实大模型接入后需用同一模型重测对照实验。</li>
+      </ul>
+    </div>
+    <div class="note">
+      <b>分工文档 §10 要求：</b>如实说明模拟数据、测试条件和产品限制；
+      不在测试报告中使用未经验证的准确率或效果数据。本页所有数字均来自 <code>tests/export_showcase_data.py --source formal</code>
+      的真实导出，并与成员 1 <code>expected.json</code> 逐分核对一致，可随时重新生成核对。
+    </div>
+  </section>
+
+  <footer>
+    数桥 DataBridge · A 赛题 · 中国数联 × 华师大 AI 智能体校园黑客松 ·
+    答辩主线版（DS-004）· 数据版本 demo-v1.1（sha256 锁定）· 接口契约 v1.1 · 2026-10-04<br>
+    可运行产品：<code>streamlit run app/app.py</code>（侧边栏切 live 对接成员 1 正式服务）
+  </footer>
+
+</div>
+</body>
+</html>

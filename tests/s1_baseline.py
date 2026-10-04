@@ -173,8 +173,11 @@ def _prepare(tables: dict, ds: str, de: str, use_status: bool):
 
     de_ts = pd.Timestamp(de) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
     o = orders[orders["pay_time"].between(pd.Timestamp(ds), de_ts)]
-    o = o.merge(customers[["customer_id", "region", "customer_type"]],
-                on="customer_id", how="left")
+    # 正式库（formal_dataset 适配表）的 orders 已自带 region/customer_type（订单快照，
+    # 对应成员 1 物理表 orders.region NOT NULL）；列已存在时不再从 customers 合并，
+    # 否则 pandas 生成 region_x/region_y 后缀。85k mock 表无这些列，路径不变。
+    dim_cols = [c for c in ("region", "customer_type") if c not in orders.columns]
+    o = o.merge(customers[["customer_id"] + dim_cols], on="customer_id", how="left")
     return o, refunds, customers
 
 
@@ -217,9 +220,15 @@ def execute_s1(question: str, tables: dict, *,
 
     o, refunds, _ = _prepare(tables, ds, de, use_status)
     o = _apply_filters(o, filters)
-    orders_dim = (tables["orders"][["order_id", "customer_id", "pay_time"]]
-                  .merge(tables["customers"][["customer_id", "region", "customer_type"]],
-                         on="customer_id", how="left"))
+    # 退款地区归属：orders 已自带快照列时直接用（正式库）；否则回退 customers（85k）
+    o0 = tables["orders"]
+    own = [c for c in ("order_id", "customer_id", "pay_time", "region", "customer_type")
+           if c in o0.columns]
+    orders_dim = o0[own].copy()
+    missing = [c for c in ("region", "customer_type") if c not in o0.columns]
+    if missing:
+        orders_dim = orders_dim.merge(
+            tables["customers"][["customer_id"] + missing], on="customer_id", how="left")
     orders_dim["pay_time"] = pd.to_datetime(orders_dim["pay_time"], errors="coerce")
     rw = _refund_frame(refunds, orders_dim, ds, de, refund_time_attr)
     rw = _apply_filters(rw, filters)

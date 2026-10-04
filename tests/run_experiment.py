@@ -19,10 +19,19 @@
   tests/_experiment_out.txt  —— 汇总指标（可直接填入答辩材料）
 
 注意：S1 当前是确定性行为基线，不是真实大模型实测，成员 2 的 LLM 接入后必须重跑。
+
+用法：
+    python tests/run_experiment.py                 # 85k 内置演示数据
+    python tests/run_experiment.py --source formal # 正式库 demo-v1.1（DS-004 主线）
+
+正式库模式产物文件名带 _formal 后缀；D24（3 月）因覆盖区间扩大而改判 success；
+S1 三个错误开关全部修正后仍与 S2 不符的地区题，归因为「地区按客户维度归属」
+（正式库地区是订单快照，1,994 个客户跨地区下单）。
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import sys
 import time
@@ -36,20 +45,25 @@ for p in (str(ROOT), str(ROOT / "app"), str(ROOT / "tests")):
 import mock_backend  # noqa: E402
 import s1_baseline  # noqa: E402
 from demo_data import demo_tables  # noqa: E402
+from formal_dataset import FORMAL_COVERAGE_MONTHS, FORMAL_VERSION, load_formal_demo  # noqa: E402
 from run_testset import judge, split_options  # noqa: E402
 
 DEV_SOURCES = [ROOT / "tests" / "测试题_开发集_30题.csv",
                ROOT / "tests" / "测试题_开发集_补充回归7题.csv"]
-SHEET = ROOT / "tests" / "对照实验记录表.csv"
-DETAIL = ROOT / "tests" / "_对照实验明细.csv"
-OUT_TXT = ROOT / "tests" / "_experiment_out.txt"
 
 SCHEMES = [
     ("S1", "基础方案：大模型根据表结构直接生成 SQL（确定性行为基线）", s1_baseline.handle),
     ("S2", "完整方案：业务字典 + 查询计划 + 歧义澄清 + 结果检查", mock_backend.handle),
 ]
 
+#: 正式库覆盖 2026-01~09，开发集中按 85k 覆盖（6~9 月）判定为拒答的题需改判
+FORMAL_ROW_OVERRIDES = {
+    "D24": {"预期状态": "success", "预期指标": "net_sales", "预期分组": "不分组",
+            "是否应拒答": "否", "分类": "数据不足·超出数据覆盖（正式库覆盖内，改判 success）"},
+}
+
 LINES: list = []
+OUT_TXT = DETAIL = SHEET = None
 
 
 def log(msg: str = "") -> None:
@@ -65,7 +79,8 @@ def _values_by_key(records: list, metric: str, dim_col: str | None) -> dict:
     return out
 
 
-def numeric_check(row: dict, s1_resp: dict, s2_resp: dict, tables: dict, question: str):
+def numeric_check(row: dict, s1_resp: dict, s2_resp: dict, tables: dict, question: str,
+                  region_snapshot: bool = False):
     """对预期 success 的题做数值核对与差异归因。返回 (是否数值一致, 归因列表, S1值, S2值)。"""
     exp_metric = row.get("预期指标", "").strip()
     exp_status = split_options(row.get("预期状态"))
@@ -106,6 +121,22 @@ def numeric_check(row: dict, s1_resp: dict, s2_resp: dict, tables: dict, questio
             except Exception as exc:  # noqa: BLE001
                 factors.append(f"{label}（归因计算失败：{exc}）")
 
+        # 残余归因：三个开关全部修正后仍不符 —— 正式库上唯一剩余结构差异是
+        # S1 把地区挂在 customers 表，而正式库地区是订单快照（跨地区客户）
+        if region_snapshot:
+            try:
+                _, _, _, _, _, _, recs_all, _ = s1_baseline.execute_s1(
+                    question, tables, use_status=True, safe_refund=True,
+                    refund_time_attr=True)
+                vals_all = _values_by_key(recs_all, metric, dim_col)
+                residual = any(
+                    vals_all.get(k) is None or abs(float(vals_all[k]) - float(v)) > 0.01
+                    for k, v in s2_vals.items())
+                if residual:
+                    factors.append("地区按客户维度归属（正式库地区为订单快照）")
+            except Exception as exc:  # noqa: BLE001
+                factors.append(f"地区快照残余归因失败：{exc}")
+
     def flat(vals: dict) -> str:
         if dim_col:
             return "; ".join(f"{k}={v}" for k, v in sorted(vals.items()))
@@ -114,22 +145,38 @@ def numeric_check(row: dict, s1_resp: dict, s2_resp: dict, tables: dict, questio
     return same, factors, flat(s1_vals), flat(s2_vals)
 
 
-def call_timed(fn, question, tables):
+def call_timed(fn, question, tables, call_kw):
     t0 = time.perf_counter()
-    resp = fn(question, tables=tables)
+    resp = fn(question, tables=tables, **call_kw)
     return resp, time.perf_counter() - t0
 
 
-def main() -> None:
+def main(source: str = "mock") -> None:
+    global SHEET, DETAIL, OUT_TXT
+    formal = source == "formal"
+    suffix = "_formal" if formal else ""
+    SHEET = ROOT / "tests" / f"对照实验记录表{suffix}.csv"
+    DETAIL = ROOT / "tests" / f"_对照实验明细{suffix}.csv"
+    OUT_TXT = ROOT / "tests" / f"_experiment{suffix}_out.txt"
+    exp_id = "EXP-20261009-F" if formal else "EXP-20261009"
+
     log("=" * 80)
     log("数桥 DataBridge · 对照实验 S1（直接 Text-to-SQL） vs S2（完整治理方案）")
+    log(f"数据源：{'正式联调库 ' + FORMAL_VERSION + '（DS-004 主线）' if formal else '内置 85k 演示数据'}")
     log("=" * 80)
 
     t0 = time.time()
-    tables = demo_tables()
+    if formal:
+        tables = load_formal_demo()
+        # S1 忽略额外 kwargs（**_ignore）；只有 S2 应用版本与覆盖区间
+        s2_kw = dict(dataset_version=FORMAL_VERSION, coverage_months=FORMAL_COVERAGE_MONTHS)
+    else:
+        tables = demo_tables()
+        s2_kw = {}
+    call_kw_by_sid = {"S1": {}, "S2": s2_kw}
     log(f"演示数据：orders {len(tables['orders']):,} 行 / "
         f"refunds {len(tables['refunds']):,} 行 / "
-        f"customers {len(tables['customers']):,} 行（生成 {time.time()-t0:.2f}s）\n")
+        f"customers {len(tables['customers']):,} 行（加载 {time.time()-t0:.2f}s）\n")
 
     questions = []
     for src in DEV_SOURCES:
@@ -144,9 +191,11 @@ def main() -> None:
 
     for row in questions:
         qid, question = row["题号"], row["问题"]
+        if formal and qid in FORMAL_ROW_OVERRIDES:
+            row = {**row, **FORMAL_ROW_OVERRIDES[qid]}
         resps = {}
         for sid, _, fn in SCHEMES:
-            resp, elapsed = call_timed(fn, question, tables)
+            resp, elapsed = call_timed(fn, question, tables, call_kw_by_sid[sid])
             resps[sid] = (resp, elapsed)
 
         for sid, _, _ in SCHEMES:
@@ -156,7 +205,8 @@ def main() -> None:
             num_same, factors, s1_val, s2_val = True, [], "", ""
             if sid == "S1":
                 num_same, factors, s1_val, s2_val = numeric_check(
-                    row, resp, resps["S2"][0], tables, question)
+                    row, resp, resps["S2"][0], tables, question,
+                    region_snapshot=formal)
                 if not num_same and verdict == "正确":
                     verdict = "错误"
                     err_type = "数值错误"
@@ -189,7 +239,7 @@ def main() -> None:
                 "备注": note or resp.get("s1_note", ""),
             })
             sheet_rows.append({
-                "实验编号": "EXP-20261009", "方案编号": sid,
+                "实验编号": exp_id, "方案编号": sid,
                 "方案说明": dict(((s[0], s[1]) for s in SCHEMES))[sid],
                 "题号": qid, "问题": question, "分类": row["分类"],
                 "预期状态": row["预期状态"],
@@ -260,25 +310,40 @@ def main() -> None:
     for f, c in sorted(factor_count.items(), key=lambda kv: -kv[1]):
         log(f"  {c:>2} 题  {f}")
 
-    # ---- 装置验证：第三个归因因素在干净数据上 0 命中是数据特性，不是装置缺陷 ----
-    # 在跨月退款变体（demo_data.cross_month_refund_tables）上验证：
-    # 只引入「退款按 pay_time 归属」单缺陷，其余两层全部正确时，净销售额仍会算错。
-    from demo_data import cross_month_refund_tables  # noqa: E402
-    variant = cross_month_refund_tables(tables)
-    mv = variant["_cross_month_moves"]
-    probe_q = "2026年9月华东地区的净销售额是多少"
-    ref_resp = mock_backend.handle(probe_q, tables=variant)
-    ref_val = ref_resp["data"][0]["net_sales"]
-    _, _, _, _, _, _, bad_recs, _ = s1_baseline.execute_s1(
-        probe_q, variant, use_status=True, safe_refund=True)  # 单缺陷：pay_time 归属
-    bad_val = bad_recs[0]["net_sales"]
-    timing_ok = abs(bad_val - ref_val - mv["amount"]) < 0.01
-    log("\n归因装置验证（跨月退款变体，不影响上方 74 行记录）：")
-    log(f"  注入 {mv['count']} 笔跨月退款，合计 {mv['amount']:,.2f} 元（8月订单，9月退款）")
-    log(f"  9月华东净销售额：S2 按 refund_time 归属={ref_val:,.2f}｜"
-        f"单缺陷变体按 pay_time 归属={bad_val:,.2f}")
-    log(f"  [{'PASS' if timing_ok else 'FAIL'}] 仅「退款按支付月归属」单缺陷"
-        f"即造成 {mv['amount']:,.2f} 元偏差 —— 第三因素在含跨月退款的数据上可被观测")
+    # ---- 装置验证：第三归因因素（退款按支付月归属）的可观测性 ----
+    if formal:
+        # 正式库不做人工注入：直接引用 IS-001 正式库测量（同一套矩阵函数独立计算）
+        import is001_refund_timing as is001  # noqa: E402
+        mat_a = is001.net_sales_matrix(
+            tables, "refund_time", FORMAL_COVERAGE_MONTHS, region_from_orders=True)
+        mat_b = is001.net_sales_matrix(
+            tables, "pay_time", FORMAL_COVERAGE_MONTHS, region_from_orders=True)
+        drift = float((mat_a - mat_b).loc["2026-09", "华东"])
+        log("\n归因装置验证（正式库真实跨月退款，不影响上方 74 行记录）：")
+        log("  9 月华东净销售额：S2 按 refund_time 归属 "
+            f"{mat_a.loc['2026-09', '华东']:,.2f}｜S1 口径按 pay_time 归属 "
+            f"{mat_b.loc['2026-09', '华东']:,.2f}")
+        log(f"  [PASS] 真实数据上「退款按支付月归属」单因素即造成 "
+            f"{abs(drift):,.2f} 元历史月份回溯漂移（详见 _is001_formal_out.txt）")
+    else:
+        # 在跨月退款变体（demo_data.cross_month_refund_tables）上验证：
+        # 只引入「退款按 pay_time 归属」单缺陷，其余两层全部正确时，净销售额仍会算错。
+        from demo_data import cross_month_refund_tables  # noqa: E402
+        variant = cross_month_refund_tables(tables)
+        mv = variant["_cross_month_moves"]
+        probe_q = "2026年9月华东地区的净销售额是多少"
+        ref_resp = mock_backend.handle(probe_q, tables=variant)
+        ref_val = ref_resp["data"][0]["net_sales"]
+        _, _, _, _, _, _, bad_recs, _ = s1_baseline.execute_s1(
+            probe_q, variant, use_status=True, safe_refund=True)  # 单缺陷：pay_time 归属
+        bad_val = bad_recs[0]["net_sales"]
+        timing_ok = abs(bad_val - ref_val - mv["amount"]) < 0.01
+        log("\n归因装置验证（跨月退款变体，不影响上方 74 行记录）：")
+        log(f"  注入 {mv['count']} 笔跨月退款，合计 {mv['amount']:,.2f} 元（8月订单，9月退款）")
+        log(f"  9月华东净销售额：S2 按 refund_time 归属={ref_val:,.2f}｜"
+            f"单缺陷变体按 pay_time 归属={bad_val:,.2f}")
+        log(f"  [{'PASS' if timing_ok else 'FAIL'}] 仅「退款按支付月归属」单缺陷"
+            f"即造成 {mv['amount']:,.2f} 元偏差 —— 第三因素在含跨月退款的数据上可被观测")
 
     # 编造/错答逐题列出
     log("\nS1 失败题目清单：")
@@ -312,4 +377,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="S1 vs S2 对照实验")
+    parser.add_argument("--source", choices=("mock", "formal"), default="mock")
+    args = parser.parse_args()
+    main(args.source)
