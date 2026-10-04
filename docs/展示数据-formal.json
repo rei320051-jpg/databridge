@@ -1,38 +1,38 @@
 {
-  "source": "mock",
-  "source_note": "内置演示数据（85,018 单，2026-06 ~ 2026-09）",
+  "source": "formal",
+  "source_note": "正式联调库 demo-v1.1（成员 1 交付，2026-01 ~ 2026-09，页面管线与 expected.json 逐分一致）",
   "net_sales_by_region": {
     "2026-09": {
-      "华东": 1156416.0,
-      "华南": 1063488.0,
-      "华北": 695385.0,
-      "华中": 625050.0,
-      "西南": 579363.0
+      "华东": 6830343.55,
+      "华南": 4105228.89,
+      "华北": 3497319.1,
+      "华中": 1386743.37,
+      "西南": 1379201.0
     },
     "2026-08": {
-      "华东": 1339510.0,
-      "华南": 1036384.0,
-      "华北": 775482.0,
-      "华中": 650496.0,
-      "西南": 552954.0
+      "华东": 7077999.19,
+      "华南": 4870736.31,
+      "华北": 3587014.12,
+      "西南": 1487957.64,
+      "华中": 1365832.09
     },
     "mom_pct": {
-      "华东": -13.67,
-      "华南": 2.62,
-      "华北": -10.33,
-      "华中": -3.91,
-      "西南": 4.78
+      "华东": -3.5,
+      "华南": -15.72,
+      "华北": -2.5,
+      "华中": 1.53,
+      "西南": -7.31
     }
   },
-  "worst_region": "华东",
+  "worst_region": "华南",
   "east_sep": {
-    "net_sales": 1156416.0,
-    "paid_amount": 1268000.0,
-    "refund_amount": 111584.0,
-    "paid_order_count": 4731,
-    "paid_customer_count": 3991
+    "net_sales": 6830343.55,
+    "paid_amount": 7786231.390000001,
+    "refund_amount": 955887.84,
+    "paid_order_count": 766,
+    "paid_customer_count": 627
   },
-  "sep_total_net_sales": 4119702.0,
+  "sep_total_net_sales": 17198835.91,
   "clarify_round1": {
     "status": "need_clarification",
     "question": "你说的「销售额」是指哪一个指标？",
@@ -56,12 +56,12 @@
     "metric": "net_sales",
     "definition": "所选期间实付金额减去同期成功退款金额",
     "unit": "元",
-    "value": 4119702.0,
+    "value": 17198835.91,
     "source_tables": [
       "orders",
       "refunds"
     ],
-    "dataset_version": "mock-v1.0-demo",
+    "dataset_version": "demo-v1.1",
     "sql": "WITH paid AS (\n  SELECT SUM(o.pay_amount) AS paid_amount\n  FROM orders o JOIN customers c ON c.customer_id = o.customer_id\n  WHERE o.pay_status = 'success' AND o.pay_time >= '2026-09-01 00:00:00' AND o.pay_time <= '2026-09-30 23:59:59'\n), refund_pre AS (\n  SELECT r.order_id, SUM(r.refund_amount) AS refund_amount\n  FROM refunds r JOIN orders o ON o.order_id = r.order_id\n       JOIN customers c ON c.customer_id = o.customer_id\n  WHERE r.refund_status = 'success' AND r.refund_time >= '2026-09-01 00:00:00' AND r.refund_time <= '2026-09-30 23:59:59'\n  GROUP BY r.order_id\n), refund AS (\n  SELECT SUM(refund_amount) AS refund_amount\n  FROM refund_pre\n)\nSELECT COALESCE(p.paid_amount, 0) AS paid_amount, COALESCE(q.refund_amount, 0) AS refund_amount, COALESCE(p.paid_amount, 0) - COALESCE(q.refund_amount, 0) AS net_sales\nFROM paid p FULL OUTER JOIN refund q ON 1=1;"
   },
   "causal": {
@@ -84,15 +84,15 @@
       "tables": [
         {
           "name": "customers",
-          "rows": 59490
+          "rows": 2000
         },
         {
           "name": "orders",
-          "rows": 85018
+          "rows": 20000
         },
         {
           "name": "refunds",
-          "rows": 15139
+          "rows": 3492
         }
       ]
     },
@@ -105,7 +105,7 @@
           "code": "missing_value",
           "field": "customer_name",
           "count": 199,
-          "message": "字段 `customer_name` 有 199 条空值（占 0.3%）。",
+          "message": "字段 `customer_name` 有 199 条空值（占 10.0%）。",
           "impact": "缺失值默认被忽略，会导致分组统计口径不一致。",
           "table": "customers"
         },
@@ -141,7 +141,7 @@
           "code": "amount_outlier",
           "field": "pay_amount",
           "count": 1,
-          "message": "金额字段 `pay_amount` 有 1 条极端大值（> 1,094），最大值为中位数的 482,067 倍。",
+          "message": "金额字段 `pay_amount` 有 1 条极端大值（> 82,992），最大值为中位数的 11,670 倍。",
           "impact": "若为测试数据或录入错误，金额类指标会被显著抬高。",
           "table": "orders"
         },
@@ -194,8 +194,8 @@
           "level": "error",
           "code": "orphan_foreign_key",
           "field": "orders.customer_id -> customers.customer_id",
-          "count": 3,
-          "message": "`orders.customer_id` 有 3 条无法在 `customers.customer_id` 中找到对应记录。",
+          "count": 11,
+          "message": "`orders.customer_id` 有 11 条无法在 `customers.customer_id` 中找到对应记录。",
           "impact": "关联后这些记录的分组维度会变成空值，按地区统计时总额对不上。",
           "table": "跨表"
         }
