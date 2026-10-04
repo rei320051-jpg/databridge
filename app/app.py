@@ -186,6 +186,9 @@ LABEL_MAP = {code: spec["label"] for code, spec in METRIC_SPEC.items()}
 LABEL_MAP.update({code: spec["label"] for code, spec in DIMENSION_SPEC.items()})
 LABEL_MAP["prev_value"] = "上一期"
 LABEL_MAP["mom_pct"] = "环比 %"
+# DM-003 派生比率的分子分母溯源列
+LABEL_MAP["numerator_value"] = "分子值"
+LABEL_MAP["denominator_value"] = "分母值"
 
 
 @st.cache_data(show_spinner="正在生成内置演示数据…")
@@ -319,7 +322,7 @@ st.markdown(
     "当数据无法支持结论时，明确说明缺什么，而不是编一个答案。</p>"
     '<div class="db-tags">'
     '<span class="db-tag">只读 · 不修改任何业务数据</span>'
-    '<span class="db-tag">5 个固定指标口径</span>'
+    '<span class="db-tag">5 个基础指标 + 3 个派生指标</span>'
     '<span class="db-tag">口径不明确时先澄清</span>'
     '<span class="db-tag">最多澄清 2 轮</span>'
     '<span class="db-tag">零售订单分析场景</span>'
@@ -516,11 +519,12 @@ def render_dictionary_zone() -> None:
         "但其对外编码、金额单位及数据集仍须与本页对齐；成员 2 的提示词尚待接入。"
     )
 
-    st.markdown("**核心指标（首版固定 5 个）**")
+    st.markdown("**核心指标（5 个基础指标 + 3 个派生比率指标）**")
     st.dataframe(pd.DataFrame([{
         "指标": spec["label"],
         "编码": code,
         "单位": spec["unit"],
+        "类型": "派生比率" if spec.get("kind") == "ratio" else "基础",
         "业务口径": spec["definition"],
         "计算逻辑": spec["formula"],
         "同义词": "、".join(spec["synonyms"]),
@@ -710,12 +714,22 @@ def _render_success(resp: dict) -> None:
 
     # 关键指标卡：先给结论，再给明细。评委和运营看的是这一行。
     unit = resp.get("unit", "")
+    is_ratio = resp.get("metric_kind") == "ratio"
     kpi = st.columns(3)
     if metric_label in df.columns:
         vals = pd.to_numeric(df[metric_label], errors="coerce")
-        total = float(vals.sum())
-        kpi[0].metric(metric_label, f"{total:,.0f} {unit}" if unit else f"{total:,.0f}",
-                      help=f"{resp.get('definition', '')}")
+        if is_ratio and group_cols:
+            # 铁律：分组比率严禁相加/平均回整体，KPI 卡不给汇总数
+            kpi[0].metric(metric_label, f"{len(df)} 个分组",
+                          help="派生比率必须先汇总分子分母再相除，"
+                               "各组比率不能相加或算术平均；整体率请去掉分组后重新查询。")
+        else:
+            if is_ratio:
+                shown = vals.dropna().iloc[0] if vals.notna().any() else None
+                text = "null（分母为 0）" if shown is None else f"{shown:,.2f} {unit}".rstrip()
+            else:
+                text = f"{float(vals.sum()):,.0f} {unit}" if unit else f"{float(vals.sum()):,.0f}"
+            kpi[0].metric(metric_label, text, help=f"{resp.get('definition', '')}")
     else:
         kpi[0].metric("返回行数", len(df))
 
@@ -733,10 +747,21 @@ def _render_success(resp: dict) -> None:
     st.markdown("**查询结果**")
     st.dataframe(df, hide_index=True)
 
-    if group_cols and num_cols:
-        chart_df = df[group_cols + num_cols].set_index(group_cols[0])
+    if is_ratio:
+        comp = resp.get("components") or {}
+        n_label = LABEL_MAP.get(comp.get("numerator_metric"), comp.get("numerator_metric", "分子"))
+        d_label = LABEL_MAP.get(comp.get("denominator_metric"), comp.get("denominator_metric", "分母"))
+        st.caption(f"派生比率：{metric_label} = {n_label} ÷ {d_label}"
+                   + (" × 100%" if unit == "%" else "")
+                   + "（先汇总、再相除；分母为 0 时返回 null，不是 0）。")
+
+    # 图表只画指标列与环比，分子/分母分量值不进图（量级不同会压平比率）
+    chart_exclude = {"分子值", "分母值"}
+    chart_num = [c for c in num_cols if c not in chart_exclude]
+    if group_cols and chart_num:
+        chart_df = df[group_cols + chart_num].set_index(group_cols[0])
         st.bar_chart(chart_df)
-    elif num_cols:
+    elif num_cols and not is_ratio:
         st.caption(f"{metric_label} = {df[num_cols[0]].iloc[0]:,.2f}")
 
 

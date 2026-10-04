@@ -17,11 +17,20 @@
 
 from __future__ import annotations
 
-MODULE_VERSION = "1.1"
-CONTRACT_DATE = "2026-09-30"
+MODULE_VERSION = "1.2"
+CONTRACT_DATE = "2026-10-04"
 FROZEN_AFTER = "2026-10-08"  # 功能冻结日，之后只修 bug 不改核心接口
 
 CHANGELOG = [
+    {
+        "version": "1.2",
+        "date": "2026-10-04",
+        "author": "成员 3（三人会签：口径冻结确认单_2026-10-04）",
+        "note": "新增三个派生比率指标（refund_rate / avg_order_value / "
+                "paid_per_customer，DM-001~006）：先汇总分子分母再相除、"
+                "分母为零返回 null + 警告、components 分子分母溯源、"
+                "「人均消费」歧义澄清；IS-001 确认为方案 A（refund_time 归属）。",
+    },
     {
         "version": "1.1",
         "date": "2026-09-30",
@@ -84,7 +93,7 @@ OPEN_ISSUES = [
     {
         "id": "IS-001",
         "title": "净销售额中「同期成功退款金额」的时间归属",
-        "status": "待三人确认",
+        "status": "已确认（2026-10-04 口径冻结确认单：方案 A，refund_time 归属）",
         "current_decision": NET_SALES_TIME_ATTRIBUTION,
         "alternative": "method_b_by_order_pay_time",
         "deadline": "2026-10-08",
@@ -103,6 +112,10 @@ class Metric:
     PAID_AMOUNT = "paid_amount"
     REFUND_AMOUNT = "refund_amount"
     NET_SALES = "net_sales"
+    # v1.2 派生比率指标（口径冻结确认单 2026-10-04，DM-001）
+    REFUND_RATE = "refund_rate"
+    AVG_ORDER_VALUE = "avg_order_value"
+    PAID_PER_CUSTOMER = "paid_per_customer"
 
     ALL = (
         "paid_order_count",
@@ -110,7 +123,13 @@ class Metric:
         "paid_amount",
         "refund_amount",
         "net_sales",
+        "refund_rate",
+        "avg_order_value",
+        "paid_per_customer",
     )
+
+    #: 派生比率指标（必须先汇总分子分母再相除；分母为零返回 null）
+    RATIO = ("refund_rate", "avg_order_value", "paid_per_customer")
 
 
 #: 指标字典。页面、查询服务、示例 Agent 必须共用同一份口径。
@@ -168,6 +187,43 @@ METRIC_SPEC = {
         "source_tables": ["orders", "refunds"],
         "ambiguous": False,
     },
+    # --- v1.2 派生比率指标（DM-001~006，口径冻结确认单 2026-10-04）---
+    Metric.REFUND_RATE: {
+        "label": "退款率",
+        "unit": "%",
+        "kind": "ratio",
+        "numerator": Metric.REFUND_AMOUNT,
+        "denominator": Metric.PAID_AMOUNT,  # DM-002：用实付毛额，不用净销售额
+        "definition": "所选期间成功退款金额占同期实付金额的比例；先汇总分子分母再相除，保留 2 位百分比",
+        "formula": "SUM(refund_amount) / SUM(paid_amount) × 100%",
+        "synonyms": ["退款率", "退款比率", "退货退款率"],
+        "source_tables": ["orders", "refunds"],
+        "ambiguous": False,
+    },
+    Metric.AVG_ORDER_VALUE: {
+        "label": "客单价",
+        "unit": CURRENCY_UNIT,
+        "kind": "ratio",
+        "numerator": Metric.PAID_AMOUNT,
+        "denominator": Metric.PAID_ORDER_COUNT,
+        "definition": "所选期间每笔成功支付订单的平均实付金额；先汇总分子分母再相除",
+        "formula": "SUM(paid_amount) / COUNT(DISTINCT order_id)",
+        "synonyms": ["客单价", "笔单价", "每单均价", "平均订单金额", "单笔均价"],
+        "source_tables": ["orders"],
+        "ambiguous": False,
+    },
+    Metric.PAID_PER_CUSTOMER: {
+        "label": "支付人均消费",
+        "unit": CURRENCY_UNIT,
+        "kind": "ratio",
+        "numerator": Metric.PAID_AMOUNT,
+        "denominator": Metric.PAID_CUSTOMER_COUNT,
+        "definition": "所选期间每位成功支付客户的平均实付金额；先汇总分子分母再相除",
+        "formula": "SUM(paid_amount) / COUNT(DISTINCT customer_id)",
+        "synonyms": ["支付人均消费", "人均支付金额", "人均实付", "客均消费", "人均消费金额"],
+        "source_tables": ["orders"],
+        "ambiguous": False,
+    },
 }
 
 
@@ -182,6 +238,9 @@ AMBIGUOUS_METRIC_TERMS = {
     "流水": [Metric.NET_SALES, Metric.PAID_AMOUNT],
     "退款多不多": [Metric.REFUND_AMOUNT, Metric.PAID_ORDER_COUNT],
     "退款情况": [Metric.REFUND_AMOUNT, Metric.PAID_ORDER_COUNT],
+    # DM-004：「人均消费」不默认，候选顺序固定为 [支付人均消费, 客单价]
+    "人均消费": [Metric.PAID_PER_CUSTOMER, Metric.AVG_ORDER_VALUE],
+    "人均": [Metric.PAID_PER_CUSTOMER, Metric.AVG_ORDER_VALUE],
 }
 
 
@@ -499,7 +558,7 @@ PRESET_EXAMPLES = [
     ("数据不足·因果", "为什么华东地区9月净销售额下降了", Status.INSUFFICIENT_DATA),
     ("超出范围·预测", "预测一下下个月的净销售额", Status.OUT_OF_SCOPE),
     ("超出范围·写操作", "把订单表里9月的记录删掉", Status.OUT_OF_SCOPE),
-    ("超出范围·派生率", "华东地区的退款率是多少", Status.OUT_OF_SCOPE),
+    ("派生比率·退款率", "2026年9月各地区的退款率", Status.SUCCESS),
 ]
 
 

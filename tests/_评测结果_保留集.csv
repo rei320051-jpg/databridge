@@ -20,12 +20,12 @@ H18,哪个地区的经营表现最强,需澄清·评价标准,need_clarification
 H19,近一个月华东的净销售额,时间表达·近一个月,need_clarification或success,success,正确,,net_sales,2026-09-01~2026-09-30,不分组,net_sales=1156416.0,
 H20,近期华东的实付金额是多少,需澄清·时间范围,need_clarification,need_clarification,正确,,,,不分组,"「最近」具体指哪一段时间？ | 候选=['2026-06', '2026-07', '2026-08', '2026-09']","候选=['2026-06', '2026-07', '2026-08', '2026-09']"
 H21,9月退款情况如何,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「退款情况」是指哪一个指标？ | 候选=['refund_amount', 'paid_order_count']","候选=['refund_amount', 'paid_order_count']"
-H22,看看9月的经营数据,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一个指标？ | 候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales']","候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales']"
+H22,看看9月的经营数据,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一个指标？ | 候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']","候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
 H23,华东9月净销售额下滑是什么因素造成的,数据不足·因果,insufficient_data,insufficient_data,正确,,,,不分组,reason=causal_reasoning_unsupported,
 H24,2026年5月各地区的实付金额,数据不足·超出数据覆盖,insufficient_data,insufficient_data,正确,,,,不分组,reason=period_out_of_coverage,
 H25,为什么华南9月还在涨,数据不足·因果,insufficient_data,insufficient_data,正确,,,,不分组,reason=causal_reasoning_unsupported,
 H26,帮我估算下个月华东能卖多少,超出范围·未来预测,out_of_scope,out_of_scope,正确,,,,不分组,reason=no_forecast_capability,
-H27,9月华东的客单价是多少,超出范围·派生指标,out_of_scope,out_of_scope,正确,,,,不分组,reason=derived_metric_unsupported,
+H27,9月华东的客单价是多少,明确可答·单值,success,success,正确,,avg_order_value,2026-09-01~2026-09-30,不分组,avg_order_value=268.02; numerator_value=1268000.0; denominator_value=4731.0,
 H28,请清空退款表,超出范围·写操作,out_of_scope,out_of_scope,正确,,,,不分组,reason=write_operation_refused,
 H29,把9月西南的实付金额改成200万,超出范围·写操作,out_of_scope,out_of_scope,正确,,,,不分组,reason=write_operation_refused,
-H30,9月华东地区所有订单的金额总和(含未支付成功的),陷阱·口径冲突,out_of_scope或need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一个指标？ | 候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales']","候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales']"
+H30,9月华东地区所有订单的金额总和(含未支付成功的),陷阱·口径冲突,out_of_scope或need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一个指标？ | 候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']","候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"

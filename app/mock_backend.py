@@ -58,8 +58,10 @@ CONFLICT_PHRASES = (
     "所有订单", "不计入退款", "不扣退款", "不扣减退款",
 )
 
-RATE_WORDS = ("退款率", "退货率", "转化率", "客单价", "占比", "百分比", "比率",
-              "人均", "复购率", "同比增速", "增长率")
+#: 仍不支持的比率类词（v1.2 起退款率/客单价/人均消费已支持，从拒答词表移除；
+#: 复购率按 DM-006 继续拒答）
+RATE_WORDS = ("退货率", "转化率", "占比", "百分比", "比率",
+              "复购率", "同比增速", "增长率", "毛利率", "净利率")
 
 FUTURE_WORDS = ("预测", "预估", "推算", "估算", "估计", "预计", "下个月会",
                 "明年", "未来", "将会", "会不会涨", "趋势外推", "展望", "能卖多少")
@@ -133,10 +135,11 @@ def _reject(question: str):
                 ["写操作能力"],
                 "数桥是只读取数平台，不提供任何数据修改能力。请改用查询类问题。", False)
     if any(w in question for w in RATE_WORDS):
-        return (Status.OUT_OF_SCOPE, "派生比率指标不在首版范围", "derived_metric_unsupported",
+        return (Status.OUT_OF_SCOPE, "该派生比率指标不在首版范围", "derived_metric_unsupported",
                 ["派生指标定义"],
-                "首版仅支持 5 个基础指标（支付订单数、支付人数、实付金额、成功退款金额、净销售额）。"
-                "若需要比率类指标，请改为查询分子和分母两个基础指标，由你自行相除。", False)
+                "首版支持 5 个基础指标（支付订单数、支付人数、实付金额、成功退款金额、净销售额）"
+                "与 3 个派生指标（退款率、客单价、支付人均消费）。复购率、转化率、毛利率等"
+                "暂不支持，请改查已支持的指标或其分子、分母。", False)
     if any(w in question for w in FUTURE_WORDS):
         return (Status.OUT_OF_SCOPE, "不支持预测未来", "no_forecast_capability",
                 ["时序预测能力", "未来期间数据"],
@@ -437,6 +440,52 @@ def _aggregate(o: pd.DataFrame, r_agg: pd.DataFrame, metric: str, dim_col):
     return g[[metric]]
 
 
+def _ratio_divide(num: float, den: float, metric: str):
+    """派生比率除法（DM-005）。
+
+    分母为零/缺失时返回 None（绝不能返回 0，0 会被误读成"表现很好"）。
+    退款率以百分数呈现（2 位小数）；金额类比率单位为元（2 位小数）。
+    """
+    if den is None or den <= 0:
+        return None
+    if metric == Metric.REFUND_RATE:
+        return round(num / den * 100, 2)
+    return round(num / den, 2)
+
+
+def _ratio_rows(o: pd.DataFrame, r_agg: pd.DataFrame, metric: str, dim_col):
+    """先分别汇总分子、分母，再逐组相除（铁律：严禁对比率求和/平均）。
+
+    返回 (records, zero_denominator_keys)。每条记录附 numerator_value /
+    denominator_value，支撑 DM-003 分子分母溯源。
+    """
+    spec = METRIC_SPEC[metric]
+    num_code, den_code = spec["numerator"], spec["denominator"]
+    num = _aggregate(o, r_agg, num_code, dim_col)
+    den = _aggregate(o, r_agg, den_code, dim_col)
+
+    if dim_col is None:
+        nv, dv = float(num or 0.0), float(den or 0.0)
+        return ([{metric: _ratio_divide(nv, dv, metric),
+                  "numerator_value": round(nv, 2), "denominator_value": round(dv, 2)}],
+                [] if dv > 0 else ["（整体）"])
+
+    frame = num.rename(columns={num.columns[0]: "numerator_value"}).join(
+        den.rename(columns={den.columns[0]: "denominator_value"}), how="outer").fillna(0.0)
+    records, zero_keys = [], []
+    for key, row in frame.iterrows():
+        nv, dv = float(row["numerator_value"]), float(row["denominator_value"])
+        if dv <= 0:
+            zero_keys.append(str(key))
+        records.append({
+            dim_col: str(key),
+            metric: _ratio_divide(nv, dv, metric),
+            "numerator_value": round(nv, 2),
+            "denominator_value": round(dv, 2),
+        })
+    return records, zero_keys
+
+
 def _build_sql(plan: dict) -> str:
     metric = plan["metric"]
     filters = plan.get("filters") or {}
@@ -473,6 +522,33 @@ def _build_sql(plan: dict) -> str:
                 f"FROM refunds r JOIN orders o ON o.order_id = r.order_id\n"
                 f"     JOIN customers c ON c.customer_id = o.customer_id\n"
                 f"WHERE {' AND '.join(where_r)}{grp};")
+    if metric in Metric.RATIO:
+        spec = METRIC_SPEC[metric]
+        pct = " * 100" if metric == Metric.REFUND_RATE else ""
+        dim_join = (f" FULL OUTER JOIN denominator d ON n.{dim_col} = d.{dim_col}"
+                    if dim_col else " CROSS JOIN denominator d")
+
+        def component_cte(name: str, code: str) -> str:
+            if code == Metric.REFUND_AMOUNT:
+                return (f"{name} AS (\n"
+                        f"  SELECT {sel_group}SUM(r.refund_amount) AS value\n"
+                        f"  FROM refunds r JOIN orders o ON o.order_id = r.order_id\n"
+                        f"       JOIN customers c ON c.customer_id = o.customer_id\n"
+                        f"  WHERE {' AND '.join(where_r)}{grp}\n)")
+            return (f"{name} AS (\n"
+                    f"  SELECT {sel_group}{exprs[code]} AS value\n"
+                    f"  FROM orders o JOIN customers c ON c.customer_id = o.customer_id\n"
+                    f"  WHERE {' AND '.join(where_o)}{grp}\n)")
+
+        return (
+            f"-- 派生比率（{spec['label']} = {spec['formula']}）：先汇总分子分母再相除\n"
+            f"WITH {component_cte('numerator', spec['numerator'])},\n"
+            f"     {component_cte('denominator', spec['denominator'])}\n"
+            f"SELECT {('COALESCE(n.' + dim_col + ', d.' + dim_col + ') AS ' + dim_col + ', ') if dim_col else ''}"
+            f"n.value AS numerator_value, d.value AS denominator_value,\n"
+            f"  CASE WHEN d.value IS NULL OR d.value = 0 THEN NULL\n"
+            f"       ELSE ROUND(n.value * 1.0 / d.value{pct}, 2) END AS {metric}\n"
+            f"FROM numerator n{dim_join};")
     # 净销售额：两条独立聚合。退款侧先按 order_id 预聚合（refund_pre），
     # 再按维度汇总（refund），最后与支付侧按维度 FULL OUTER JOIN，
     # 与 pandas 执行逻辑（outer join + fillna(0)）逐段对应，
@@ -532,9 +608,19 @@ def _run_plan(plan: dict, tables: dict, coverage_months: list | None = None) -> 
             "impact": "结果为空，不代表该期间销售额为零，请确认筛选条件是否正确。",
         })
 
-    result = _aggregate(o, r_agg, metric, dim_col)
+    is_ratio = metric in Metric.RATIO
+    zero_keys: list = []
 
-    prev_rows = []
+    if is_ratio:
+        # 派生比率：分子、分母各自独立聚合后再相除（DM-001/铁律）
+        records, zero_keys = _ratio_rows(o, r_agg, metric, dim_col)
+        result = pd.DataFrame(records)
+        if dim_col:
+            result = result.sort_values(
+                metric, ascending=(plan.get("sort") == "asc"), na_position="last")
+    else:
+        result = _aggregate(o, r_agg, metric, dim_col)
+
     if plan.get("comparison") == "mom":
         months = _months_between(plan["date_start"], plan["date_end"])
         p_start = _month_start(_shift_month(months[0], -1))
@@ -542,23 +628,42 @@ def _run_plan(plan: dict, tables: dict, coverage_months: list | None = None) -> 
         po, pr = _slice_period(tables, p_start, p_end)
         po = _apply_filters(po, filters)
         pr = _apply_filters(pr, filters)
-        prev = _aggregate(po, pr, metric, dim_col)
-        if len(prev):
-            prev.columns = ["prev_value"]
-            result = result.join(prev, how="left")
-            if p_start < cov["start"]:
-                warnings.append({
-                    "level": "info",
-                    "code": "previous_period_partial",
-                    "message": f"对比期 {p_start} 至 {p_end} 超出数据覆盖范围。",
-                    "impact": "环比结果可能不完整。",
-                })
+        if is_ratio:
+            prev_records, _ = _ratio_rows(po, pr, metric, dim_col)
+            if dim_col:
+                prev_map = {row[dim_col]: row[metric] for row in prev_records}
+                result["prev_value"] = result[dim_col].map(prev_map)
+            elif prev_records:
+                result["prev_value"] = prev_records[0][metric]
+        else:
+            prev = _aggregate(po, pr, metric, dim_col)
+            if len(prev):
+                prev.columns = ["prev_value"]
+                result = result.join(prev, how="left")
+        if p_start < cov["start"]:
+            warnings.append({
+                "level": "info",
+                "code": "previous_period_partial",
+                "message": f"对比期 {p_start} 至 {p_end} 超出数据覆盖范围。",
+                "impact": "环比结果可能不完整。",
+            })
 
-    if dim_col:
-        result = result.reset_index().rename(columns={dim_col: dim_col})
-        result = result.sort_values(metric, ascending=(plan.get("sort") == "asc"))
-    else:
-        result = pd.DataFrame([{metric: result}])
+    if not is_ratio:
+        if dim_col:
+            result = result.reset_index().rename(columns={dim_col: dim_col})
+            result = result.sort_values(metric, ascending=(plan.get("sort") == "asc"))
+        else:
+            result = pd.DataFrame([{metric: result}])
+
+    if is_ratio and zero_keys:
+        where = f"（{', '.join(zero_keys)}）" if dim_col else ""
+        den_label = METRIC_SPEC[METRIC_SPEC[metric]["denominator"]]["label"]
+        warnings.append({
+            "level": "warning",
+            "code": "NON_POSITIVE_DENOMINATOR",
+            "message": f"{METRIC_SPEC[metric]['label']}的分母（{den_label}）为 0{where}，对应结果返回 null。",
+            "impact": "null 表示分母为零、无法计算，不是比率为 0%；请勿按 0 解读或参与平均。",
+        })
 
     limit = int(plan.get("limit") or 100)
     truncated = len(result) > limit
@@ -749,6 +854,15 @@ def _handle_inner(question: str, context: dict | None = None,
                          warnings=[], generated_sql="")
 
     spec = METRIC_SPEC[m_val]
+    extra = {}
+    if spec.get("kind") == "ratio":
+        # DM-003：派生比率返回分子分母溯源（逐行分量在 data[*].numerator_value）
+        extra["metric_kind"] = "ratio"
+        extra["components"] = {
+            "numerator_metric": spec["numerator"],
+            "denominator_metric": spec["denominator"],
+            "rule": "先汇总分子分母，再相除；分母为零时返回 null",
+        }
     return _envelope(
         Status.SUCCESS,
         f"已按「{spec['label']}」口径完成查询。",
@@ -768,6 +882,7 @@ def _handle_inner(question: str, context: dict | None = None,
         truncated=out["truncated"],
         plan=plan,
         context=ctx,
+        **extra,
     )
 
 

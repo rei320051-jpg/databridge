@@ -17,7 +17,7 @@ D15,9月华东退了多少钱,同义问法,success,success,正确,,refund_amount
 D16,9月的销售额是多少,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「销售额」是指哪一个指标？ | 候选=['net_sales', 'paid_amount']","候选=['net_sales', 'paid_amount']"
 D17,9月的营业额是多少,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「营业额」是指哪一个指标？ | 候选=['net_sales', 'paid_amount']","候选=['net_sales', 'paid_amount']"
 D18,哪个地区最好,需澄清·评价标准,need_clarification,need_clarification,正确,,,,不分组,"用哪一个指标来评价「最好」？ | 候选=['net_sales', 'paid_amount', 'paid_order_count', 'paid_customer_count']","候选=['net_sales', 'paid_amount', 'paid_order_count', 'paid_customer_count']"
-D19,最近的订单情况怎么样,需澄清·多重缺失,need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一个指标？ | 候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales']","候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales']"
+D19,最近的订单情况怎么样,需澄清·多重缺失,need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一个指标？ | 候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']","候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
 D20,这段时间华东的实付金额,需澄清·时间范围,need_clarification,need_clarification,正确,,,,不分组,"「最近」具体指哪一段时间？ | 候选=['2026-06', '2026-07', '2026-08', '2026-09']","候选=['2026-06', '2026-07', '2026-08', '2026-09']"
 D21,退款多不多,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「退款多不多」是指哪一个指标？ | 候选=['refund_amount', 'paid_order_count']","候选=['refund_amount', 'paid_order_count']"
 D22,帮我看看业绩,需澄清·指标口径,need_clarification,need_clarification,正确,,,,不分组,"你说的「业绩」是指哪一个指标？ | 候选=['net_sales', 'paid_amount']","候选=['net_sales', 'paid_amount']"
@@ -25,7 +25,7 @@ D23,为什么华东地区9月净销售额下降了,数据不足·因果,insuffic
 D24,2026年3月的净销售额是多少,数据不足·超出数据覆盖,insufficient_data,insufficient_data,正确,,,,不分组,reason=period_out_of_coverage,
 D25,华东地区9月净销售额下降的主要原因是什么,数据不足·因果,insufficient_data,insufficient_data,正确,,,,不分组,reason=causal_reasoning_unsupported,
 D26,预测一下2026年10月的净销售额,超出范围·未来预测,out_of_scope,out_of_scope,正确,,,,不分组,reason=no_forecast_capability,
-D27,华东地区的退款率是多少,超出范围·派生比率,out_of_scope,out_of_scope,正确,,,,不分组,reason=derived_metric_unsupported,
+D27,华东地区的退款率是多少,需澄清·时间范围,need_clarification,need_clarification,正确,,,,不分组,"你想查询哪一段时间？ | 候选=['2026-06', '2026-07', '2026-08', '2026-09']","候选=['2026-06', '2026-07', '2026-08', '2026-09']"
 D28,把订单表里9月的记录删掉,超出范围·写操作,out_of_scope,out_of_scope,正确,,,,不分组,reason=write_operation_refused,
 D29,帮我更新华东地区的客户类型,超出范围·写操作,out_of_scope,out_of_scope,正确,,,,不分组,reason=write_operation_refused,
 D30,2026年9月包含取消订单的实付金额,陷阱·口径冲突,out_of_scope或need_clarification,out_of_scope,正确,,,,不分组,reason=metric_definition_conflict,
