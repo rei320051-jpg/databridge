@@ -66,7 +66,9 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 `POST /v1/query` 是成员 1 的结构化只读执行层；`POST /agent/query` 是成员 2 的自然语言入口，
 调用同一个执行层。默认采用可复现的规则解析。可选模型解析需要本机设置
 `DATABRIDGE_AGENT_MODE=model`、`OPENAI_API_KEY`、`DATABRIDGE_MODEL`，目前**没有真实模型调用的验证成绩**。
-示例运营 Agent 可运行 `python scripts/run_operations_agent.py 生成2026年9月经营简报`。
+示例运营 Agent 可本地运行 `python scripts/run_operations_agent.py 生成2026年9月经营简报`，
+或在服务启动后运行 `python scripts/run_operations_agent.py --api http://127.0.0.1:8001 生成2026年9月经营简报`，
+通过真实 HTTP 调用平台。自然语言入口支持共享 v1.2 的八个指标，三项派生指标在 Agent 层组合可信基础查询。
 
 页面内置 85,018 单的模拟数据与正式后端 20,000 单演示数据不能混用答案或版本；
 `/datasets/inspect` 仍未在正式后端实现，页面 live 还不能声称完整联调。
@@ -137,7 +139,7 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 ├── examples/                          查询计划示例
 │
 ├── tests/                             三方测试与实验（详见 docs/测试集与对照实验说明.md）
-│   ├── member2_workflow_test.py        成员 2 工作流 11 项
+│   ├── member2_workflow_test.py / member2_completion_test.py  成员 2 工作流与补齐验收 34 项
 │   ├── formal_dataset_test.py         正式库 × 页面管线一致性 35 项（F07 锚点）
 │   ├── smoke_test.py（26 项）/ scenario_test.py（F01~F08）/ page_render_test.py / live_mode_test.py（15 项）
 │   ├── run_testset.py                 测试集自动评分器（开发集 37 / 保留集 30）
@@ -285,7 +287,7 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 ## 8. 当前限制
 
 1. 页面默认仍使用页面侧参考实现；成员 1 正式查询服务已并入源码，但自然语言入口、数据上传与统一数据集尚未完成三方联调。
-2. 示例运营 Agent 为页面侧调用回放，正式 Agent 由成员 2 交付。
-3. 首版仅支持 5 个基础指标，不支持退款率、客单价等派生比率指标（派生指标契约草案已出，见 `docs/派生指标设计草案_v0.1.md`，待三人确认后实现）。
-4. 净销售额中「同期成功退款金额」的时间归属口径待三人确认（议题 IS-001，截止 10-08）；成员 3 已用跨月退款变体完成两口径对比实验并给出推荐结论（按 refund_time 归属），见 `docs/测试集与对照实验说明.md` §4 与 `tests/_IS001口径对比.csv`。
+2. 页面 Agent 回放与正式运营 Agent 分别保留；正式 Agent 已支持本地与 HTTP 调用，同一正式数据版本下可复现简报。
+3. 页面与正式自然语言入口支持 5 个基础指标及退款率、客单价、支付人均消费；结构化 `/v1/query` 仍为 5 个基础指标，派生指标由 Agent 层组合分子分母，不是执行层原生接口。
+4. 净销售额按退款完成时间归属期间（IS-001 方案 A，见 `docs/口径冻结确认单_2026-10-04.md`）；自然语言比较仍仅支持完整自然月环比，同比/任意两期比较明确拒答。
 5. 演示数据为模拟数据，任何结论都不代表真实经营情况。

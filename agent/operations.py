@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import math
 
 from shared.contracts import Metric, Status
 
@@ -22,10 +23,18 @@ def monthly_brief(workflow, request: str) -> dict:
         return {"status": response["status"], "message": response["message"],
                 "source_response": response}
     rows = response["data"]
-    if response["metric"] != Metric.NET_SALES or response["group_by"] != ["region"] or not rows:
+    if (response["metric"] != Metric.NET_SALES or response["group_by"] != ["region"] or not rows
+            or response.get('truncated') or response['plan'].get('comparison') != 'mom'):
         return {"status": Status.INSUFFICIENT_DATA,
                 "message": "缺少各地区净销售额数据，无法形成经营简报。",
                 "source_response": response}
+    for row in rows:
+        if ('growth_rate' not in row or not isinstance(row.get('region'), str)
+                or any(type(row.get(key)) not in (int, float) or not math.isfinite(row[key])
+                       for key in (Metric.NET_SALES, 'compare_value', 'difference'))
+                or (row.get('growth_rate') is not None and
+                    (type(row['growth_rate']) not in (int, float) or not math.isfinite(row['growth_rate'])))):
+            return {'status': Status.EXECUTION_FAILED, 'message': '接口数值或环比结构无效，无法形成简报。'}
     # Match member 3's showcase: "下降幅度" means percentage, not absolute fen.
     declines = [row for row in rows if row.get("growth_rate") is not None and row["growth_rate"] < 0]
     worst = min(declines, key=lambda row: row["growth_rate"]) if declines else None
@@ -40,4 +49,6 @@ def monthly_brief(workflow, request: str) -> dict:
             "source_tables": response["source_tables"], "dataset_version": response["dataset_version"],
             "query_id": response["query_id"], "warnings": response["warnings"],
             "limitations": ["模拟数据不代表真实经营", "仅能描述指标变化，不能判断因果原因"],
+            "generated_sql": response.get('generated_sql'),
+            "sql_parameters": response.get('sql_parameters'),
             "plan": response["plan"]}
