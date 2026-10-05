@@ -139,7 +139,7 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 ├── examples/                          查询计划示例
 │
 ├── tests/                             三方测试与实验（详见 docs/测试集与对照实验说明.md）
-│   ├── member2_workflow_test.py / member2_completion_test.py  成员 2 工作流与补齐验收 33 项
+│   ├── member2_workflow_test.py / member2_completion_test.py  成员 2 工作流与补齐验收 34 项
 │   ├── formal_dataset_test.py         正式库 × 页面管线一致性 35 项（F07 锚点）
 │   ├── smoke_test.py（26 项）/ scenario_test.py（F01~F08）/ page_render_test.py / live_mode_test.py（15 项）
 │   ├── run_testset.py                 测试集自动评分器（开发集 37 / 保留集 30）

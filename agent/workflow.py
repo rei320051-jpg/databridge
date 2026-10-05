@@ -29,7 +29,7 @@ METRIC_TO_EXECUTOR = {
 CUSTOMER_TYPES = {"新客户": "new", "老客户": "returning"}
 REVERSE_CUSTOMER_TYPES = {v: k for k, v in CUSTOMER_TYPES.items()}
 WRITE_WORDS = ("删除", "删掉", "清空", "修改", "更改", "更新", "改成", "改为", "插入", "写入", "drop", "delete", "update", "insert", "truncate")
-RATES = ("转化率", "占比", "复购率", "同比")
+RATES = ("转化率", "占比", "复购率", "同比", "退货率")
 FUTURE = ("预测", "预估", "估算", "预计", "未来", "下个月会", "明年")
 CAUSE = ("为什么", "原因", "导致", "归因", "什么因素")
 CONFLICT = ("包含取消", "算上取消", "包含失败", "算上失败", "包含未支付", "不扣退款", "不计入退款")
@@ -189,6 +189,9 @@ class AgentWorkflow:
             return _failure(Status.OUT_OF_SCOPE, "要求的口径与指标字典不符。", version, "metric_definition_conflict", ["对应指标定义"], "请按当前字典口径提问，或先由三人确认新口径。")
         if any(word in question for word in RATES):
             return _failure(Status.OUT_OF_SCOPE, "当前不支持该比率指标或同比。", version, "derived_metric_unsupported", ["派生指标定义"], "请查询业务字典中的八个指标或使用环比。")
+        if '比率' in question and _metric(question)[0] not in Metric.RATIO:
+            return _failure(Status.OUT_OF_SCOPE, "该比率没有业务定义。", version,
+                            "derived_metric_unsupported", ["比率指标定义"], "请查询业务字典中的三个派生指标。")
         if '增长率' in question and not any(term in question for term in MOM_TERMS):
             return _failure(Status.OUT_OF_SCOPE, "增长率需要明确比较基期。", version,
                             "missing_comparison_basis", ["比较基期"], "请改为某月环比增长率。")

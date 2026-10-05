@@ -285,6 +285,16 @@ class CompletionTests(unittest.TestCase):
         result = self.query('2026年9月实付金额和人均支付金额')
         self.assertEqual(result['status'], Status.NEED_CLARIFICATION)
 
+    def test_unknown_ratio_never_returns_additive_metric(self):
+        for question in ['2026年9月净销售额比率', '2026年9月退款金额比率', '2026年9月退货率']:
+            with self.subTest(question=question):
+                result = self.query(question)
+                self.assertEqual(result['status'], Status.OUT_OF_SCOPE)
+                self.assertNotIn('data', result)
+        result = self.query('2026年9月退款比率')
+        self.assertEqual(result['status'], Status.SUCCESS)
+        self.assertEqual(result['metric'], Metric.REFUND_RATE)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
