@@ -72,7 +72,7 @@ class CompletionTests(unittest.TestCase):
         self.assertIsNone(south[Metric.REFUND_RATE])
         self.assertEqual(south['numerator_value'], 80)
         self.assertEqual(south['denominator_value'], 0)
-        self.assertTrue(any(w['code'] == 'ZERO_DENOMINATOR' for w in result['warnings']))
+        self.assertTrue(any(w['code'] == 'NON_POSITIVE_DENOMINATOR' for w in result['warnings']))
 
     def test_ratio_mom_computes_rates_before_comparing(self):
         result = self.query('2026年9月各地区客单价环比')

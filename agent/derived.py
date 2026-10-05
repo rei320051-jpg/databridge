@@ -44,7 +44,7 @@ def execute_ratio(workflow, slots, version, context):
 
     def ratio(n, d, label):
         if d <= 0:
-            warnings.append({'level': 'warning', 'code': 'ZERO_DENOMINATOR',
+            warnings.append({'level': 'warning', 'code': 'NON_POSITIVE_DENOMINATOR',
                              'message': f'{label}分母为零，指标为空。', 'impact': '不得把空值解释为 0。'})
             return None
         return _rounded(Decimal(str(n)) / Decimal(str(d)) * scale)
