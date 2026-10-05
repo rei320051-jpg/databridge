@@ -33,4 +33,6 @@
 - [x] 新建 `agent/client.py` 的 `HTTPAgentClient.run(payload) -> dict`，修改 `scripts/run_operations_agent.py` 增加 `--api` 参数；加固 `agent/operations.py` 的无结果/截断限制。
 - [x] 运行 `scripts/test_query_api.py`、`scripts/test_importer.py`、`scripts/validate_demo.py`、基础及新增 Agent 测试和成员三派生指标测试。
 - [x] 更新 `docs/member2_delivery.md`、README，写实际验证证据和未实测限制；独立审查，修复发现的问题。
-- [ ] `git diff --check` 后提交功能分支并创建 PR；不自行合入 main。
+- [x] `git diff --check` 后提交功能分支并创建 PR；不自行合入 main。
+
+交付：PR #1（https://github.com/rei320051-jpg/databridge/pull/1）；34项成员二测试及独立审查通过。
