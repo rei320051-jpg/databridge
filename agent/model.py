@@ -8,9 +8,9 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from shared.contracts import DIMENSION_SPEC, METRIC_SPEC
+from shared.contracts import DIMENSION_SPEC, METRIC_SPEC, REFERENCE_DATE
 
-PROMPT_VERSION = "plan_v1"
+PROMPT_VERSION = "plan_v2"
 PROMPT = (Path(__file__).parent / "prompts" / f"{PROMPT_VERSION}.txt").read_text(encoding="utf-8")
 
 
@@ -35,9 +35,16 @@ class OpenAIPlanModel:
             raise ModelFailure("模型模式缺少 OPENAI_API_KEY 或 DATABRIDGE_MODEL 配置")
         context = {
             "question": question,
-            "metrics": {k: {"label": v["label"], "synonyms": v["synonyms"]}
+            "reference_date": REFERENCE_DATE,
+            "metrics": {k: {"label": v["label"], "synonyms": v["synonyms"],
+                            "definition": v["definition"], "unit": v["unit"]}
                         for k, v in METRIC_SPEC.items()},
             "dimensions": DIMENSION_SPEC,
+            "tables": {"orders": ["order_id", "customer_id", "region", "payment_status", "paid_at", "paid_amount_fen"],
+                       "refunds": ["refund_id", "order_id", "refund_status", "refunded_at", "refund_amount_fen"],
+                       "customers": ["customer_id", "customer_type"]},
+            "relationships": ["refunds.order_id -> orders.order_id (many-to-one)",
+                              "orders.customer_id -> customers.customer_id (many-to-one)"],
         }
         payload = {
             "model": self.model,
@@ -59,11 +66,31 @@ class OpenAIPlanModel:
             raise ModelFailure("模型服务调用失败，请检查网络和模型配置") from exc
         except (UnicodeError, json.JSONDecodeError) as exc:
             raise ModelOutputInvalid("模型服务返回的响应不是合法 JSON") from exc
+        if not isinstance(body, dict):
+            raise ModelOutputInvalid("模型响应必须是对象")
         if body.get("status") != "completed":
             raise ModelFailure("模型未完成结构化解析")
-        chunks = [content.get("text", "") for item in body.get("output", [])
-                  if item.get("type") == "message"
-                  for content in item.get("content", []) if content.get("type") == "output_text"]
+        output = body.get('output')
+        if not isinstance(output, list):
+            raise ModelOutputInvalid("模型 output 必须是数组")
+        chunks = []
+        for item in output:
+            if not isinstance(item, dict):
+                raise ModelOutputInvalid("模型 output 元素必须是对象")
+            if item.get('type') != 'message':
+                continue
+            content = item.get('content')
+            if not isinstance(content, list):
+                raise ModelOutputInvalid("模型 message.content 必须是数组")
+            for part in content:
+                if not isinstance(part, dict):
+                    raise ModelOutputInvalid("模型 content 元素必须是对象")
+                if part.get('type') == 'refusal':
+                    raise ModelOutputInvalid("模型拒绝解析，请改用规则模式")
+                if part.get('type') == 'output_text':
+                    if not isinstance(part.get('text'), str):
+                        raise ModelOutputInvalid("模型文本类型错误")
+                    chunks.append(part['text'])
         if len(chunks) != 1:
             raise ModelOutputInvalid("模型没有返回唯一的 JSON 文本")
         try:

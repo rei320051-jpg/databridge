@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from uuid import uuid4
 
+from agent.periods import parse_period, UnsupportedPeriod
 from agent.model import ModelFailure, ModelOutputInvalid, OpenAIPlanModel, PROMPT_VERSION
 from shared.contracts import (
     ALLOWED_FILTER_KEYS, AMBIGUOUS_METRIC_TERMS, Comparison, DIMENSION_SPEC,
@@ -28,13 +29,12 @@ METRIC_TO_EXECUTOR = {
 CUSTOMER_TYPES = {"新客户": "new", "老客户": "returning"}
 REVERSE_CUSTOMER_TYPES = {v: k for k, v in CUSTOMER_TYPES.items()}
 WRITE_WORDS = ("删除", "删掉", "清空", "修改", "更改", "更新", "改成", "改为", "插入", "写入", "drop", "delete", "update", "insert", "truncate")
-RATES = ("退款率", "退货率", "转化率", "客单价", "占比", "比率", "复购率", "同比", "增长率")
+RATES = ("转化率", "占比", "复购率", "同比")
 FUTURE = ("预测", "预估", "估算", "预计", "未来", "下个月会", "明年")
 CAUSE = ("为什么", "原因", "导致", "归因", "什么因素")
 CONFLICT = ("包含取消", "算上取消", "包含失败", "算上失败", "包含未支付", "不扣退款", "不计入退款")
-GROUP_MARKERS = ("各", "每个", "按", "分别", "排名", "排行", "哪个", "哪些", "top")
-CN_MONTH = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7,
-            "八": 8, "九": 9, "十": 10, "十一": 11, "十二": 12}
+GROUP_MARKERS = ("各", "每个", "按", "分别", "排名", "排行", "哪个", "哪些", "top", "前", "最高", "最低")
+MOM_TERMS = ("环比", "对比上月", "跟上月比", "比上个月", "比上月", "下降最多", "降幅最大")
 
 
 def _month_bounds(year: int, month: int) -> tuple[str, str]:
@@ -65,13 +65,17 @@ def _failure(status, message, version, reason, missing, suggestion, retryable=Fa
 def _metric(question: str):
     # Longest explicit synonym wins. Ambiguous terms are checked only when no
     # unambiguous metric phrase was present ("净销售额" contains "销售额").
-    matches = [(len(term), code) for code, spec in METRIC_SPEC.items()
-               for term in spec["synonyms"] if term.lower() in question.lower()]
+    matches = [(match.start(), match.end(), code) for code, spec in METRIC_SPEC.items()
+               for term in spec['synonyms'] for match in re.finditer(re.escape(term.lower()), question.lower())]
+    # Ignore only fully contained occurrences, e.g. 支付金额 inside 人均支付金额.
+    # Separate mentions of total and per-customer spending still need clarification.
+    matches = [(start, end, code) for start, end, code in matches if not any(
+        a <= start and end <= b and b - a > end - start for a, b, _ in matches)]
     if matches:
-        distinct = sorted({code for _, code in matches})
+        distinct = sorted({code for _, _, code in matches})
         if len(distinct) > 1:
             return None, distinct
-        return sorted(matches, reverse=True)[0][1], None
+        return distinct[0], None
     for term in sorted(AMBIGUOUS_METRIC_TERMS, key=len, reverse=True):
         if term in question:
             return None, AMBIGUOUS_METRIC_TERMS[term]
@@ -79,36 +83,7 @@ def _metric(question: str):
 
 
 def _period(question: str):
-    anchor = date.fromisoformat(REFERENCE_DATE)
-    explicit = re.search(r"(20\d{2})\s*[-/年]\s*(\d{1,2})\s*[-/月]\s*(\d{1,2})", question)
-    if explicit:
-        day = date(*map(int, explicit.groups())).isoformat()
-        return day, day
-    span = re.search(r"(?:(20\d{2})年)?(\d{1,2})月\s*(?:到|至|[-~—])\s*(?:(20\d{2})年)?(\d{1,2})月", question)
-    if span:
-        y1, m1, y2, m2 = span.groups()
-        y1, y2 = int(y1 or y2 or anchor.year), int(y2 or y1 or anchor.year)
-        return _month_bounds(y1, int(m1))[0], _month_bounds(y2, int(m2))[1]
-    quarter = re.search(r"(?:(20\d{2})年)?第?([一二三四1234])季度", question)
-    if quarter:
-        q = {"一": 1, "二": 2, "三": 3, "四": 4}.get(quarter.group(2), quarter.group(2))
-        first = (int(q) - 1) * 3 + 1
-        year = int(quarter.group(1) or anchor.year)
-        return _month_bounds(year, first)[0], _month_bounds(year, first + 2)[1]
-    if "上个月" in question or "上月" in question:
-        prior = anchor.replace(day=1) - timedelta(days=1)
-        return _month_bounds(prior.year, prior.month)
-    if "本月" in question or "这个月" in question:
-        return _month_bounds(anchor.year, anchor.month)
-    if any(word in question for word in ("近30天", "最近30天", "过去30天")):
-        return (anchor - timedelta(days=29)).isoformat(), anchor.isoformat()
-    month = re.search(r"(?:(20\d{2})年)?(\d{1,2})月", question)
-    if month:
-        return _month_bounds(int(month.group(1) or anchor.year), int(month.group(2)))
-    chinese = re.search(r"([一二三四五六七八九十]{1,2})月", question)
-    if chinese and chinese.group(1) in CN_MONTH:
-        return _month_bounds(anchor.year, CN_MONTH[chinese.group(1)])
-    return None, None
+    return parse_period(question)
 
 
 def _slots(question: str, proposal: dict) -> dict:
@@ -117,8 +92,7 @@ def _slots(question: str, proposal: dict) -> dict:
     if metric is None and ambiguous is None and not criterion_ambiguous and proposal.get("metric") in Metric.ALL:
         metric = proposal["metric"]
     start, end = _period(question)
-    vague_recent = any(term in question for term in ("最近", "近期", "近来", "这段时间")) and not any(
-        term in question for term in ("近30天", "最近30天", "过去30天"))
+    vague_recent = any(term in question for term in ("最近", "近期", "近来", "这段时间")) and not re.search(r"(?:近|最近|过去)\d+天", question)
     has_time_cue = any(term in question for term in ("年", "月", "季度", "天", "昨天", "前天"))
     if not start and not end and not vague_recent and has_time_cue:
         start, end = proposal.get("date_start"), proposal.get("date_end")
@@ -137,7 +111,7 @@ def _slots(question: str, proposal: dict) -> dict:
         group.append(Dimension.REGION)
     # Never let a model silently add an unrequested group or filter. The
     # explicit user text and shared dimension dictionary are authoritative.
-    comparison = Comparison.MOM if any(term in question for term in ("环比", "对比上月", "跟上月比", "下降最多", "降幅最大")) else Comparison.NONE
+    comparison = Comparison.MOM if any(term in question for term in MOM_TERMS) else Comparison.NONE
     sort = Sort.ASC if any(term in question for term in ("最低", "最少", "最小", "最差")) else Sort.DESC
     return {"metric": metric, "ambiguous": ambiguous, "date_start": start, "date_end": end,
             "group_by": group, "filters": filters, "sort": sort, "comparison": comparison}
@@ -160,6 +134,12 @@ def _validate_slots(slots: dict) -> bool:
             if not isinstance(values, list) or not values or any(v not in DIMENSION_SPEC[dim]["values"] for v in values):
                 return False
         if slots["sort"] not in Sort.ALL or slots["comparison"] not in Comparison.ALL:
+            return False
+        if 'ranking_limit' in slots and (type(slots['ranking_limit']) is not int or not 1 <= slots['ranking_limit'] <= 100):
+            return False
+        if 'rank_decline' in slots and type(slots['rank_decline']) is not bool:
+            return False
+        if (slots['date_start'] is None) != (slots['date_end'] is None):
             return False
         if slots["date_start"] is not None and slots["date_end"] is not None:
             start, end = date.fromisoformat(slots["date_start"]), date.fromisoformat(slots["date_end"])
@@ -208,7 +188,10 @@ class AgentWorkflow:
         if any(word in question for word in CONFLICT):
             return _failure(Status.OUT_OF_SCOPE, "要求的口径与指标字典不符。", version, "metric_definition_conflict", ["对应指标定义"], "请按当前字典口径提问，或先由三人确认新口径。")
         if any(word in question for word in RATES):
-            return _failure(Status.OUT_OF_SCOPE, "首版不支持派生比率或同比。", version, "derived_metric_unsupported", ["派生指标定义"], "请改查五个基础指标或使用环比。")
+            return _failure(Status.OUT_OF_SCOPE, "当前不支持该比率指标或同比。", version, "derived_metric_unsupported", ["派生指标定义"], "请查询业务字典中的八个指标或使用环比。")
+        if '增长率' in question and not any(term in question for term in MOM_TERMS):
+            return _failure(Status.OUT_OF_SCOPE, "增长率需要明确比较基期。", version,
+                            "missing_comparison_basis", ["比较基期"], "请改为某月环比增长率。")
         if any(word in question for word in FUTURE):
             return _failure(Status.OUT_OF_SCOPE, "当前不提供预测。", version, "no_forecast_capability", ["未来数据和预测模型"], "请查询已发生月份。")
         if any(word in question for word in CAUSE):
@@ -221,9 +204,9 @@ class AgentWorkflow:
                             "dataset_version_mismatch", [f"{requested_version} 对应的正式数据集"],
                             "请切换至正式数据集，勿混用页面模拟数据的结果。")
         context = payload.get("context") or {}
-        if not isinstance(context, dict) or not isinstance(context.get("clarification_round", 0), int):
+        if not isinstance(context, dict) or type(context.get("clarification_round", 0)) is not int:
             return _failure(Status.MODEL_OUTPUT_INVALID, "澄清上下文格式错误。", version, "invalid_context", [], "请重新提问。")
-        context = {k: v for k, v in context.items() if k in ("metric", "date_start", "date_end", "group_by", "filters", "clarification_round")}
+        context = {k: v for k, v in context.items() if k in ("metric", "date_start", "date_end", "group_by", "filters", "sort", "comparison", "clarification_round", "ranking_limit", "rank_decline")}
         if context.get("clarification_round", 0) < 0 or context.get("clarification_round", 0) > MAX_CLARIFICATION_ROUNDS:
             return _failure(Status.MODEL_OUTPUT_INVALID, "澄清轮数非法。", version, "invalid_context", [], "请重新提问。")
         # The page also sends its last successful context on a new question.
@@ -242,20 +225,39 @@ class AgentWorkflow:
                 return _failure(Status.EXECUTION_FAILED, "模型调用失败。", version,
                                 "model_unavailable", ["可用模型服务"], "检查密钥、模型和网络，或改用规则模式。", True)
             allowed = {"metric", "date_start", "date_end", "group_by", "filters", "sort", "comparison"}
-            if (set(proposal) != allowed or
+            if (not isinstance(proposal, dict) or set(proposal) != allowed or
                     proposal["metric"] not in (*Metric.ALL, None) or
                     proposal["sort"] not in Sort.ALL or
                     proposal["comparison"] not in Comparison.ALL or
                     not isinstance(proposal["group_by"], list) or
-                    not isinstance(proposal["filters"], dict)):
+                    not isinstance(proposal["filters"], dict) or
+                    not _validate_slots(proposal)):
                 return _failure(Status.MODEL_OUTPUT_INVALID, "模型输出字段或枚举不符合契约。", version,
                                 "model_output_invalid", ["合法查询计划"], "请重试或改用规则模式。", True)
         elif self.mode != "rules":
             return _failure(Status.EXECUTION_FAILED, "AI 模式配置错误。", version,
                             "invalid_agent_mode", ["rules 或 model"], "检查 DATABRIDGE_AGENT_MODE。")
-        slots = _slots(question, proposal)
+        if re.search(r"\d{1,2}月\s*(?:与|和|跟|对比|比较).*?\d{1,2}月", question):
+            return _failure(Status.OUT_OF_SCOPE, "目前比较契约仅支持完整自然月环比。", version,
+                            "unsupported_comparison_period", ["受支持的比较方式"], "请分别查询两期，或改用某月环比。")
+        try:
+            slots = _slots(question, proposal)
+        except UnsupportedPeriod:
+            return _failure(Status.OUT_OF_SCOPE, "目前比较契约仅支持完整自然月环比。", version,
+                            "unsupported_comparison_period", ["受支持的比较方式"], "请分别查询两期，或改用某月环比。")
+        except (ValueError, OverflowError):
+            return _failure(Status.INSUFFICIENT_DATA, "日期不存在或时间区间不合法。", version,
+                            "invalid_date_range", ["有效时间范围"], "请检查月份、日期及起止顺序。")
+        number = re.search(r"(?:前|top\s*)(\d+|[一二两三四五六七八九十]+)(?:名|个)?", low)
+        if number:
+            token = number[1]
+            slots['ranking_limit'] = int(token) if token.isdigit() else {'一': 1, '二': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10}.get(token)
+            if not slots['ranking_limit'] or not 1 <= slots['ranking_limit'] <= 100:
+                return _failure(Status.OUT_OF_SCOPE, "排名数量须为 1 至 100。", version,
+                                "invalid_ranking_limit", [], "请使用前五名等明确数量。")
+        slots['rank_decline'] = any(term in question for term in ('下降最多', '降幅最大'))
         if clarification:
-            for field in ("metric", "date_start", "date_end", "group_by", "filters"):
+            for field in ("metric", "date_start", "date_end", "group_by", "filters", "sort", "comparison", "ranking_limit", "rank_decline"):
                 if field in context:
                     slots[field] = context[field]
             if "metric" in context:
@@ -283,7 +285,7 @@ class AgentWorkflow:
                     slots["ambiguous"] = None
                 else:
                     return _clarify("metric", ReasonCode.AMBIGUOUS_METRIC,
-                                    "未识别指标，请选一个基础指标。", list(Metric.ALL), context, version)
+                                    "未识别指标，请从业务字典选择。", list(Metric.ALL), context, version)
             elif target == "date_range" and isinstance(choice, str) and re.fullmatch(r"20\d{2}-(0[1-9]|1[0-2])", choice):
                 slots["date_start"], slots["date_end"] = _month_bounds(*map(int, choice.split("-")))
             elif target == "date_range" and isinstance(choice, str):
@@ -302,10 +304,16 @@ class AgentWorkflow:
                                 "invalid_clarification_choice", [], "请选择页面给出的选项，或重新提问。")
         if not _validate_slots(slots):
             return _failure(Status.MODEL_OUTPUT_INVALID, "解析结果不符合共享契约。", version,
-                            "invalid_plan", ["合法的指标、日期或维度"], "请用明确的月份和五个基础指标重新提问。")
-        context.update({k: slots[k] for k in ("group_by", "filters")})
+                            "invalid_plan", ["合法的指标、日期或维度"], "请用明确的时间和业务字典指标重新提问。")
+        context.update({k: slots[k] for k in ("group_by", "filters", "sort", "comparison", "rank_decline")})
+        if 'ranking_limit' in slots:
+            context['ranking_limit'] = slots['ranking_limit']
+        for field in ('date_start', 'date_end'):
+            if slots[field]:
+                context[field] = slots[field]
         if slots["ambiguous"] and not slots["metric"]:
-            return _clarify("metric", ReasonCode.AMBIGUOUS_METRIC, "你说的销售额是实付金额还是净销售额？",
+            labels = '、'.join(METRIC_SPEC[code]['label'] for code in slots['ambiguous'])
+            return _clarify("metric", ReasonCode.AMBIGUOUS_METRIC, f"请确认指标口径：{labels}？",
                             slots["ambiguous"], context, version)
         if not slots["metric"]:
             ask = "请指定评价指标，例如净销售额。" if "最好" in question else "你想查询哪个指标？"
@@ -316,7 +324,20 @@ class AgentWorkflow:
             return _clarify("date_range", ReasonCode.AMBIGUOUS_TIME_RANGE if "最近" in question else ReasonCode.MISSING_FIELD,
                             "请确认查询月份。", ["2026-06", "2026-07", "2026-08", "2026-09"], context, version)
         context.update({"date_start": slots["date_start"], "date_end": slots["date_end"]})
-        return self._execute(slots, version, context)
+        if slots['metric'] in Metric.RATIO:
+            from agent.derived import execute_ratio
+            result = execute_ratio(self, slots, version, context)
+        else:
+            result = self._execute(slots, version, context)
+        if result['status'] == Status.SUCCESS:
+            if slots.get('rank_decline'):
+                result['data'].sort(key=lambda r: (r.get('growth_rate') is None, r.get('growth_rate') or 0))
+                result['ranking_basis'] = 'growth_rate_asc'
+            if slots.get('ranking_limit'):
+                result['data'] = result['data'][:slots['ranking_limit']]
+                result['row_count'] = len(result['data'])
+                result['ranking_limit'] = slots['ranking_limit']
+        return result
 
     def _version(self):
         from databridge.service import QueryError, connect_readonly

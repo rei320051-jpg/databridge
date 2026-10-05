@@ -119,7 +119,7 @@ class WorkflowTests(unittest.TestCase):
             ("为什么9月华东净销售额下降", Status.INSUFFICIENT_DATA),
             ("预测10月净销售额", Status.OUT_OF_SCOPE),
             ("删除9月订单", Status.OUT_OF_SCOPE),
-            ("9月退款率", Status.OUT_OF_SCOPE),
+            ("9月复购率", Status.OUT_OF_SCOPE),
             ("9月净销售额不扣退款", Status.OUT_OF_SCOPE),
             ("2027年9月净销售额", Status.INSUFFICIENT_DATA),
         ]
@@ -193,18 +193,12 @@ class WorkflowTests(unittest.TestCase):
         # uses the contract five-region vocabulary, so D10 (Southwest) now
         # succeeds and only D24 (March, outside page coverage) differs.
         dataset_specific = {"D24": Status.SUCCESS}
-        # v1.2 派生指标（口径冻结确认单 2026-10-04）：页面管线已支持退款率/客单价/
-        # 支付人均消费，但成员 1 执行层尚未实现比率聚合，工作流在此之前继续拒答；
-        # D27 未给时间，页面侧预期 need_clarification（时间澄清）。
-        # 待成员 1/2 按确认单落地后删除本覆写。
-        backend_pending = {"D27": Status.OUT_OF_SCOPE}
         for filename in ("测试题_开发集_30题.csv", "测试题_开发集_补充回归7题.csv"):
             with (ROOT / "tests" / filename).open(encoding="utf-8-sig", newline="") as handle:
                 for case in csv.DictReader(handle):
                     with self.subTest(id=case["题号"], question=case["问题"]):
                         result = self.agent.run({"question": case["问题"]})
-                        expected = (dataset_specific.get(case["题号"])
-                                    or backend_pending.get(case["题号"]))
+                        expected = dataset_specific.get(case["题号"])
                         allowed = {expected} if expected else set(case["预期状态"].split("或"))
                         self.assertIn(result["status"], allowed)
 
