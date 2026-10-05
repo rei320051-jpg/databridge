@@ -6,521 +6,722 @@
 <title>数桥 DataBridge · 答辩幻灯片（demo-v1.1）</title>
 <style>
   :root{
-    --ink:#0e1c33; --ink2:#3d4a63; --ink3:#6b7891; --line:#dfe5ee;
-    --bg:#eef2f8; --paper:#ffffff;
-    --navy:#16305c; --blue:#2f5fd0; --blue-soft:#eaf0fe;
-    --up:#c62828; --down:#1f7a43; --warn:#b26a00; --warn-bg:#fff6e3;
-    --bad-bg:#fdecec; --bad-line:#eabbbb; --bad-ink:#9c2b2b;
-    --good-bg:#ecf5ef; --good-line:#b7dcc3; --good-ink:#1c5c37;
+    --ink:#0d1b32; --ink2:#3a475f; --ink3:#69768f; --line:#dde4ee;
+    --bg:#e9eef6; --paper:#fff;
+    --navy:#142c55; --navy2:#1d4686; --blue:#2f5fd0; --blue-soft:#eaf0fe;
+    --up:#c62828; --up-bg:#fdecec; --down:#1c7a44; --down-bg:#ebf6ef;
+    --warn:#a96608; --warn-bg:#fff6e1;
     --mono:ui-monospace,"SF Mono",Consolas,"Courier New",monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;background:var(--bg);
+  html,body{height:100%;overflow:hidden;background:
+    radial-gradient(circle at 20% 10%, #dfe7f3 0, transparent 55%),
+    radial-gradient(circle at 85% 90%, #d5e0f0 0, transparent 50%), var(--bg);
     font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
     color:var(--ink);-webkit-font-smoothing:antialiased}
-  /* 16:9 舞台 */
+
   #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
   .slide{position:absolute;width:1280px;height:720px;background:var(--paper);
-    border-radius:14px;box-shadow:0 24px 70px rgba(14,28,51,.18);
-    padding:54px 64px 64px;display:none;flex-direction:column;overflow:hidden;
+    border-radius:14px;box-shadow:0 24px 70px rgba(13,27,50,.20);
+    padding:42px 56px 50px;display:none;flex-direction:column;overflow:hidden;
     transform:scale(var(--s,1));transform-origin:center}
-  .slide.active{display:flex;animation:fade .45s ease both}
-  @keyframes fade{from{opacity:0;transform:scale(var(--s,1)) translateY(14px)}
-                       to{opacity:1;transform:scale(var(--s,1)) translateY(0)}}
-  .kicker{font-size:14px;letter-spacing:.18em;color:var(--blue);font-weight:700;text-transform:uppercase}
-  h1{font-size:44px;line-height:1.22;font-weight:800;letter-spacing:-.01em;margin-top:10px}
-  h2{font-size:32px;line-height:1.25;font-weight:800;letter-spacing:-.01em}
-  h2 .no{color:var(--blue);margin-right:12px;font-variant-numeric:tabular-nums}
-  .lead{font-size:18px;color:var(--ink2);margin-top:12px;line-height:1.65}
-  .grow{flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:18px}
-  .foot{margin-top:auto;font-size:13px;color:var(--ink3);display:flex;justify-content:space-between;
-    border-top:1px solid var(--line);padding-top:12px}
-  .speaker{position:absolute;left:64px;right:64px;bottom:16px;font-size:12.5px;color:var(--ink3);
-    background:#f6f8fc;border-left:3px solid var(--blue);padding:7px 12px;border-radius:0 6px 6px 0;
-    max-height:0;overflow:hidden;opacity:0;transition:.25s}
-  #stage.notes .speaker{max-height:90px;opacity:1;position:static;margin-top:14px}
+  .slide.active{display:flex}
+  .slide.active .rise{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+  .slide.active .rise:nth-child(2){animation-delay:.06s}
+  .slide.active .rise:nth-child(3){animation-delay:.12s}
+  .slide.active .rise:nth-child(4){animation-delay:.18s}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+  /* 点阵纹理 + 水印页码（.slide .wm 提权，避免被 .slide>* 的 relative 规则覆盖而占位） */
+  .slide::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:radial-gradient(rgba(47,95,208,.07) 1px,transparent 1px);
+    background-size:22px 22px;border-radius:14px}
+  .slide .wm{position:absolute;right:34px;top:6px;font-size:150px;line-height:1;font-weight:800;
+    color:rgba(47,95,208,.055);font-variant-numeric:tabular-nums;pointer-events:none;z-index:0;
+    letter-spacing:-.05em;user-select:none;height:auto;margin:0}
+  .slide>*:not(.wm){position:relative;z-index:1}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .cap{font-size:12px;font-weight:700;letter-spacing:.16em;color:#fff;background:var(--blue);
+    border-radius:5px;padding:4px 11px;text-transform:uppercase}
+  .cap.gray{background:var(--navy)}
+  .crumb{font-size:12.5px;color:var(--ink3);letter-spacing:.05em}
+  .line{flex:1;height:2px;background:linear-gradient(90deg,var(--blue) 0%,rgba(47,95,208,.08) 60%)}
+  h1{font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.01em}
+  h2{font-size:28px;line-height:1.22;font-weight:800;letter-spacing:-.01em;margin:2px 0 2px}
+  .lead{font-size:15.5px;color:var(--ink2);line-height:1.6}
+  .grow{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;margin-top:12px}
+  .foot{margin-top:10px;font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;
+    align-items:center;border-top:1px solid var(--line);padding-top:9px;gap:14px}
+  .src{font-family:var(--mono);font-size:11px;color:#8a96ac}
+  .speaker{font-size:11.5px;color:var(--ink3);background:#f5f8fd;border-left:3px solid var(--blue);
+    padding:6px 11px;border-radius:0 6px 6px 0;max-height:0;overflow:hidden;opacity:0;transition:.2s;
+    margin-top:0}
+  #stage.notes .speaker{max-height:70px;opacity:1;margin-top:8px}
   b.strong{color:var(--navy)}
   .up{color:var(--up);font-weight:700}.down{color:var(--down);font-weight:700}
-  .mono{font-family:var(--mono);font-size:.92em}
+  .mono{font-family:var(--mono);font-size:.9em}
+  .chip{display:inline-block;border-radius:5px;padding:2px 8px;font-size:11.5px;font-family:var(--mono);
+        background:#eef2f9;color:var(--navy);border:1px solid var(--line);white-space:nowrap}
+  .chip.bad{background:var(--up-bg);color:var(--up);border-color:#ecc3c3}
+  .chip.good{background:var(--down-bg);color:var(--down);border-color:#b9dcc6}
 
   /* 封面 */
-  .cover{background:linear-gradient(135deg,#12294f 0%,#1d4686 60%,#2f5fd0 100%);color:#fff}
-  .cover .kicker{color:#a9c4f5}
-  .cover h1{font-size:56px;color:#fff;margin-top:18px}
-  .cover .sub{font-size:21px;color:#d7e3fb;margin-top:22px;max-width:900px;line-height:1.6}
-  .cover .tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
-  .cover .tag{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 15px;font-size:14px;color:#eaf1ff}
-  .cover .meta{margin-top:auto;font-size:13.5px;color:#a9c0e8}
+  .cover{background:linear-gradient(135deg,#0f2247 0%,#173a75 55%,#2656bd 100%);color:#fff;padding:54px 64px}
+  .cover::before{background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:24px 24px;opacity:1}
+  .cover::after{content:"";position:absolute;right:-160px;top:-160px;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(circle,rgba(120,170,255,.28),transparent 65%);pointer-events:none}
+  .cover h1{color:#fff}
+  .cover .lead,.cover .crumb{color:#cddcf5}
+  .cover .cap{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25)}
+  .cover .line{background:linear-gradient(90deg,rgba(255,255,255,.5),rgba(255,255,255,.05))}
 
-  /* 卡片栅格 */
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  .card{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:20px 22px}
-  .card h3{font-size:18px;margin-bottom:8px}
-  .card p{font-size:15px;color:var(--ink2);line-height:1.6}
-  .card.bad{background:var(--bad-bg);border-color:var(--bad-line)}
-  .card.bad h3{color:var(--bad-ink)}
-  .card.good{background:var(--good-bg);border-color:var(--good-line)}
-  .card.good h3{color:var(--good-ink)}
-  .big-num{font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-  .big-num .u{font-size:16px;color:var(--ink3);font-weight:500;margin-left:4px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .card{background:#fbfcfe;border:1px solid var(--line);border-radius:11px;padding:16px 18px;position:relative}
+  .card h3{font-size:16px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card p{font-size:13.5px;color:var(--ink2);line-height:1.58}
+  .card.bad{background:var(--up-bg);border-color:#ecc3c3}.card.bad h3{color:var(--up)}
+  .card.good{background:var(--down-bg);border-color:#b9dcc6}.card.good h3{color:var(--down)}
+  .card.warn{background:var(--warn-bg);border-color:#efd9ac}
+  .card.navy{background:#f3f7ff;border-color:#cdddf7}
+  .ico{width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;
+    font-size:14px;background:var(--blue-soft);color:var(--blue);flex:none}
+  .card.bad .ico{background:#f7d7d7;color:var(--up)}.card.good .ico{background:#d3ecdc;color:var(--down)}
+  .big-num{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1}
+  .big-num .u{font-size:14px;color:var(--ink3);font-weight:500;margin-left:3px}
 
-  table{width:100%;border-collapse:collapse;font-size:16px}
-  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
-  th{background:#f4f7fc;color:var(--ink3);font-size:13.5px;font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line)}
+  th{background:#f3f7fc;color:var(--ink3);font-size:12px;font-weight:600}
   td.num{text-align:right;font-variant-numeric:tabular-nums}
   tr:last-child td{border-bottom:none}
 
-  /* VS 对比 */
-  .vs{display:grid;grid-template-columns:1fr 70px 1fr;gap:0;align-items:stretch}
-  .vs .pane{border-radius:12px;padding:24px;display:flex;flex-direction:column}
-  .vs .s1{background:var(--bad-bg);border:1px solid var(--bad-line)}
-  .vs .s2{background:var(--good-bg);border:1px solid var(--good-line)}
-  .vs .mid{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink3);font-size:15px}
-  .vs .pane h3{font-size:17px;margin-bottom:14px}
-  .vs .s1 h3{color:var(--bad-ink)}.vs .s2 h3{color:var(--good-ink)}
-  .vs .row{display:flex;justify-content:space-between;font-size:15px;padding:7px 0;border-bottom:1px dashed rgba(0,0,0,.08)}
-  .vs .row:last-child{border-bottom:none}
+  .vs{display:grid;grid-template-columns:1fr 56px 1fr;gap:0;align-items:stretch}
+  .pane{border-radius:11px;padding:18px 20px;display:flex;flex-direction:column}
+  .s1{background:var(--up-bg);border:1.5px solid #e6b9b9}.s2{background:var(--down-bg);border:1.5px solid #aed6bd}
+  .mid{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink3);font-size:13px}
+  .pane h3{font-size:15.5px;margin-bottom:10px}
+  .s1 h3{color:var(--up)}.s2 h3{color:var(--down)}
+  .vrow{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;padding:6px 0;
+    border-bottom:1px dashed rgba(0,0,0,.08)}
+  .vrow:last-child{border-bottom:none}
+  .vrow b{font-variant-numeric:tabular-nums}
 
-  /* 流程防线 */
-  .defense{display:flex;gap:12px;align-items:stretch}
-  .dstep{flex:1;background:#fff;border:1.5px solid var(--line);border-top:4px solid var(--blue);
-    border-radius:10px;padding:16px 15px}
-  .dstep .n{font-size:13px;color:var(--blue);font-weight:700;letter-spacing:.1em}
-  .dstep .t{font-size:16.5px;font-weight:700;margin:6px 0 6px}
-  .dstep p{font-size:13px;color:var(--ink2);line-height:1.55}
+  .defense{display:flex;gap:11px}
+  .dstep{flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 13px;position:relative;
+    box-shadow:0 3px 10px rgba(13,27,50,.04)}
+  .dstep::before{content:"";position:absolute;top:0;left:13px;right:13px;height:3px;border-radius:0 0 3px 3px;
+    background:linear-gradient(90deg,var(--blue),#6d97ea)}
+  .dstep .n{font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.12em;margin-top:4px}
+  .dstep .t{font-size:15px;font-weight:700;margin:4px 0}
+  .dstep p{font-size:12px;color:var(--ink2);line-height:1.5}
 
-  /* 聊天气泡 */
-  .chat{display:flex;flex-direction:column;gap:12px}
-  .bubble{max-width:80%;border-radius:12px;padding:13px 17px;font-size:16px;line-height:1.55}
+  .chat{display:flex;flex-direction:column;gap:9px}
+  .bubble{max-width:92%;border-radius:11px;padding:10px 14px;font-size:13.5px;line-height:1.55}
   .bu{align-self:flex-start;background:var(--blue-soft);border:1px solid #cbd9f7}
   .ba{align-self:flex-end;background:#fff;border:1px solid var(--line)}
-  .role{display:block;font-size:12px;color:var(--ink3);margin-bottom:3px}
-  .opts{margin:6px 0 0;padding:0;list-style:none}
-  .opts li{background:#fff;border:1px solid #cbd9f7;border-radius:8px;padding:7px 11px;font-size:14px;margin-top:6px}
+  .role{display:block;font-size:11px;color:var(--ink3);margin-bottom:2px}
+  .opts{margin:5px 0 0;padding:0;list-style:none}
+  .opts li{background:#fff;border:1px solid #cbd9f7;border-radius:7px;padding:5px 10px;font-size:12.5px;margin-top:5px}
 
-  /* 条形 */
-  .bars{display:flex;flex-direction:column;gap:13px;margin-top:8px}
-  .bar{display:grid;grid-template-columns:64px 1fr 150px;gap:14px;align-items:center}
-  .bar .name{font-size:16px;font-weight:600}
-  .track{background:#eef1f7;height:26px;border-radius:6px;overflow:hidden}
-  .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#4a7be0,#2f5fd0)}
-  .bar .val{font-size:15px;text-align:right;font-variant-numeric:tabular-nums}
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .bar{display:grid;grid-template-columns:56px 1fr 178px;gap:12px;align-items:center}
+  .bar .name{font-size:13.5px;font-weight:600}
+  .track{background:#edf0f6;height:22px;border-radius:5px;overflow:hidden}
+  .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#4a7be0,#2f5fd0)}
+  .bar .val{font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
 
-  pre{background:#0d1830;color:#d8e4fa;border-radius:10px;padding:16px 18px;font-family:var(--mono);
-     font-size:13.5px;line-height:1.65;overflow:auto}
-  .chip{display:inline-block;border-radius:6px;padding:2px 9px;font-size:12.5px;font-family:var(--mono);
-        background:#eef2f9;color:var(--navy);border:1px solid var(--line)}
-  .chip.bad{background:var(--bad-bg);color:var(--bad-ink);border-color:var(--bad-line)}
-  ul.clean{list-style:none}
-  ul.clean li{padding:9px 0 9px 26px;position:relative;font-size:16px;color:var(--ink2);line-height:1.55;
-    border-bottom:1px dashed var(--line)}
-  ul.clean li:before{content:"▸";position:absolute;left:4px;color:var(--blue);font-weight:700}
-  ul.clean li:last-child{border-bottom:none}
-  .arch{font-family:var(--mono);font-size:15px;line-height:2;background:#0d1830;color:#cddcf7;
-        border-radius:12px;padding:24px;white-space:pre}
+  pre{background:#0c1730;color:#d3e1fa;border-radius:10px;padding:13px 15px;font-family:var(--mono);
+     font-size:11.5px;line-height:1.6;overflow:auto;white-space:pre}
+  pre .kw{color:#8fb4ff}pre .cm{color:#7587a8}
+
+  /* 迷你趋势柱：列容器固定高，柱体绝对定位 bottom:0，百分比高度才有效 */
+  .spark{display:flex;align-items:flex-end;gap:7px;height:104px;padding-top:18px}
+  .spark .col{flex:1;position:relative;height:100%}
+  .spark .stick{position:absolute;bottom:0;left:8%;right:8%;border-radius:4px 4px 0 0;
+    background:linear-gradient(180deg,#5b87e6,#2f5fd0);min-height:10px}
+  .spark .col.sep .stick{background:linear-gradient(180deg,#e06060,#c62828)}
+  .spark .mlab{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--ink3)}
+  .spark .mv{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--ink3);
+    white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  .statline{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .statline .s{flex:1;padding:11px 14px;border-right:1px solid var(--line);background:#fbfcfe}
+  .statline .s:last-child{border-right:none}
+  .statline .s .k{font-size:11.5px;color:var(--ink3)}
+  .statline .s .v{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+
+  .flow5{display:flex;align-items:stretch;gap:0}
+  .f5{flex:1;background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px 10px;text-align:center}
+  .f5 .n{width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--navy);color:#fff;
+    font-size:12.5px;font-weight:700;margin:0 auto 6px}
+  .f5 .t{font-size:12.5px;font-weight:700}.f5 .d{font-size:10.5px;color:var(--ink3);margin-top:3px;line-height:1.4}
+  .arr{display:flex;align-items:center;color:#9aa7bd;font-size:16px;padding:0 4px}
+
+  .arch{font-family:var(--mono);font-size:12.5px;line-height:1.95;background:#0c1730;color:#c6d5f3;
+        border-radius:11px;padding:18px 20px;white-space:pre;overflow:auto}
   .arch b{color:#8fb4ff}
+  .arch .ok{color:#7fd3a1}
 
-  /* HUD */
-  #hud{position:fixed;left:0;right:0;bottom:14px;display:flex;align-items:center;gap:14px;
+  ul.tight{list-style:none}
+  ul.tight li{padding:6px 0 6px 22px;position:relative;font-size:13.5px;color:var(--ink2);line-height:1.5}
+  ul.tight li:before{content:"▸";position:absolute;left:2px;color:var(--blue);font-weight:700}
+
+  #hud{position:fixed;left:0;right:0;bottom:12px;display:flex;align-items:center;gap:12px;
        justify-content:center;pointer-events:none;z-index:10}
-  #pager{background:rgba(14,28,51,.82);color:#fff;border-radius:999px;padding:6px 16px;font-size:13px;
+  #pager{background:rgba(13,27,50,.85);color:#fff;border-radius:999px;padding:5px 15px;font-size:12.5px;
          font-variant-numeric:tabular-nums}
-  #bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);z-index:20;
-       transition:width .35s ease}
-  .hint{position:fixed;top:14px;right:18px;font-size:12px;color:var(--ink3);z-index:10}
+  #bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#2f5fd0,#6d97ea);z-index:20;transition:width .35s}
+  .hint{position:fixed;top:12px;right:16px;font-size:11.5px;color:var(--ink3);z-index:10;background:rgba(255,255,255,.7);
+        padding:3px 10px;border-radius:999px}
   @media print{
-    html,body{overflow:visible;background:#fff}
-    #hud,#bar,.hint{display:none}
-    #stage{position:static;display:block}
-    .slide{position:relative;display:flex !important;page-break-after:always;box-shadow:none;
-      border-radius:0;width:100vw;height:56.25vw;max-height:100vh}
+    html,body{overflow:visible;background:#fff}#hud,#bar,.hint{display:none}#stage{position:static;display:block}
+    .slide{position:relative;display:flex !important;page-break-after:always;box-shadow:none;border-radius:0;
+      width:100vw;height:56.25vw;max-height:100vh}
   }
 </style>
 </head>
 <body>
 <div id="bar"></div>
-<div class="hint">← → / 空格翻页 · N 演讲备注 · P 打印PDF · F 全屏</div>
+<div class="hint">← →/空格 翻页 · N 备注 · P 导出PDF · F 全屏</div>
 <div id="stage">
 
-  <!-- P1 封面 -->
-  <section class="slide cover">
-    <div class="kicker">可信取数平台 · AI AGENT DATA GATEWAY</div>
+<!-- P1 -->
+<section class="slide cover">
+  <div class="wm" style="color:rgba(255,255,255,.07)">01</div>
+  <div class="topbar rise"><span class="cap">可信取数 · Trusted Data Gateway</span><div class="line"></div><span class="crumb">v1.2 / demo-v1.1</span></div>
+  <div style="margin-top:26px" class="rise">
     <h1>数桥 DataBridge</h1>
-    <div class="sub">面向 AI Agent 的可信取数平台——让大模型给出的每一个数字，都解释得清<b style="color:#fff">口径</b>、追得回<b style="color:#fff">源头</b>。</div>
-    <div class="tags">
-      <span class="tag">只读 · 不修改业务数据</span>
-      <span class="tag">8 个冻结指标口径</span>
-      <span class="tag">歧义先澄清</span>
-      <span class="tag">数字可追溯</span>
-      <span class="tag">零售订单分析</span>
+    <p class="lead" style="font-size:19px;max-width:940px;margin-top:14px">面向 AI Agent 的可信取数平台——让大模型给出的每一个数字，<br>都解释得清<b style="color:#fff">口径</b>、追得回<b style="color:#fff">源头</b>、证得了<b style="color:#fff">对错</b>。</p>
+  </div>
+  <div class="grow rise" style="justify-content:center">
+    <div style="display:flex;gap:9px;flex-wrap:wrap">
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28)">只读 · 零写操作</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28)">8 个冻结指标</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28)">歧义先澄清</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28)">数字可追溯</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28)">三人三模块契约驱动</span>
     </div>
-    <div class="meta">A 赛题 · 中国数联 × 华师大 AI 智能体校园黑客松 · 2026-10 ｜ 正式联调库 demo-v1.1（sha256 锁定）· 接口契约 v1.2</div>
-    <div class="speaker">各位评委好，我们的产品叫数桥，解决的是企业把数据库交给 AI Agent 后最致命的问题——数字看起来正常，但它是错的。</div>
-  </section>
-
-  <!-- P2 痛点 -->
-  <section class="slide">
-    <div class="kicker">01 · 问题</div>
-    <h2>AI 取数的门槛，已经不是"写不写得出 SQL"</h2>
-    <div class="grow grid3">
-      <div class="card bad"><h3>① 各说各话</h3>
-        <p>"9月销售额"是净销 <b>1,720 万</b>还是实付 <b>1,941 万</b>？两个口径相差 <span class="up">221.5 万元</span>，没人说得清该用哪个。</p></div>
-      <div class="card bad"><h3>② 错而不自知</h3>
-        <p>SQL 能跑、不报错，但把取消订单算进来、退款被一对多重累计——9 月净销虚高 <span class="up">96.8 万元</span>。</p></div>
-      <div class="card bad"><h3>③ 自信地编造</h3>
-        <p>问"为什么华南跌了""预测下个月"，模型给一段听起来合理的话，但数据根本不支持，还可能执行写操作。</p></div>
+    <div class="statline" style="margin-top:26px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18)">
+      <div class="s" style="background:transparent;border-color:rgba(255,255,255,.15)"><div class="k" style="color:#a9c0e8">2026-09 全平台净销售额</div><div class="v" style="color:#fff">17,198,835.91 元</div></div>
+      <div class="s" style="background:transparent;border-color:rgba(255,255,255,.15)"><div class="k" style="color:#a9c0e8">演示主线数据集</div><div class="v" style="color:#fff">20,000 订单 · 9 个月</div></div>
+      <div class="s" style="background:transparent"><div class="k" style="color:#a9c0e8">自动化测试</div><div class="v" style="color:#fff">15 入口全绿</div></div>
     </div>
-    <div class="foot"><span>Text-to-SQL 解决了"能不能拿到数"，没解决"这个数字能不能信"。</span><span>demo-v1.1 · 2026-09</span></div>
-    <div class="speaker">企业里真正出事的是这三种：口径没对齐、数字错了看不出来、AI 越界或编造。</div>
-  </section>
+  </div>
+  <div class="rise" style="font-size:12.5px;color:#9fb6dd">A 赛题 · 中国数联 × 华师大 AI 智能体校园黑客松 · 2026-10 ｜ sha256 manifest 锁定</div>
+  <div class="speaker">各位评委好。我们解决的是企业把数据库交给 AI Agent 后最致命的问题——数字看起来正常，但它是错的。</div>
+</section>
 
-  <!-- P3 钩子 -->
-  <section class="slide">
-    <div class="kicker">02 · 同一个问题，两个数字</div>
-    <h2>SQL 都跑得通，钱差了将近 97 万</h2>
-    <div class="grow vs">
+<!-- P2 -->
+<section class="slide">
+  <div class="wm">02</div>
+  <div class="topbar rise"><span class="cap">01 · 问题</span><div class="line"></div><span class="crumb">门槛已经不是"写不写得出 SQL"</span></div>
+  <h2 class="rise">AI 能拿到数，但企业不敢用这个数</h2>
+  <div class="grow rise">
+    <div class="grid3">
+      <div class="card bad"><h3><span class="ico">≠</span>各说各话</h3>
+        <div class="big-num up" style="font-size:27px">221.5 万元</div>
+        <p style="margin-top:6px">同一个"9月销售额"：净销 <b>1,720 万</b>还是实付 <b>1,941 万</b>？差的正是当月退款总额，没人说清用哪个。</p></div>
+      <div class="card bad"><h3><span class="ico">⚠</span>错而不自知</h3>
+        <div class="big-num up" style="font-size:27px">+96.8 万元</div>
+        <p style="margin-top:6px">SQL 能跑、不报错，但取消订单混入、退款被一对多累计，9 月净销虚高 5.63%，错误静默通过。</p></div>
+      <div class="card bad"><h3><span class="ico">✎</span>自信地编造</h3>
+        <div class="big-num up" style="font-size:27px">8 / 37 题</div>
+        <p style="margin-top:6px">因果归因、未来预测、写操作、未定义指标——直接 Text-to-SQL 在正式库上全部"自信作答"，无一拒答。</p></div>
+    </div>
+    <div class="card navy" style="margin-top:14px;display:flex;align-items:center;gap:16px">
+      <div style="font-size:14px;line-height:1.6;color:var(--ink2)">
+        Text-to-SQL 解决了<b class="strong">"能不能拿到数"</b>；企业真正出事的是<b class="strong">"这个数字能不能信、敢不敢写进汇报"</b>。
+        37 道业务题实测：直接方案 <span class="up">完成 0 题</span>，不是 SQL 写错，而是缺了口径、澄清、安全聚合与边界四层治理。
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>数字均来自 demo-v1.1 真实计算（正式联调库，非页面模拟数）</span><span class="src">_experiment_formal_out.txt</span></div>
+  <div class="speaker">企业里出事的不是报错，而是不报错的错数、各说各话的口径、和 AI 越界编造。</div>
+</section>
+
+<!-- P3 -->
+<section class="slide">
+  <div class="wm">03</div>
+  <div class="topbar rise"><span class="cap">02 · 同一个问题</span><div class="line"></div><span class="crumb">两个数字 · 差 96.8 万</span></div>
+  <h2 class="rise">问：2026 年 9 月的净销售额是多少？</h2>
+  <div class="grow rise" style="gap:12px">
+    <div class="vs">
       <div class="pane s1">
-        <h3>普通方案 S1：直接 Text-to-SQL</h3>
-        <div class="row"><span>2026年9月净销售额</span><b>18,166,729.12 元</b></div>
-        <div class="row"><span>偏差</span><span class="up">+967,893.21（+5.63%）</span></div>
-        <div class="row"><span>SQL 状态</span><span>能执行 · 无报错</span></div>
-        <div class="row"><span>37 道测试题</span><b class="up">完成 0 题</b></div>
+        <h3>✕ 普通方案 S1 · 直接 Text-to-SQL</h3>
+        <div class="vrow"><span>返回净销售额</span><b style="font-size:17px">18,166,729.12 元</b></div>
+        <div class="vrow"><span>偏差</span><span class="up">+967,893.21（+5.63%）</span></div>
+        <div class="vrow"><span>SQL 执行</span><span>成功 · 无任何报错</span></div>
+        <div class="vrow"><span>指标/时间识别</span><span>全部"正确"</span></div>
+        <div class="vrow"><span>37 道业务题</span><b class="up">完成 0 题</b></div>
       </div>
       <div class="mid">VS</div>
       <div class="pane s2">
-        <h3>数桥 S2：字典+计划+澄清+检查</h3>
-        <div class="row"><span>2026年9月净销售额</span><b>17,198,835.91 元</b></div>
-        <div class="row"><span>与成员1标准答案</span><span class="down">逐分一致</span></div>
-        <div class="row"><span>口径 / SQL / 版本</span><span>全部可追溯</span></div>
-        <div class="row"><span>37 道测试题</span><b class="down">完成 37 题</b></div>
+        <h3>✓ 数桥 S2 · 字典+计划+澄清+检查</h3>
+        <div class="vrow"><span>返回净销售额</span><b style="font-size:17px">17,198,835.91 元</b></div>
+        <div class="vrow"><span>与成员 1 标准答案</span><span class="down">35 项逐分一致</span></div>
+        <div class="vrow"><span>口径/SQL/版本</span><span>随结果一并返回</span></div>
+        <div class="vrow"><span>无依据编造 / 数值错误</span><span class="down">0 / 0</span></div>
+        <div class="vrow"><span>37 道业务题</span><b class="down">完成 37 题（100%）</b></div>
       </div>
     </div>
-    <div class="foot"><span>最危险的不是报错，是<b class="strong">不报错但数字错了</b>——财务汇报时这就是一场事故。</span><span class="mono">_对照实验明细_formal.csv · D01</span></div>
-    <div class="speaker">同一个库、同一个问题，S1 报 1816 万，真值是 1719 万，差将近 97 万，而且它不报错。</div>
-  </section>
+    <div class="statline">
+      <div class="s"><div class="k">S1 错误三来源（可叠加）</div><div class="v" style="font-size:15px">状态过滤缺失 · JOIN 扇出 · 退款归属错月</div></div>
+      <div class="s"><div class="k">最危险特征</div><div class="v" style="font-size:15px;color:var(--up)">能跑通 ≠ 算得对</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>同库、同题、同环境，差异完全来自治理层；S1 为确定性行为基线（非真实 LLM）</span><span class="src">_对照实验明细_formal.csv D01</span></div>
+  <div class="speaker">最危险的是它不报错。财务汇报里一个 +5.63% 的静默偏差，就是一场事故。</div>
+</section>
 
-  <!-- P4 四道防线 -->
-  <section class="slide">
-    <div class="kicker">03 · 产品定位</div>
-    <h2>数字在到你手里之前，先过四道关</h2>
-    <div class="grow defense">
-      <div class="dstep"><div class="n">防线 01</div><div class="t">统一口径</div><p>8 个指标写进共享契约 contracts.py，页面、Agent、SQL 服务同一份定义，禁止各自写字面量。</p></div>
-      <div class="dstep"><div class="n">防线 02</div><div class="t">先澄清</div><p>命中歧义词必须问清楚，最多 2 轮；超轮降级"数据不足"，绝不替用户猜。</p></div>
-      <div class="dstep"><div class="n">防线 03</div><div class="t">安全聚合</div><p>成功状态过滤；退款先按 order_id 预聚合；按退款完成月归属，防一对多扇出。</p></div>
-      <div class="dstep"><div class="n">防线 04</div><div class="t">有边界</div><p>因果归因、预测、写操作、未定义比率——明确拒绝，列出缺什么与替代问法。</p></div>
+<!-- P4 -->
+<section class="slide">
+  <div class="wm">04</div>
+  <div class="topbar rise"><span class="cap">03 · 产品定位</span><div class="line"></div><span class="crumb">四道关卡 · 一份契约</span></div>
+  <h2 class="rise">数字在到你手里之前，先过四道关</h2>
+  <div class="grow rise" style="gap:14px">
+    <div class="defense">
+      <div class="dstep"><div class="n">关卡 01</div><div class="t">统一口径</div><p>5 基础 + 3 派生指标写进 contracts.py，页面/Agent/执行层 import 同一份定义。</p></div>
+      <div class="dstep"><div class="n">关卡 02</div><div class="t">先澄清</div><p>歧义词必须问清，候选+定义齐备，最多 2 轮，不替用户猜口径。</p></div>
+      <div class="dstep"><div class="n">关卡 03</div><div class="t">安全聚合</div><p>成功状态过滤、退款按订单预聚合、按退款完成月归属，防扇出重复。</p></div>
+      <div class="dstep"><div class="n">关卡 04</div><div class="t">有边界</div><p>因果/预测/写操作/未定义指标明确拒答，列出缺什么与替代问法。</p></div>
     </div>
-    <div class="foot"><span>接下来：成员 2 讲 Agent 如何理解问题，成员 1 讲数字如何保证正确。</span><span>shared/contracts.py v1.2</span></div>
-    <div class="speaker">一句话：数桥用四道关把数字管起来。下面分别展开 Agent 机制和数据可信。</div>
-  </section>
+    <div class="grid2">
+      <div class="card navy"><h3>能力面（冻结清单）</h3>
+        <p><b class="strong">8 个指标</b>：支付订单数/支付人数/实付/退款/净销 + 退款率/客单价/人均消费；<b class="strong">2 个维度</b>：地区（5 值）、客户类型；<b class="strong">6 种状态</b>含澄清与四类拒答；支持环比，不做同比/预测。</p></div>
+      <div class="card navy"><h3>实现方式</h3>
+        <p>三人独立开发、独立交付，唯一事实来源 <span class="mono">shared/contracts.py v1.2</span>；任何枚举变更须三人同意，改动写入 CHANGELOG。</p></div>
+    </div>
+    <div class="statline">
+      <div class="s"><div class="k">自动化测试入口</div><div class="v">15 个全绿</div></div>
+      <div class="s"><div class="k">开发集 / 保留集</div><div class="v">37 + 30 题</div></div>
+      <div class="s"><div class="k">跨团队同数锚点</div><div class="v">35 项 · 差值 0 分</div></div>
+      <div class="s"><div class="k">数据质检 / HTTP 冒烟</div><div class="v">70 项 / 4 端点</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>下面由成员 2 展开 Agent 如何理解问题，成员 1 展开数字如何保证正确</span><span class="src">shared/contracts.py</span></div>
+  <div class="speaker">数桥不是一个更大的模型，是在模型和数据库之间加了四层确定性治理。</div>
+</section>
 
-  <!-- P5 字典 -->
-  <section class="slide">
-    <div class="kicker">04 · 防线一 · 业务字典</div>
-    <h2>8 个指标，只有一种算法</h2>
-    <div class="grow grid2" style="align-items:start">
-      <div class="card">
-        <table>
-          <thead><tr><th>基础指标（5）</th><th>口径要点</th></tr></thead>
-          <tbody>
-            <tr><td>支付订单数 / 支付人数</td><td>成功支付，按 ID 去重</td></tr>
-            <tr><td>实付金额</td><td>不做退款扣减</td></tr>
-            <tr><td>成功退款金额</td><td>按退款完成时间</td></tr>
-            <tr><td>净销售额</td><td>实付 − 同期成功退款</td></tr>
-          </tbody>
-        </table>
-        <table style="margin-top:12px">
-          <thead><tr><th>派生比率（3，v1.2）</th><th>公式</th></tr></thead>
-          <tbody>
-            <tr><td>退款率</td><td class="mono">退款 ÷ 实付</td></tr>
-            <tr><td>客单价</td><td class="mono">实付 ÷ 订单数</td></tr>
-            <tr><td>支付人均消费</td><td class="mono">实付 ÷ 支付人数</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card good">
-        <h3>为什么退款率分母用实付，不用净销？</h3>
-        <p style="margin-top:8px">若用净销售额做分母：退款越多 → 分母越小 → 退款率被反向放大，出现"退款越严重、率越虚高"的悖论。</p>
-        <p style="margin-top:12px">比率铁律：<b class="strong">先汇总分子分母、再相除</b>；分组比率不能算术平均回整体；分母为零返回 <span class="chip bad">null</span> 而不是 0。</p>
-      </div>
-    </div>
-    <div class="foot"><span>页面 / Agent / 执行层 import 同一份契约，三方不可能出现两套口径。</span><span>DM-002</span></div>
-    <div class="speaker">Agent 不临场理解指标。退款率分母写死是实付金额，避免退款越多率越被放大的悖论。</div>
-  </section>
-
-  <!-- P6 澄清 -->
-  <section class="slide">
-    <div class="kicker">05 · 防线二 · 歧义澄清</div>
-    <h2>口径不明确，先问，不猜</h2>
-    <div class="grow grid2" style="align-items:start">
-      <div class="chat">
-        <div class="bubble bu"><span class="role">用户</span>9月的销售额是多少</div>
-        <div class="bubble ba"><span class="role">数桥 · ambiguous_metric</span>你说的「销售额」是指哪一个？
-          <ul class="opts">
-            <li><b>净销售额</b> —— 实付金额减去同期成功退款</li>
-            <li><b>实付金额</b> —— 不做退款扣减</li>
-          </ul></div>
-        <div class="bubble bu"><span class="role">用户（选择）</span>净销售额</div>
-        <div class="bubble ba"><span class="role">数桥 · 查询成功</span><b>17,198,835.91 元</b>；口径、来源表、版本、SQL 一并返回。</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div class="card"><div class="big-num up">2,215,508<span class="u">元</span></div>
-          <p style="margin-top:6px">两个候选口径在 2026-09 全平台相差的金额（即当月成功退款总额）。</p></div>
-        <div class="card"><h3>不无限追问</h3><p>最多 <b class="strong">2 轮</b>澄清；仍无法确定即降级"当前数据不足"，并保留无状态二次提交协议（id + choice）。</p></div>
-      </div>
-    </div>
-    <div class="foot"><span>同一批人、同一个词，从此不会再吵出两个数字。</span><span>MAX_CLARIFICATION_ROUNDS=2</span></div>
-    <div class="speaker">普通模型直接猜一个返回；数桥把选择权交还用户，37 题里有 8 题正确触发澄清。</div>
-  </section>
-
-  <!-- P7 安全聚合 -->
-  <section class="slide">
-    <div class="kicker">06 · 防线三 · 安全聚合</div>
-    <h2>近 97 万的错，拆成三个独立来源</h2>
-    <div class="grow grid2" style="align-items:start">
-      <div>
-        <div class="bars">
-          <div class="bar"><span class="name">状态</span><div class="track"><div class="fill" style="width:86%"></div></div><span class="val"><b>18 题</b> 未排除失败/取消</span></div>
-          <div class="bar"><span class="name">扇出</span><div class="track"><div class="fill" style="width:76%"></div></div><span class="val"><b>16 题</b> JOIN 一对多累计</span></div>
-          <div class="bar"><span class="name">归属</span><div class="track"><div class="fill" style="width:62%"></div></div><span class="val"><b>13 题</b> 退款按支付月归属</span></div>
-        </div>
-        <p class="lead" style="font-size:15px;margin-top:18px">退款侧先按 <span class="chip">order_id</span> 预聚合，再连接订单取地区快照——结构上不可能重复累计。</p>
-      </div>
-      <div class="card">
-        <h3>华东 2026-09 等式拆解（元）</h3>
-        <table style="margin-top:8px">
-          <tbody>
-            <tr><td>实付金额</td><td class="num">7,786,231.39</td></tr>
-            <tr><td>成功退款金额</td><td class="num">955,887.84</td></tr>
-            <tr><td><b>净销售额</b></td><td class="num"><b>6,830,343.55</b></td></tr>
-            <tr><td>支付订单数 / 人数</td><td class="num">766 / 627</td></tr>
-          </tbody>
-        </table>
-        <p style="margin-top:12px;font-size:13.5px">不变量：同一订单追加 5 笔各 1000 元退款 → 净销精确降 5000，实付<b>完全不变</b>。</p>
-      </div>
-    </div>
-    <div class="foot"><span>归因方法：每次只引入一个缺陷，定位该层治理的独立增量（可多因叠加）。</span><span>成员 1</span></div>
-    <div class="speaker">两侧独立聚合，一个订单多笔退款也不会放大实付。追加退款的不变量测试精确到元。</div>
-  </section>
-
-  <!-- P8 IS-001 -->
-  <section class="slide">
-    <div class="kicker">07 · 口径冻结 · IS-001</div>
-    <h2>44% 的退款是跨月的，历史账不能被改写</h2>
-    <div class="grow grid3" style="align-items:start">
-      <div class="card"><div class="big-num up">44.28%</div><p style="margin-top:6px">正式库成功退款 3,062 笔中 <b>1,356 笔</b>跨月（金额占比 45.55%，617.7 万元）。</p></div>
-      <div class="card"><div class="big-num up">−329,335<span class="u">元</span></div><p style="margin-top:6px">若按订单支付月归属，2026-09 华东被回溯改写的金额（占该格 −4.82%）。</p></div>
-      <div class="card good"><div class="big-num down">0</div><p style="margin-top:6px">三人 2026-10-04 冻结方案 A：退款按<b>退款完成月</b>归属，历史月份零漂移。</p></div>
-    </div>
-    <div class="card" style="margin-top:18px">
-      <p style="font-size:15px">方案 B（按支付月）下，每发生一笔退款，历史已结账月份就被改写一次，月度报表永远在漂；方案 A 只影响退款发生当月，两口径全期总额相等（守恒校验通过）。</p>
-    </div>
-    <div class="foot"><span>产物：tests/_is001_formal_out.txt · 决策：docs/口径冻结确认单_2026-10-04.md</span><span>成员 1</span></div>
-    <div class="speaker">接近一半退款在支付之后的月份。按支付月算，9月发的退款会回头改8月报表——我们实测后冻结了方案A。</div>
-  </section>
-
-  <!-- P9 拒答 -->
-  <section class="slide">
-    <div class="kicker">08 · 防线四 · 边界</div>
-    <h2>不支持就说不支持，绝不编</h2>
-    <div class="grow">
+<!-- P5 -->
+<section class="slide">
+  <div class="wm">05</div>
+  <div class="topbar rise"><span class="cap gray">成员 2 · 防线一</span><div class="line"></div><span class="crumb">业务字典</span></div>
+  <h2 class="rise">8 个指标，只有一种算法</h2>
+  <div class="grow rise grid2" style="align-items:start">
+    <div class="card">
       <table>
-        <thead><tr><th>用户问题</th><th>数桥回答</th><th>机器原因码</th></tr></thead>
+        <thead><tr><th>指标</th><th>口径 / 公式</th><th>单位</th></tr></thead>
         <tbody>
-          <tr><td>为什么华南 9 月净销售额下降？</td><td>数据不足：缺营销/竞品/价格/库存数据，可改查各月变化</td><td><span class="chip bad">causal_reasoning_unsupported</span></td></tr>
-          <tr><td>预测一下下个月净销售额</td><td>只查询历史已发生数据，不做预测建模</td><td><span class="chip bad">no_forecast_capability</span></td></tr>
-          <tr><td>把订单表里 9 月的记录删掉</td><td>只读平台，拒绝任何写操作</td><td><span class="chip bad">write_operation_refused</span></td></tr>
-          <tr><td>复购率是多少？</td><td>二期指标，当前拒答（退款率/客单价/人均已支持）</td><td><span class="chip bad">derived_metric_unsupported</span></td></tr>
+          <tr><td>支付订单数</td><td class="mono">COUNT(DISTINCT order_id)，成功支付</td><td>单</td></tr>
+          <tr><td>支付人数</td><td class="mono">COUNT(DISTINCT customer_id)</td><td>人</td></tr>
+          <tr><td>实付金额</td><td class="mono">SUM(pay_amount)，不扣退款</td><td>元</td></tr>
+          <tr><td>成功退款</td><td class="mono">SUM(refund_amount)，按退款完成时间</td><td>元</td></tr>
+          <tr><td><b>净销售额</b></td><td class="mono">实付 − 同期成功退款</td><td>元</td></tr>
+          <tr><td><b>退款率</b></td><td class="mono">退款 ÷ <b>实付</b>（先汇总再相除）</td><td>%</td></tr>
+          <tr><td><b>客单价 / 人均</b></td><td class="mono">实付 ÷ 订单数 / 支付人数</td><td>元</td></tr>
         </tbody>
       </table>
-      <p class="lead" style="margin-top:20px">每条拒答都带 <span class="chip">reason</span> <span class="chip">missing</span> <span class="chip">suggestion</span> <span class="chip">retryable</span>——拒答不是能力缺失，是<b class="strong">可信承诺</b>。</p>
     </div>
-    <div class="foot"><span>成员 2 · 工作流规则/模型双模式共用同一套护栏</span><span>Status: out_of_scope / insufficient_data</span></div>
-    <div class="speaker">平台明确告诉你缺什么、可以怎么改问，而不是硬给一个数或一段原因分析。</div>
-  </section>
-
-  <!-- P10 演示过渡 -->
-  <section class="slide cover" style="background:linear-gradient(135deg,#10244a,#1d4686 70%)">
-    <div class="kicker">09 · 现场演示 · LIVE</div>
-    <h1 style="font-size:46px">2026 年 9 月，华南怎么了？</h1>
-    <div class="sub" style="font-size:18px">切换到 Streamlit live 页面（FastAPI + SQLite，demo-v1.1）：
-      ① 数据接入与质检 → ② 分地区环比 → ③ 口径澄清收敛 → ④ Agent 经营简报 → ⑤ 结果依据 SQL。</div>
-    <div class="tags">
-      <span class="tag">净销 17,198,835.91 元</span>
-      <span class="tag" style="border-color:#f2b8b8;color:#ffd9d9">华南 ▼15.72%</span>
-      <span class="tag" style="border-color:#b7e0c4;color:#c9f0d8">华中 ▲1.53% 唯一增长</span>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div class="card bad"><h3>为什么退款率分母必须是实付？</h3>
+        <p>若用净销售额做分母：退款越多 → 分母越小 → 比率被反向放大，出现"退款越严重率越虚高"的悖论。<b class="strong">DM-002 三人冻结</b>。</p></div>
+      <div class="card good"><h3>比率三条铁律</h3>
+        <p>① 先汇总分子分母、再相除，组率不可平均回整体；② 同源/同期/同筛选/同分组；③ 分母为 0 返回 <span class="chip bad">null</span> 而非 0，附 NON_POSITIVE_DENOMINATOR 警告。</p></div>
+      <pre><span class="cm"># 三方共用，禁止各自写字面量</span>
+<span class="kw">from</span> shared.contracts <span class="kw">import</span> METRIC_SPEC, Metric
+Metric.REFUND_RATE  <span class="cm"># 'refund_rate', kind='ratio'</span></pre>
     </div>
-    <div class="meta">质检 0 错 0 警 · sha256 锁定 · 简报：华南减少 765,507.42 元，且明确"不能推断变化原因"</div>
-    <div class="speaker">现场操作：先展示数据接入的质检结果，再问分地区环比；澄清题与上一题数字一致；Agent 简报自动点名华南；最后翻 SQL。</div>
-  </section>
+  </div>
+  <div class="foot"><span>正式库 9 月实测锚点：全平台退款率 11.41%，华东 12.28% / 华中 8.87%</span><span class="src">derived_metrics_test.py</span></div>
+  <div class="speaker">指标不允许模型临场理解。字典里把定义、同义词、分子分母、单位全部写死。</div>
+</section>
 
-  <!-- P11 追溯 -->
-  <section class="slide">
-    <div class="kicker">10 · 结果依据</div>
-    <h2>每个数字，都能翻出它的底账</h2>
-    <div class="grow grid2" style="align-items:start">
-      <div>
-        <pre>用户提问
-  → 共享契约（指标/枚举/白名单）
-  → 结构化查询计划 JSON
-  → 只读参数化 SQL（半开区间，禁写）
-  → 结果 + 质量警告 + query_id
+<!-- P6 -->
+<section class="slide">
+  <div class="wm">06</div>
+  <div class="topbar rise"><span class="cap gray">成员 2 · 防线二</span><div class="line"></div><span class="crumb">歧义澄清协议</span></div>
+  <h2 class="rise">口径不明确，先问，不猜</h2>
+  <div class="grow rise grid2" style="align-items:start">
+    <div class="card">
+      <div class="chat">
+        <div class="bubble bu"><span class="role">用户</span>9月的销售额是多少</div>
+        <div class="bubble ba"><span class="role">数桥 · ambiguous_metric · 第 1 轮</span>你说的「销售额」是指？
+          <ul class="opts"><li><b>净销售额</b> —— 实付 − 同期成功退款</li><li><b>实付金额</b> —— 不做退款扣减</li></ul></div>
+        <div class="bubble bu"><span class="role">用户（二次提交）</span>choice = net_sales（id 原样回传）</div>
+        <div class="bubble ba"><span class="role">数桥 · success</span><b>17,198,835.91 元</b>，与分地区汇总题数字完全一致。</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div class="card bad"><div class="big-num up">2,215,508<span class="u">元</span></div>
+        <p>两个候选口径在 2026-09 全平台相差的金额——猜一次就是百万级口径事故。</p></div>
+      <div class="card navy"><h3>协议要点</h3>
+        <ul class="tight">
+          <li>澄清无状态：<span class="mono">id + choice</span> 即可恢复上下文</li>
+          <li>最多 <b class="strong">2 轮</b>，超轮降级 insufficient_data，不纠缠</li>
+          <li>"人均消费"候选顺序固定 [支付人均消费, 客单价]，不默认</li>
+          <li>37 题中 8 题正确触发澄清，S1 为 0 题</li>
+        </ul></div>
+    </div>
+  </div>
+  <div class="foot"><span>歧义词表：销售额/营业额/营收/业绩/收入/流水/人均消费……命中即澄清</span><span class="src">AMBIGUOUS_METRIC_TERMS</span></div>
+  <div class="speaker">把选择权交还给用户，同一批人、同一个词，从此不会再吵出两个数字。</div>
+</section>
+
+<!-- P7 -->
+<section class="slide">
+  <div class="wm">07</div>
+  <div class="topbar rise"><span class="cap gray">成员 1 · 防线三</span><div class="line"></div><span class="crumb">安全聚合 · 独立归因</span></div>
+  <h2 class="rise">96.8 万的错，拆成三个可独立观测的来源</h2>
+  <div class="grow rise grid2" style="align-items:start;gap:14px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="bars">
+        <div class="bar"><span class="name">状态</span><div class="track"><div class="fill" style="width:86%"></div></div><span class="val"><b>18 题</b> 混入失败/取消订单</span></div>
+        <div class="bar"><span class="name">扇出</span><div class="track"><div class="fill" style="width:76%"></div></div><span class="val"><b>16 题</b> 一对多 JOIN 累计</span></div>
+        <div class="bar"><span class="name">归属</span><div class="track"><div class="fill" style="width:62%"></div></div><span class="val"><b>13 题</b> 退款按支付月回溯</span></div>
+      </div>
+      <pre><span class="cm">-- 两侧独立聚合 + 退款先按 order_id 预聚合</span>
+<span class="kw">SELECT</span> o.region, COALESCE(SUM(r.refund_amount_fen),0)
+<span class="kw">FROM</span> refunds r <span class="kw">JOIN</span> orders o <span class="kw">ON</span> o.order_id=r.order_id
+<span class="kw">WHERE</span> r.refund_status='success'
+  <span class="kw">AND</span> r.refunded_at &gt;= ? <span class="kw">AND</span> r.refunded_at &lt; ?
+<span class="kw">GROUP BY</span> o.region;   <span class="cm">-- 地区取订单快照</span></pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div class="card"><h3>华东 2026-09 等式拆解（元）</h3>
+        <table><tbody>
+          <tr><td>实付金额</td><td class="num">7,786,231.39</td></tr>
+          <tr><td>成功退款金额</td><td class="num">955,887.84</td></tr>
+          <tr><td><b>净销售额</b></td><td class="num"><b>6,830,343.55</b></td></tr>
+          <tr><td>支付订单 / 人数</td><td class="num">766 单 / 627 人</td></tr>
+          <tr><td>退款率 / 客单价</td><td class="num">12.28% / 10,164.79</td></tr>
+        </tbody></table></div>
+      <div class="card good"><h3>5000 元不变量</h3>
+        <p>同一订单追加 5 笔各 1000 元退款 → 净销精确下降 5,000 元，实付金额<b>完全不变</b>；导入器硬性校验"累计退款 ≤ 实付"，违反即拒绝入库。</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>归因方法：每轮只打开一个缺陷开关，逐题定位该层独立增量（题数可叠加）</span><span class="src">s1_baseline.py</span></div>
+  <div class="speaker">退款侧先按订单预聚合，再取订单快照上的地区，结构上就不可能把实付放大。</div>
+</section>
+
+<!-- P8 -->
+<section class="slide">
+  <div class="wm">08</div>
+  <div class="topbar rise"><span class="cap gray">成员 1 · IS-001</span><div class="line"></div><span class="crumb">2026-10-04 三人冻结 · 方案 A</span></div>
+  <h2 class="rise">44% 的退款发生跨月，历史账不能被回溯改写</h2>
+  <div class="grow rise" style="gap:11px">
+    <div class="grid4">
+      <div class="card"><div class="big-num">1,356<span class="u">/3,062 笔</span></div><p style="margin-top:4px">跨月退款笔数占比 <b class="strong">44.28%</b></p></div>
+      <div class="card"><div class="big-num">45.55%</div><p style="margin-top:4px">跨月退款金额占比 <b class="strong">617.7 万元</b></p></div>
+      <div class="card bad"><div class="big-num up" style="font-size:29px">−329,335<span class="u">元</span></div><p style="margin-top:4px">方案 B 下 9 月华东被回溯改写（−4.82%）</p></div>
+      <div class="card good"><div class="big-num down">0<span class="u">漂移</span></div><p style="margin-top:4px">方案 A：按退款完成月归属，历史月份零改写</p></div>
+    </div>
+    <div class="grid2" style="align-items:start">
+      <div class="card"><h3>正式库全平台净销 9 个月（百万元）</h3>
+        <div class="spark">
+          <div class="col"><div class="stick" style="height:100%"><span class="mv">19.61</span></div><span class="mlab">1月</span></div>
+          <div class="col"><div class="stick" style="height:81%"></div><span class="mlab">2月</span></div>
+          <div class="col"><div class="stick" style="height:91%"></div><span class="mlab">3月</span></div>
+          <div class="col"><div class="stick" style="height:94%"></div><span class="mlab">4月</span></div>
+          <div class="col"><div class="stick" style="height:93%"></div><span class="mlab">5月</span></div>
+          <div class="col"><div class="stick" style="height:88%"></div><span class="mlab">6月</span></div>
+          <div class="col"><div class="stick" style="height:96%"></div><span class="mlab">7月</span></div>
+          <div class="col"><div class="stick" style="height:94%"></div><span class="mlab">8月</span></div>
+          <div class="col sep"><div class="stick" style="height:88%"><span class="mv" style="color:#c62828">17.20</span></div><span class="mlab">9月</span></div>
+        </div>
+        <p style="margin-top:24px;font-size:12px">9 月 17,198,835.91 元，环比 −6.47%；方案 B 会把部分 9 月退款挪回 8 月，两个月数字同时失真。</p>
+      </div>
+      <div class="card"><h3>方案 B 对 2026-09 各地区的回溯改写（元）</h3>
+        <table><tbody>
+          <tr><td>华东</td><td class="num up">−329,335.21</td></tr>
+          <tr><td>华南</td><td class="num up">−219,145.62</td></tr>
+          <tr><td>华北</td><td class="num up">−151,402.16</td></tr>
+          <tr><td>华中</td><td class="num up">−58,941.70</td></tr>
+          <tr><td>西南</td><td class="num up">−45,827.80</td></tr>
+        </tbody></table>
+        <p style="margin-top:6px;font-size:12px">守恒：两口径全期总额相等；差异矩阵 = 逐笔退款独立重算（3 项校验 PASS）。</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>产物：_is001_formal_out.txt ｜ 决策：口径冻结确认单_2026-10-04.md</span><span class="src">成员 1</span></div>
+  <div class="speaker">接近一半退款在支付之后的月份。按支付月算，历史报表永远在漂；方案 A 让结账数字永久稳定。</div>
+</section>
+
+<!-- P9 -->
+<section class="slide">
+  <div class="wm">09</div>
+  <div class="topbar rise"><span class="cap gray">成员 2 · 防线四</span><div class="line"></div><span class="crumb">边界护栏 · 拒答契约</span></div>
+  <h2 class="rise">不支持就说不支持，而且说清缺什么</h2>
+  <div class="grow rise" style="gap:12px">
+    <table class="card" style="padding:0;overflow:hidden">
+      <thead><tr><th style="width:27%">用户问题</th><th>数桥回答（节选）</th><th style="width:24%">原因码</th></tr></thead>
+      <tbody>
+        <tr><td>为什么华南 9 月净销售额下降？</td><td>缺营销/竞品/价格/库存数据，可改查各月变化幅度</td><td><span class="chip bad">causal_reasoning_unsupported</span></td></tr>
+        <tr><td>预测一下 10 月净销售额</td><td>只查询历史已发生数据，预测属建模能力</td><td><span class="chip bad">no_forecast_capability</span></td></tr>
+        <tr><td>把订单表 9 月记录删掉</td><td>只读取数平台，不提供任何数据修改能力</td><td><span class="chip bad">write_operation_refused</span></td></tr>
+        <tr><td>9 月净销包含取消订单</td><td>与指标字典冲突，不按错误口径计算</td><td><span class="chip bad">metric_definition_conflict</span></td></tr>
+        <tr><td>复购率是多少？</td><td>二期指标；退款率/客单价/人均已支持，可直接问</td><td><span class="chip bad">derived_metric_unsupported</span></td></tr>
+      </tbody>
+    </table>
+    <div class="grid3">
+      <div class="card navy"><h3>结构化四字段</h3><p><span class="mono">reason · missing · suggestion · retryable</span>，拒答同样可被程序消费，不是一句自然语言。</p></div>
+      <div class="card navy"><h3>写操作双保险</h3><p>Agent 护栏先拦；SQLite 以只读连接打开，绕过应用也无法写入（只读不变量实测哈希不变）。</p></div>
+      <div class="card navy"><h3>实测编造数</h3><p>正式库 37 题：S1 把 8 道应拒答题全部作答；S2 全部正确拒答或澄清，<b class="strong">0 编造</b>。</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>规则模式与模型模式共用同一套护栏；模型只提槽位，校验与执行始终在本地</span><span class="src">workflow.py</span></div>
+  <div class="speaker">拒答不是能力缺失，是可信承诺——而且每条拒答都机器可读、给出下一步。</div>
+</section>
+
+<!-- P10 -->
+<section class="slide cover" style="background:linear-gradient(135deg,#0e2148,#173a75 60%,#2656bd)">
+  <div class="wm" style="color:rgba(255,255,255,.06)">10</div>
+  <div class="topbar rise"><span class="cap">09 · 现场演示 · LIVE</span><div class="line"></div><span class="crumb">Streamlit → /agent/query → SQLite</span></div>
+  <h1 class="rise" style="font-size:38px;margin-top:14px">2026 年 9 月，华南怎么了？</h1>
+  <div class="grow rise" style="justify-content:center;gap:18px">
+    <div class="flow5">
+      <div class="f5" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="n" style="background:#fff;color:var(--navy)">1</div><div class="t" style="color:#fff">数据接入</div><div class="d" style="color:#b9cdf0">20,000 单 · 质检 0/0</div></div>
+      <div class="arr">→</div>
+      <div class="f5" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="n" style="background:#fff;color:var(--navy)">2</div><div class="t" style="color:#fff">分地区环比</div><div class="d" style="color:#b9cdf0">华南 −15.72%</div></div>
+      <div class="arr">→</div>
+      <div class="f5" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="n" style="background:#fff;color:var(--navy)">3</div><div class="t" style="color:#fff">口径澄清</div><div class="d" style="color:#b9cdf0">与②同数收敛</div></div>
+      <div class="arr">→</div>
+      <div class="f5" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="n" style="background:#fff;color:var(--navy)">4</div><div class="t" style="color:#fff">Agent 简报</div><div class="d" style="color:#b9cdf0">点名华南 · 不归因</div></div>
+      <div class="arr">→</div>
+      <div class="f5" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="n" style="background:#fff;color:var(--navy)">5</div><div class="t" style="color:#fff">结果依据</div><div class="d" style="color:#b9cdf0">真实 SQL + query_id</div></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">净销 17,198,835.91 元（环比 −6.47%）</span>
+      <span class="cap" style="background:rgba(198,40,40,.35);border:1px solid rgba(255,180,180,.5)">华南 ▼15.72% · 减 765,507.42 元</span>
+      <span class="cap" style="background:rgba(28,122,68,.35);border:1px solid rgba(160,225,185,.5)">华中 ▲1.53% · 唯一正增长</span>
+    </div>
+  </div>
+  <div class="rise" style="font-size:12px;color:#9fb6dd">HTTP 黄金路径已自动化实测 14/14 通过；§5.4 验收：黄金路径连跑 3 次数字逐字一致</div>
+  <div class="speaker">现场按五步操作：质检、问环比、澄清验证同数、Agent 简报、翻 SQL。全程真实 live 链路。</div>
+</section>
+
+<!-- P11 -->
+<section class="slide">
+  <div class="wm">11</div>
+  <div class="topbar rise"><span class="cap gray">成员 1 · 结果依据</span><div class="line"></div><span class="crumb">每个数字都能翻底账</span></div>
+  <h2 class="rise">返回的不只是数字，还有它的完整生产过程</h2>
+  <div class="grow rise grid2" style="align-items:start;gap:14px">
+    <pre><span class="cm"># 成员 1 正式执行层真实 SQL（整数分 · 半开区间 · 参数化）</span>
+<span class="kw">SELECT</span> o.region, COALESCE(SUM(o.paid_amount_fen),0) <span class="kw">AS</span> value
+<span class="kw">FROM</span> orders o
+<span class="kw">WHERE</span> o.payment_status='paid'
+  <span class="kw">AND</span> o.paid_at &gt;= <span class="cm">'2026-09-01T00:00'</span>
+  <span class="kw">AND</span> o.paid_at &lt;  <span class="cm">'2026-10-01T00:00'</span>
+<span class="kw">GROUP BY</span> o.region;          <span class="cm">-- 地区=订单快照</span>
 
 GET /v1/query-records/{query_id}
-  → 当时执行的 SQL 模板与参数，可复查</pre>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card bad"><h3>注入与越权实测</h3><p><span class="mono">' OR 1=1 --</span> 类输入 → 422 拒绝；DELETE/UPDATE 在计划校验与数据库只读连接两层被挡。</p></div>
-        <div class="card bad"><h3>只读不变量</h3><p>测试前后数据库文件 sha256 不变；查询记录写入独立目录，业务库零修改。</p></div>
-      </div>
+  → sql[] 模板 + parameters + elapsed_ms + 数据库哈希</pre>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div class="card bad"><h3>注入与越权</h3>
+        <p><span class="mono">' OR 1=1 --</span>、<span class="mono">DROP</span> 等 → 计划校验 422；只读连接 + 查询计划白名单双重拦截（test_06/10）。</p></div>
+      <div class="card good"><h3>只读不变量</h3>
+        <p>测试前后数据库文件 sha256 不变；查询记录写独立目录，业务库零修改。</p></div>
+      <div class="card navy"><h3>信封字段</h3>
+        <p><span class="mono">definition · unit · source_tables · dataset_version · warnings · query_id · metric_kind/components</span>，页面与外部 Agent 同源消费。</p></div>
     </div>
-    <div class="foot"><span>数字之外，还返回它的整个生产过程：口径、来源表、SQL、数据集版本。</span><span>成员 1</span></div>
-    <div class="speaker">现场可以在结果依据页直接看到真实 SQL 和 query_id，任何一个数字都能复查它怎么来的。</div>
-  </section>
+  </div>
+  <div class="foot"><span>HTTP 实测：/health、/v1/query、/agent/query、query-records 四端点在真实 uvicorn 子进程下全部通过</span><span class="src">smoke_demo_http.py</span></div>
+  <div class="speaker">现场在结果依据页能直接看到这段 SQL 和编号，任何数字都可以事后复查。</div>
+</section>
 
-  <!-- P12 质检 -->
-  <section class="slide">
-    <div class="kicker">11 · 数据质量</div>
-    <h2>数据先过质检，才允许被查询</h2>
-    <div class="grow grid2" style="align-items:start">
-      <div class="card good">
-        <h3>正式联调库 demo-v1.1</h3>
-        <table style="margin-top:8px"><tbody>
+<!-- P12 -->
+<section class="slide">
+  <div class="wm">12</div>
+  <div class="topbar rise"><span class="cap gray">成员 1 · 数据质量</span><div class="line"></div><span class="crumb">先质检，后查询</span></div>
+  <h2 class="rise">数据本身不过关，查询结果一律不得采信</h2>
+  <div class="grow rise" style="gap:12px">
+    <div class="grid2" style="align-items:start">
+      <div class="card good"><h3>正式联调库 demo-v1.1 · 入库通过</h3>
+        <table><tbody>
           <tr><td>customers / orders / refunds</td><td class="num">2,000 / 20,000 / 3,492</td></tr>
           <tr><td>严重问题 / 警告</td><td class="num"><b>0 / 0</b></td></tr>
-          <tr><td>manifest 一致性校验</td><td class="num">70 项全过</td></tr>
-          <tr><td>超额退款（累计退款 &gt; 实付）</td><td class="num">0 例</td></tr>
+          <tr><td>manifest sha256 一致性</td><td class="num">70 项检查</td></tr>
+          <tr><td>超额退款订单</td><td class="num">0 例</td></tr>
         </tbody></table>
+        <p style="margin-top:6px;font-size:12px">覆盖 2026-01~09，金额整数分入库，接口 display_divisor=100 转元。</p>
       </div>
-      <div class="card bad">
-        <h3>九类异常固件（导入即拦截 6 错 5 警）</h3>
-        <p style="margin-top:6px">重复主键 · 负金额 · 坏时间戳 · 外键悬空 · 缺列 · 金额类型错误 · 异常极值等；每条问题都附<b>对查询结果的影响</b>说明。</p>
-        <p style="margin-top:10px">真实案例：我们曾在 8.5 万条演示数据中查出 <b>3,132 单超额退款、净销多扣约 45.9 万</b>，修复后重生成归零。</p>
-      </div>
-    </div>
-    <div class="card warn" style="margin-top:16px;background:var(--warn-bg);border-color:#f0dcb4">
-      <b style="color:#5a3f08">产品红线：</b><span style="color:#6b4e12;font-size:14.5px">严重问题未解决前，任何查询结果都不得作为正确结论使用。</span>
-    </div>
-    <div class="speaker">我们自己的演示数据曾查出超额退款，修复后用无放回抽单加水位线封顶重生成，正式库归零。</div>
-  </section>
-
-  <!-- P13 实验 -->
-  <section class="slide">
-    <div class="kicker">12 · 实验结果</div>
-    <h2>37 道开发题：0 / 37 对 37 / 37</h2>
-    <div class="grow grid2" style="align-items:start">
-      <div>
-        <table>
-          <thead><tr><th>指标</th><th class="num">S1 直接 Text-to-SQL</th><th class="num">S2 数桥</th></tr></thead>
-          <tbody>
-            <tr><td>任务完成率</td><td class="num up">0 / 37（0%）</td><td class="num down">37 / 37（100%）</td></tr>
-            <tr><td>数值错误</td><td class="num">21</td><td class="num">0</td></tr>
-            <tr><td>无依据编造</td><td class="num">8</td><td class="num">0</td></tr>
-            <tr><td>正确澄清</td><td class="num">0</td><td class="num">8</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card"><h3>三重独立验证</h3><p>保留集 30 题盲测全过（开发期不调参）；formal_dataset_test <b>35 项</b>对成员 1 expected.json 逐分一致（分地区差值 0 分）。</p></div>
-        <div class="card warn" style="background:var(--warn-bg);border-color:#f0dcb4"><h3 style="color:#5a3f08">诚实声明</h3><p style="color:#6b4e12">S1 是<b>确定性行为基线</b>（无真实 LLM 调用），用于隔离治理层增量；真实模型的准确率/成本/时延待密钥接入后用同一模型重测。</p></div>
+      <div class="card bad"><h3>九类异常固件 · 导入即拦</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+          <span class="chip bad">重复主键</span><span class="chip bad">负金额</span><span class="chip bad">坏时间戳</span>
+          <span class="chip bad">外键悬空</span><span class="chip bad">缺列</span><span class="chip bad">金额类型错</span>
+          <span class="chip" style="background:var(--warn-bg);color:var(--warn);border-color:#efd9ac">极端大值</span>
+          <span class="chip" style="background:var(--warn-bg);color:var(--warn);border-color:#efd9ac">退款悬空</span>
+          <span class="chip" style="background:var(--warn-bg);color:var(--warn);border-color:#efd9ac">枚举非法</span>
+        </div>
+        <p style="margin-top:8px">拦截结果 <b class="strong">6 错 5 警</b>；每条问题附"对查询结果的影响"，不只报现象。</p>
       </div>
     </div>
-    <div class="foot"><span>不使用任何未经验证的效果数字。</span><span class="mono">tests/run_experiment.py --source formal</span></div>
-    <div class="speaker">S1 错的 37 题恰好被三道防线逐题挡住；测试集、保留集、成员1标准答案三方独立核对。</div>
-  </section>
+    <div class="card warn"><h3 style="color:#7a5208">真实修复案例：我们先在自己的数据上抓出了大错</h3>
+      <p style="color:#6b4e12">8.5 万条演示数据曾查出 <b>3,132 单</b>累计退款超过实付（最严重一单支付 100.6 元退 1,361 元），净销多扣约 <b>45.9 万元</b>。
+      改为无放回抽单 + 实付水位线封顶后归零，并重算全部基线；另修复 Windows CRLF 导致的 manifest 哈希失配（强制 LF + 生成器显式 LF 写入）。</p></div>
+  </div>
+  <div class="foot"><span>红线：严重问题未解决前，任何查询结果都不能作为正确结论使用</span><span class="src">测试报告 BUG-01/03/04</span></div>
+  <div class="speaker">质检不是演示摆设——我们自己的数据集就被它拦下来过，修复过程完整写进缺陷登记册。</div>
+</section>
 
-  <!-- P14 架构 -->
-  <section class="slide">
-    <div class="kicker">13 · 系统架构</div>
-    <h2>三人三模块，一份冻结契约拼起来</h2>
-    <div class="grow">
-      <div class="arch">Streamlit 产品页面 <span style="color:#7d93bd">（成员 3）</span>
-  ├─ mock 参考实现 <span style="color:#7d93bd">（现场保底，开箱可用）</span>
-  └─ live ─▶ POST /agent/query ─▶ <b>AI 工作流</b> <span style="color:#7d93bd">（成员 2）</span>
-                                 · 规则 / 模型双模式
-                                 · 两轮澄清 · 比率分量组合
-                                 └─▶ POST /v1/query ─▶ <b>FastAPI 查询服务</b> <span style="color:#7d93bd">（成员 1）</span>
-                                                       └─▶ SQLite（整数分 · 只读）
-
-唯一事实来源：shared/contracts.py v1.2 ｜ 15 个自动化测试入口全绿</div>
-      <p class="lead" style="margin-top:20px;text-align:center">三个模块<b class="strong">独立开发、独立交付</b>，页面、Agent、SQL 服务对同一个问题给出完全相同的数字（F07）。</p>
+<!-- P13 -->
+<section class="slide">
+  <div class="wm">13</div>
+  <div class="topbar rise"><span class="cap gray">成员 1 · 实验结果</span><div class="line"></div><span class="crumb">37 开发题 + 30 保留题</span></div>
+  <h2 class="rise">0 / 37 对 37 / 37：治理层的增量被逐题量化</h2>
+  <div class="grow rise grid2" style="align-items:start;gap:14px">
+    <div class="card">
+      <table>
+        <thead><tr><th>指标（开发集 37 题）</th><th class="num">S1 直接</th><th class="num">S2 数桥</th></tr></thead>
+        <tbody>
+          <tr><td>任务完成率</td><td class="num up">0 / 37（0%）</td><td class="num down">37 / 37（100%）</td></tr>
+          <tr><td>数值错误（元数据对、数字错）</td><td class="num">21</td><td class="num">0</td></tr>
+          <tr><td>无依据编造</td><td class="num">8</td><td class="num">0</td></tr>
+          <tr><td>正确澄清</td><td class="num">0</td><td class="num">8</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;font-size:12.5px">保留集 30 题盲测（开发期不调参）同样 <b class="strong">30/30</b>。</p>
     </div>
-    <div class="foot"><span>DS-001 五地区词表统一 · DS-004 正式库主线 · 内容哈希版本追溯</span><span>成员 3</span></div>
-    <div class="speaker">强调协作：不是一个人写的大系统，是三个人按同一份契约独立实现，再用自动化测试证明拼得严丝合缝。</div>
-  </section>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div class="card navy"><h3>跨团队同数锚点 F07</h3>
+        <p>页面管线对成员 1 expected.json：<b class="strong">formal_dataset_test 35 项</b>，9 月五指标×全平台/五地区共 25 项地区核对，<span class="chip good">差值 0 分</span>。</p></div>
+      <div class="card navy"><h3>测试金字塔</h3>
+        <p>15 个自动化入口全绿：smoke 26 · 开发 37 · 保留 30 · F01–F08 · live 15 · 渲染 · formal 35 · 成员 2 共 34 项 · 成员 1 契约/导入/70 项校验/双 HTTP 冒烟。</p></div>
+      <div class="card warn"><h3 style="color:#7a5208">诚实声明</h3>
+        <p style="color:#6b4e12">S1 是确定性行为基线（无真实 LLM），用于隔离治理层价值；真实模型准确率/成本/时延待密钥接入后同模型重测，报告不写未验证数字。</p></div>
+      <div class="card navy"><h3>一键复现</h3>
+        <pre style="margin-top:4px">python tests/run_testset.py 开发集
+python tests/run_experiment.py --source formal
+python tests/formal_dataset_test.py</pre></div>
+    </div>
+  </div>
+  <div class="foot"><span>S1 失败的 37 题恰好分布在三道防线上：数值 21 / 澄清 8 / 编造与写操作 8</span><span class="src">run_experiment.py --source formal</span></div>
+  <div class="speaker">不用"感觉更准"这种话——37 道题逐题真实计算，错在哪一层、错多少钱全部可复现。</div>
+</section>
 
-  <!-- P15 限制 -->
-  <section class="slide">
-    <div class="kicker">14 · 当前限制（如实说明）</div>
-    <h2>边界讲清楚，数字才可信</h2>
-    <div class="grow">
-      <ul class="clean">
-        <li>数据为固定种子生成的<b class="strong">模拟业务数据</b>（2 万单，2026-01~09），任何结论都不代表真实经营。</li>
-        <li>S1 为确定性行为基线；真实大模型的准确率/成本/时延尚未测量——模型适配器已就绪，待密钥接入用同一模型重测。</li>
-        <li>派生比率在 Agent 层组合两次分量查询实现；结构化 /v1/query 仍只接受 5 个基础指标。</li>
-        <li>首版 2 个维度（地区 / 客户类型）、5 基础 + 3 派生指标；同比、预测、因果归因、复购率不做。</li>
-        <li>尚未在另一台电脑做全新部署验证；页面上传/激活闭环未纳入本次演示范围。</li>
+<!-- P14 -->
+<section class="slide">
+  <div class="wm">14</div>
+  <div class="topbar rise"><span class="cap">13 · 系统架构</span><div class="line"></div><span class="crumb">三人三模块 · 契约驱动</span></div>
+  <h2 class="rise">独立开发，靠一份冻结契约严丝合缝</h2>
+  <div class="grow rise" style="gap:12px">
+    <div class="arch"><b>Streamlit 产品页面</b> <span style="color:#7d93bd">（成员 3）</span>
+  ├─ mock 参考实现          <span style="color:#7d93bd">// 现场保底，开箱零依赖</span>
+  └─ live ─▶ POST /agent/query
+              ▼
+        <b>AI 工作流</b> <span style="color:#7d93bd">（成员 2）</span>      <span class="ok">// 规则/模型双模式 · 两轮澄清</span>
+          · 槽位白名单校验      <span class="ok">// 模型只提建议，执行在本地</span>
+          · 比率 = 两次分量查询组合 <span class="ok">// 分子分母溯源 + 数据集指纹校验</span>
+              ▼ POST /v1/query
+        <b>FastAPI 查询服务</b> <span style="color:#7d93bd">（成员 1）</span>
+          · 计划校验 / 版本协商 / 只读 SQLite（整数分）
+              ▼
+<span class="ok">页面 · Agent · SQL 服务对同一问题给出相同数字（F07 逐分一致）</span></div>
+    <div class="grid3">
+      <div class="card navy"><h3>契约 v1.2</h3><p>指标/状态/维度/地区枚举全部冻结；CHANGELOG 可追溯。</p></div>
+      <div class="card navy"><h3>数据集版本</h3><p>内容 sha256 哈希；DS-001 统一五地区词表；DS-004 正式库主线。</p></div>
+      <div class="card navy"><h3>联调方式</h3><p>各自开发不互相等待：mock_server 先行，契约测试与 35 项同数锚点收口。</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>成员 1 执行层 /v1/query 保持五基础指标契约；派生比率在 Agent 层组合（已评审确认）</span><span class="src">databridge/ · agent/ · app/</span></div>
+  <div class="speaker">这不是一个人的大系统，是三个人按同一份契约独立交付，再用自动化测试证明拼得起来。</div>
+</section>
+
+<!-- P15 -->
+<section class="slide">
+  <div class="wm">15</div>
+  <div class="topbar rise"><span class="cap">14 · 当前限制</span><div class="line"></div><span class="crumb">如实说明 · 分工文档 §10</span></div>
+  <h2 class="rise">边界讲清楚，数字才可信</h2>
+  <div class="grow rise grid2" style="align-items:start;gap:14px">
+    <div class="card">
+      <h3>已知限制（5）</h3>
+      <ul class="tight">
+        <li>固定种子<b class="strong">模拟业务数据</b>（2 万单 / 2026-01~09），不代表真实经营</li>
+        <li>S1 为行为基线；真实 LLM 准确率/成本/时延未测，适配器已就绪待密钥</li>
+        <li>比率在 Agent 层组合，/v1/query 仍只接受 5 个基础指标</li>
+        <li>2 维度、5+3 指标；同比、预测、因果、复购率明确不做</li>
+        <li>未做换机全新部署验证；上传/激活闭环不在本次演示范围</li>
       </ul>
     </div>
-    <div class="foot"><span>分工文档 §10：如实说明模拟数据、测试条件与产品限制。</span><span>不使用未验证数据</span></div>
-    <div class="speaker">主动讲限制是加分项。我们没有在报告里使用任何没跑过的准确率。</div>
-  </section>
-
-  <!-- P16 结尾 -->
-  <section class="slide cover" style="background:linear-gradient(135deg,#0e1f44,#16305c 55%,#1d4686)">
-    <div class="kicker">15 · 结语 & Q&amp;A</div>
-    <h1 style="font-size:42px">AI 取数的门槛，不是写不写得出 SQL，<br>而是数字能不能被信任。</h1>
-    <div class="sub" style="font-size:17px;margin-top:26px">数桥做的，就是 Agent 与企业数据之间的这层<b style="color:#fff">信任</b>。</div>
-    <div class="tags">
-      <span class="tag">解决什么问题</span><span class="tag">与 Text-to-SQL 的区别</span>
-      <span class="tag">数据从哪来</span><span class="tag">如何证明正确</span>
-      <span class="tag">限制与下一步</span>
+    <div class="card good">
+      <h3>下一步路线</h3>
+      <ul class="tight">
+        <li><b class="strong">近期</b>：真实模型密钥接入 → 同一模型重跑 S1/S2，更新实验报告</li>
+        <li><b class="strong">近期</b>：datasets/inspect 上传激活闭环走完</li>
+        <li><b class="strong">二期</b>：复购率等更多派生指标、更多维度</li>
+        <li><b class="strong">工程化</b>：换机部署脚本、并发/负载测试</li>
+      </ul>
     </div>
-    <div class="meta">下一步：真实 LLM 同模型重测对照实验 · 上传激活闭环 · 更多维度与复购率二期 ｜ 谢谢评委</div>
-    <div class="speaker">收尾后进入提问：产品问题成员3答、Agent机制成员2答、数据口径与实验成员1答。</div>
-  </section>
+  </div>
+  <div class="foot"><span>所有汇报数字均可由仓库脚本重算核对；不使用任何未经验证的效果数据</span><span class="src">docs/测试报告.md §6</span></div>
+  <div class="speaker">主动讲限制是加分项。什么能做到、什么没测、下一步是什么，全部摊开讲。</div>
+</section>
+
+<!-- P16 -->
+<section class="slide cover" style="background:linear-gradient(135deg,#0c1d40,#142c55 55%,#1d4686)">
+  <div class="wm" style="color:rgba(255,255,255,.06)">16</div>
+  <div class="topbar rise"><span class="cap">15 · 结语 &amp; Q&amp;A</span><div class="line"></div><span class="crumb">谢谢评委</span></div>
+  <div style="margin-top:30px" class="rise">
+    <h1 style="font-size:38px">AI 取数的门槛，不是写不写得出 SQL，<br>而是<span style="color:#9dbcf7">数字能不能被信任</span>。</h1>
+    <p class="lead" style="font-size:17px;margin-top:18px;color:#d7e3fb">数桥做的，就是 Agent 与企业数据之间的这层<b style="color:#fff">信任</b>。</p>
+  </div>
+  <div class="grow rise" style="justify-content:center;gap:14px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">解决什么问题</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">与 Text-to-SQL 区别</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">为何选零售场景</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">数据从哪来</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">如何证明正确</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">限制与下一步</span>
+    </div>
+    <div style="font-size:13px;color:#a9c0e8">答疑分工：产品与演示 → 成员 3　·　Agent 机制 → 成员 2　·　指标口径/质检/实验 → 成员 1</div>
+  </div>
+  <div class="rise" style="font-size:12.5px;color:#93acd6">数桥 DataBridge · 中国数联 × 华师大 AI 智能体校园黑客松 · demo-v1.1 · 2026-10</div>
+  <div class="speaker">金句收尾后进入提问；每个公共问题都有对应章节和实测数字支撑。</div>
+</section>
 
 </div>
-
 <div id="hud"><div id="pager">1 / 16</div></div>
-
 <script>
 (function(){
   var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
-  var i = 0, stage = document.getElementById('stage'), pager = document.getElementById('pager'),
-      bar = document.getElementById('bar');
+  var i = 0, stage = document.getElementById('stage'), pager = document.getElementById('pager'), bar = document.getElementById('bar');
   function fit(){
-    var s = Math.min(window.innerWidth/1280, window.innerHeight/720) * 0.96;
+    var s = Math.min(window.innerWidth/1280, window.innerHeight/720) * 0.97;
     slides.forEach(function(el){ el.style.setProperty('--s', s); });
   }
   function go(n){
     i = Math.max(0, Math.min(slides.length-1, n));
-    slides.forEach(function(el,k){ el.classList.toggle('active', k===i); });
+    var cur = slides[i];
+    slides.forEach(function(el,k){
+      var on = k===i;
+      el.classList.toggle('active', on);
+      if(on){ void el.offsetWidth; } // 重启动画
+    });
     pager.textContent = (i+1) + ' / ' + slides.length;
     bar.style.width = ((i+1)/slides.length*100) + '%';
     history.replaceState(null,'','#'+(i+1));
   }
   document.addEventListener('keydown', function(e){
-    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='Enter'){ e.preventDefault(); go(i+1); }
-    else if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='Backspace'){ e.preventDefault(); go(i-1); }
-    else if(e.key==='Home'){ go(0); } else if(e.key==='End'){ go(slides.length-1); }
-    else if(e.key==='n'||e.key==='N'){ stage.classList.toggle('notes'); }
-    else if(e.key==='p'||e.key==='P'){ window.print(); }
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='Enter'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='Backspace'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key==='n'||e.key==='N'){stage.classList.toggle('notes');}
+    else if(e.key==='p'||e.key==='P'){window.print();}
     else if(e.key==='f'||e.key==='F'){
-      if(!document.fullscreenElement){ document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
-      else { document.exitFullscreen && document.exitFullscreen(); }
+      if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+      else{document.exitFullscreen&&document.exitFullscreen();}
     }
   });
-  // 触屏滑动
   var sx=null;
   document.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
-  document.addEventListener('touchend',function(e){
-    if(sx===null)return; var dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>50){ go(dx<0?i+1:i-1); } sx=null;
-  },{passive:true});
-  window.addEventListener('resize', fit);
+  document.addEventListener('touchend',function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)>50){go(dx<0?i+1:i-1);}sx=null;},{passive:true});
+  window.addEventListener('resize',fit);
   fit();
-  go(Math.max(0, parseInt(location.hash.replace('#',''),10)-1) || 0);
+  go(Math.max(0,(parseInt(location.hash.replace('#',''),10)||1)-1));
 })();
 </script>
 </body>
