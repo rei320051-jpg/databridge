@@ -168,7 +168,8 @@ class WorkflowTests(unittest.TestCase):
                 {"type": "output_text", "text": json.dumps(proposal)}]}]}
             return io.BytesIO(json.dumps(reply).encode("utf-8"))
 
-        model = OpenAIPlanModel(api_key="test-only", model="test-model", transport=transport)
+        model = OpenAIPlanModel(api_key="test-only", model="test-model",
+                                base_url="", transport=transport)
         result = AgentWorkflow(self.service, model=model, mode="model").run({"question": "9月净销售额"})
         self.assertEqual(result["status"], Status.SUCCESS)
         self.assertEqual(result["interpretation_mode"], "model")
@@ -186,6 +187,37 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(aggregate["group_by"], [])
         criterion = guarded.run({"question": "哪个地区最好"})
         self.assertEqual(criterion["status"], Status.NEED_CLARIFICATION)
+
+    def test_chat_completions_adapter_deepseek_compatible(self):
+        """OpenAI 兼容通道（DeepSeek）：chat/completions + JSON object，本地仍负责计算。"""
+        seen = {}
+
+        def transport(request, timeout):
+            seen["path"] = request.full_url
+            seen["request"] = json.loads(request.data)
+            proposal = {"metric": Metric.NET_SALES, "date_start": "2026-09-01",
+                        "date_end": "2026-09-30", "group_by": [], "filters": {},
+                        "sort": "desc", "comparison": "none"}
+            reply = {"choices": [{"message": {"content": json.dumps(proposal)}}]}
+            return io.BytesIO(json.dumps(reply).encode("utf-8"))
+
+        model = OpenAIPlanModel(api_key="test-only", model="deepseek-chat",
+                                base_url="https://api.deepseek.com", transport=transport)
+        result = AgentWorkflow(self.service, model=model, mode="model").run(
+            {"question": "9月净销售额"})
+        self.assertEqual(result["status"], Status.SUCCESS)
+        self.assertEqual(result["interpretation_mode"], "model")
+        self.assertEqual(seen["path"], "https://api.deepseek.com/v1/chat/completions")
+        self.assertEqual(seen["request"]["response_format"]["type"], "json_object")
+        self.assertEqual(seen["request"]["messages"][0]["role"], "system")
+        # 畸形响应不得伪装成功
+        def bad_transport(request, timeout):
+            return io.BytesIO(json.dumps({"choices": []}).encode("utf-8"))
+        broken = OpenAIPlanModel(api_key="test-only", model="deepseek-chat",
+                                 base_url="https://api.deepseek.com", transport=bad_transport)
+        failed = AgentWorkflow(self.service, model=broken, mode="model").run(
+            {"question": "9月净销售额"})
+        self.assertEqual(failed["status"], Status.MODEL_OUTPUT_INVALID)
 
     def test_member3_development_question_statuses(self):
         # These cases assume the page's June-September mock dataset. The
