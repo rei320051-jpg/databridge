@@ -207,7 +207,7 @@
     <div class="statline" style="margin-top:26px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18)">
       <div class="s" style="background:transparent;border-color:rgba(255,255,255,.15)"><div class="k" style="color:#a9c0e8">2026-09 全平台净销售额</div><div class="v" style="color:#fff">17,198,835.91 元</div></div>
       <div class="s" style="background:transparent;border-color:rgba(255,255,255,.15)"><div class="k" style="color:#a9c0e8">演示主线数据集</div><div class="v" style="color:#fff">20,000 订单 · 9 个月</div></div>
-      <div class="s" style="background:transparent"><div class="k" style="color:#a9c0e8">自动化测试</div><div class="v" style="color:#fff">15 入口全绿</div></div>
+      <div class="s" style="background:transparent"><div class="k" style="color:#a9c0e8">自动化测试</div><div class="v" style="color:#fff">16 入口全绿</div></div>
     </div>
   </div>
   <div class="rise" style="font-size:12.5px;color:#9fb6dd">A 赛题 · 中国数联 × 华师大 AI 智能体校园黑客松 · 2026-10 ｜ sha256 manifest 锁定</div>
@@ -498,7 +498,7 @@ Metric.REFUND_RATE  <span class="cm"># 'refund_rate', kind='ratio'</span></pre>
       <span class="cap" style="background:rgba(28,122,68,.35);border:1px solid rgba(160,225,185,.5)">华中 ▲1.53% · 唯一正增长</span>
     </div>
   </div>
-  <div class="rise" style="font-size:12px;color:#9fb6dd">HTTP 黄金路径已自动化实测 14/14 通过；§5.4 验收：黄金路径连跑 3 次数字逐字一致</div>
+  <div class="rise" style="font-size:12px;color:#9fb6dd">HTTP 黄金路径已自动化实测 14/14 通过；§5.4 验收：黄金路径连跑 3 次数字逐字一致。live 默认走真实 DeepSeek（理解约 0.9s），断网一键切离线 rules，数字 67/67 一致、演示不翻车</div>
   <div class="speaker">现场按五步操作：质检、问环比、澄清验证同数、Agent 简报、翻 SQL。全程真实 live 链路。</div>
 </section>
 
@@ -588,9 +588,9 @@ GET /v1/query-records/{query_id}
       <div class="card navy"><h3>跨团队同数锚点 F07</h3>
         <p>页面管线对成员 1 expected.json：<b class="strong">formal_dataset_test 35 项</b>，9 月五指标×全平台/五地区共 25 项地区核对，<span class="chip good">差值 0 分</span>。</p></div>
       <div class="card navy"><h3>测试金字塔</h3>
-        <p>15 个自动化入口全绿：smoke 26 · 开发 37 · 保留 30 · F01–F08 · live 15 · 渲染 · formal 35 · 成员 2 共 34 项 · 成员 1 契约/导入/70 项校验/双 HTTP 冒烟。</p></div>
-      <div class="card warn"><h3 style="color:#7a5208">诚实声明</h3>
-        <p style="color:#6b4e12">S1 是确定性行为基线（无真实 LLM），用于隔离治理层价值；真实模型准确率/成本/时延待密钥接入后同模型重测，报告不写未验证数字。</p></div>
+        <p>16 个自动化入口全绿：<b class="strong">真实模型 67 题复测</b> · smoke 26 · 开发 37 · 保留 30 · F01–F08 · live 15 · 渲染 · formal 35 · 成员 2 共 35 项 · 成员 1 契约/导入/70 项校验/双 HTTP 冒烟。</p></div>
+      <div class="card good"><h3 style="color:#14633a">诚实声明 → 真实模型复测</h3>
+        <p>S1 是确定性行为基线（无真实 LLM），用于隔离治理层价值。换上真实大模型还守不守得住？下一页用同一批 67 题给实测答案，报告不写未验证数字。</p></div>
       <div class="card navy"><h3>一键复现</h3>
         <pre style="margin-top:4px">python tests/run_testset.py 开发集
 python tests/run_experiment.py --source formal
@@ -598,20 +598,67 @@ python tests/formal_dataset_test.py</pre></div>
     </div>
   </div>
   <div class="foot"><span>S1 失败的 37 题恰好分布在三道防线上：数值 21 / 澄清 8 / 编造与写操作 8</span><span class="src">run_experiment.py --source formal</span></div>
-  <div class="speaker">不用"感觉更准"这种话——37 道题逐题真实计算，错在哪一层、错多少钱全部可复现。</div>
+  <div class="speaker">不用"感觉更准"这种话——37 道题逐题真实计算，错在哪一层、错多少钱全部可复现。那换成真实大模型呢？看下一页。</div>
 </section>
 
 <!-- P14 -->
 <section class="slide">
   <div class="wm">14</div>
-  <div class="topbar rise"><span class="cap">13 · 系统架构</span><div class="line"></div><span class="crumb">三人三模块 · 契约驱动</span></div>
+  <div class="topbar rise"><span class="cap">成员 2 · 真实模型</span><div class="line"></div><span class="crumb">DeepSeek 全量复测 · 2026-10-06</span></div>
+  <h2 class="rise">换上真实 DeepSeek，67 个数字<span style="color:var(--down)">一个没变</span></h2>
+  <div class="grow rise grid2" style="align-items:stretch;gap:14px;margin-top:10px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="arch" style="flex:1;font-size:12.5px;line-height:1.9">用户自然语言问题
+   ▼
+<b>真实 DeepSeek</b>　问题 → 结构化槽位     <span style="color:#f0b860">◀ 模型到此为止 · 不碰数据库</span>
+   ▼
+本地治理层　业务字典 · 歧义澄清 · 范围护栏
+　　　　　　只读 SQL · 安全聚合（全程可验证）
+   ▼
+<span class="ok">可信结果 ＋ SQL ＋ query_id</span></div>
+      <div class="card good" style="margin:0">
+        <h3 style="color:#14633a"><span class="ico" style="background:#d3ecdc;color:var(--down)">⛔</span>13 题在模型调用前就被拦下</h3>
+        <p>因果 / 预测 / 写操作 / 口径冲突类问题由<b class="strong">本地护栏前置拦截</b>——问题不外发、<b class="strong">零 token</b>，既不泄密又省钱。规则/模型一键切换，数字 67/67 一致。</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div class="card" style="margin:0">
+        <table>
+          <thead><tr><th>正式库 demo-v1.1 实测</th><th class="num">结果</th></tr></thead>
+          <tbody>
+            <tr><td>开发集 37 题</td><td class="num down">37 / 37 正确</td></tr>
+            <tr><td>保留集 30 题（盲测·未调参）</td><td class="num down">30 / 30 正确</td></tr>
+            <tr><td>与离线规则响应信封（含全部数据行）</td><td class="num down">67 / 67 逐字段一致</td></tr>
+            <tr><td>无依据编造</td><td class="num">0</td></tr>
+            <tr><td>终态执行失败（1 题重试后成功）</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="statline">
+        <div class="s"><div class="k">真实调用模型</div><div class="v">54 <span style="font-size:12px;color:var(--ink3)">题</span></div></div>
+        <div class="s"><div class="k">护栏前零调用</div><div class="v" style="color:var(--down)">13 <span style="font-size:12px;color:var(--ink3)">题</span></div></div>
+        <div class="s"><div class="k">67 题实付成本</div><div class="v">¥0.023</div></div>
+      </div>
+      <div class="card navy" style="margin:0">
+        <p style="font-size:12.5px">平均 <b class="strong">0.93s</b>/题（p90 1.03s，最大 3.67s 即重试题）；token 命中缓存 62,208。请求名 <span class="mono">deepseek-chat</span> 经官方别名实际服务 <b class="strong">deepseek-flash（V4.1-Flash）</b>。</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>模型只做语言理解；口径、聚合、拒答与计算全部本地，模型可替换而信任不打折</span><span class="src">_LLM真实模型复测明细.csv · 测试报告 §4.2</span></div>
+  <div class="speaker">我们没让大模型直接写 SQL——它只转槽位，查什么、怎么算、能不能答全由本地决定，全程碰不到数据库。换真实 DeepSeek 重跑 67 题数字一个不差，危险问题还没发出去就拦下 13 题，总共花了不到三分钱。</div>
+</section>
+
+<!-- P15 -->
+<section class="slide">
+  <div class="wm">15</div>
+  <div class="topbar rise"><span class="cap">14 · 系统架构</span><div class="line"></div><span class="crumb">三人三模块 · 契约驱动</span></div>
   <h2 class="rise">独立开发，靠一份冻结契约严丝合缝</h2>
   <div class="grow rise" style="gap:12px">
     <div class="arch"><b>Streamlit 产品页面</b> <span style="color:#7d93bd">（成员 3）</span>
   ├─ mock 参考实现          <span style="color:#7d93bd">// 现场保底，开箱零依赖</span>
   └─ live ─▶ POST /agent/query
               ▼
-        <b>AI 工作流</b> <span style="color:#7d93bd">（成员 2）</span>      <span class="ok">// 规则/模型双模式 · 两轮澄清</span>
+        <b>AI 工作流</b> <span style="color:#7d93bd">（成员 2）</span>      <span class="ok">// 规则 / 真实 DeepSeek 一键切换 · 两轮澄清</span>
           · 槽位白名单校验      <span class="ok">// 模型只提建议，执行在本地</span>
           · 比率 = 两次分量查询组合 <span class="ok">// 分子分母溯源 + 数据集指纹校验</span>
               ▼ POST /v1/query
@@ -629,17 +676,18 @@ python tests/formal_dataset_test.py</pre></div>
   <div class="speaker">这不是一个人的大系统，是三个人按同一份契约独立交付，再用自动化测试证明拼得起来。</div>
 </section>
 
-<!-- P15 -->
+<!-- P16 -->
 <section class="slide">
-  <div class="wm">15</div>
-  <div class="topbar rise"><span class="cap">14 · 当前限制</span><div class="line"></div><span class="crumb">如实说明 · 分工文档 §10</span></div>
+  <div class="wm">16</div>
+  <div class="topbar rise"><span class="cap">15 · 当前限制</span><div class="line"></div><span class="crumb">如实说明 · 分工文档 §10</span></div>
   <h2 class="rise">边界讲清楚，数字才可信</h2>
   <div class="grow rise grid2" style="align-items:start;gap:14px">
     <div class="card">
-      <h3>已知限制（5）</h3>
+      <h3>已知限制（6）</h3>
       <ul class="tight">
         <li>固定种子<b class="strong">模拟业务数据</b>（2 万单 / 2026-01~09），不代表真实经营</li>
-        <li>S1 为行为基线；真实 LLM 准确率/成本/时延未测，适配器已就绪待密钥</li>
+        <li>真实模型仅验证<b class="strong">单一供应商</b>（deepseek-flash）与 67 道零售订单题；跨模型、跨行业题集、长周期稳定性未测</li>
+        <li>模型只做"问题→槽位"；<b class="strong">LLM 直接生成 SQL 不在产品架构内</b>，S1 保留为确定性对照</li>
         <li>比率在 Agent 层组合，/v1/query 仍只接受 5 个基础指标</li>
         <li>2 维度、5+3 指标；同比、预测、因果、复购率明确不做</li>
         <li>未做换机全新部署验证；上传/激活闭环不在本次演示范围</li>
@@ -648,21 +696,21 @@ python tests/formal_dataset_test.py</pre></div>
     <div class="card good">
       <h3>下一步路线</h3>
       <ul class="tight">
-        <li><b class="strong">近期</b>：真实模型密钥接入 → 同一模型重跑 S1/S2，更新实验报告</li>
-        <li><b class="strong">近期</b>：datasets/inspect 上传激活闭环走完</li>
+        <li><b class="strong">已达成</b>：真实 DeepSeek 67 题复测——37/37、30/30、0 编造，成本 ¥0.023</li>
+        <li><b class="strong">近期</b>：更多模型供应商与跨行业题集验证；datasets/inspect 上传激活闭环</li>
         <li><b class="strong">二期</b>：复购率等更多派生指标、更多维度</li>
-        <li><b class="strong">工程化</b>：换机部署脚本、并发/负载测试</li>
+        <li><b class="strong">工程化</b>：换机部署脚本（F08）、并发/负载测试</li>
       </ul>
     </div>
   </div>
-  <div class="foot"><span>所有汇报数字均可由仓库脚本重算核对；不使用任何未经验证的效果数据</span><span class="src">docs/测试报告.md §6</span></div>
-  <div class="speaker">主动讲限制是加分项。什么能做到、什么没测、下一步是什么，全部摊开讲。</div>
+  <div class="foot"><span>所有汇报数字均可由仓库脚本重算核对；成本 0.023 元、时延 0.93s 均为实测，不使用任何未经验证数据</span><span class="src">docs/测试报告.md §4.2 / §6</span></div>
+  <div class="speaker">主动讲限制是加分项。什么做到了、只验证了哪家模型、什么没测、下一步是什么，全部摊开讲。</div>
 </section>
 
-<!-- P16 -->
+<!-- P17 -->
 <section class="slide cover" style="background:linear-gradient(135deg,#0c1d40,#142c55 55%,#1d4686)">
-  <div class="wm" style="color:rgba(255,255,255,.06)">16</div>
-  <div class="topbar rise"><span class="cap">15 · 结语 &amp; Q&amp;A</span><div class="line"></div><span class="crumb">谢谢评委</span></div>
+  <div class="wm" style="color:rgba(255,255,255,.06)">17</div>
+  <div class="topbar rise"><span class="cap">16 · 结语 &amp; Q&amp;A</span><div class="line"></div><span class="crumb">谢谢评委</span></div>
   <div style="margin-top:30px" class="rise">
     <h1 style="font-size:38px">AI 取数的门槛，不是写不写得出 SQL，<br>而是<span style="color:#9dbcf7">数字能不能被信任</span>。</h1>
     <p class="lead" style="font-size:17px;margin-top:18px;color:#d7e3fb">数桥做的，就是 Agent 与企业数据之间的这层<b style="color:#fff">信任</b>。</p>
@@ -674,6 +722,7 @@ python tests/formal_dataset_test.py</pre></div>
       <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">为何选零售场景</span>
       <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">数据从哪来</span>
       <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">如何证明正确</span>
+      <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">真实大模型效果如何</span>
       <span class="cap" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)">限制与下一步</span>
     </div>
     <div style="font-size:13px;color:#a9c0e8">答疑分工：产品与演示 → 成员 3　·　Agent 机制 → 成员 2　·　指标口径/质检/实验 → 成员 1</div>
@@ -683,7 +732,7 @@ python tests/formal_dataset_test.py</pre></div>
 </section>
 
 </div>
-<div id="hud"><div id="pager">1 / 16</div></div>
+<div id="hud"><div id="pager">1 / 17</div></div>
 <script>
 (function(){
   var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
