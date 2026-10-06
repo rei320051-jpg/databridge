@@ -64,8 +64,12 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 ```
 
 `POST /v1/query` 是成员 1 的结构化只读执行层；`POST /agent/query` 是成员 2 的自然语言入口，
-调用同一个执行层。默认采用可复现的规则解析。可选模型解析需要本机设置
-`DATABRIDGE_AGENT_MODE=model`、`OPENAI_API_KEY`、`DATABRIDGE_MODEL`，目前**没有真实模型调用的验证成绩**。
+调用同一个执行层。默认采用可复现的规则解析。可选模型解析只需在仓库根目录 `.env`
+（已 gitignore）配置 `OPENAI_API_KEY`、`DATABRIDGE_MODEL=deepseek-flash`、
+`DATABRIDGE_BASE_URL=https://api.deepseek.com` 并设 `DATABRIDGE_AGENT_MODE=model`
+（真实环境变量优先；配置方法见 `docs/产品使用说明.md`）。真实 DeepSeek 已于 2026-10-06
+完成开发集 37 题 + 保留集 30 题全量复测，结果与规则模式 67/67 逐字段一致、0 编造，
+成本与时延等实测数据见 `docs/测试报告.md` §4.2。
 示例运营 Agent 可本地运行 `python scripts/run_operations_agent.py 生成2026年9月经营简报`，
 或在服务启动后运行 `python scripts/run_operations_agent.py --api http://127.0.0.1:8001 生成2026年9月经营简报`，
 通过真实 HTTP 调用平台。自然语言入口支持共享 v1.2 的八个指标，三项派生指标在 Agent 层组合可信基础查询。
