@@ -58,6 +58,10 @@ class OpenAIPlanModel:
         self.base_url = (base_url if base_url is not None
                          else os.environ.get("DATABRIDGE_BASE_URL", "")).rstrip("/")
         self.transport = transport or urllib.request.urlopen
+        # 纯观测字段：便于 S1/S2 真实模型复测统计调用次数与 token，不参与任何业务判断
+        self.calls = 0
+        self.last_usage = None
+        self.last_model = None
 
     def _context(self, question: str) -> dict:
         return {
@@ -87,6 +91,8 @@ class OpenAIPlanModel:
     def propose(self, question: str) -> dict:
         if not self.api_key or not self.model:
             raise ModelFailure("模型模式缺少 OPENAI_API_KEY 或 DATABRIDGE_MODEL 配置")
+        self.calls += 1
+        self.last_usage = None
         context = self._context(question)
         if self.base_url:
             return self._propose_chat_completions(context)
@@ -114,6 +120,8 @@ class OpenAIPlanModel:
             method="POST",
         )
         body = self._post(request, timeout=30)
+        self.last_usage = body.get("usage") if isinstance(body, dict) else None
+        self.last_model = body.get("model") if isinstance(body, dict) else None
         try:
             text = body["choices"][0]["message"]["content"]
             result = json.loads(text)
@@ -139,6 +147,8 @@ class OpenAIPlanModel:
             method="POST",
         )
         body = self._post(request, timeout=15)
+        self.last_usage = body.get("usage") if isinstance(body, dict) else None
+        self.last_model = body.get("model") if isinstance(body, dict) else None
         try:
             if body.get("status") != "completed":
                 raise ModelFailure("模型未完成结构化解析")

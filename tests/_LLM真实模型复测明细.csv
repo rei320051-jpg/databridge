@@ -1,0 +1,68 @@
+﻿题号,题集,问题,分类,预期状态,rules状态,model状态,判定,错误分类,与rules一致,重试,模型调用次数,prompt缓存命中,prompt未命中,completion_tokens,total_tokens,实际服务模型,model响应秒,rules响应秒,备注
+D01,开发集,2026年9月的净销售额是多少,明确可答·单值,success,success,success,正确,,是,0,1,1152,182,55,1389,deepseek-flash,0.961,0.018,
+D02,开发集,2026年9月各地区的净销售额,明确可答·分组,success,success,success,正确,,是,0,1,1152,183,57,1392,deepseek-flash,0.86,0.016,
+D03,开发集,2026年9月华东地区的实付金额,明确可答·筛选,success,success,success,正确,,是,0,1,1152,184,60,1396,deepseek-flash,1.032,0.013,
+D04,开发集,2026年8月华南地区的支付订单数,明确可答·单值,success,success,success,正确,,是,0,1,1152,184,61,1397,deepseek-flash,0.667,0.018,
+D05,开发集,2026年9月新客户的支付人数,明确可答·筛选,success,success,success,正确,,是,0,1,1152,183,54,1389,deepseek-flash,0.955,0.016,
+D06,开发集,2026年第三季度各地区的成功退款金额,明确可答·分组,success,success,success,正确,,是,0,1,1152,184,57,1393,deepseek-flash,1.373,0.015,
+D07,开发集,2026年9月各客户类型的净销售额,明确可答·分组,success,success,success,正确,,是,0,1,1152,184,58,1394,deepseek-flash,0.731,0.018,
+D08,开发集,2026年9月净销售额最高的地区,排序/排名,success,success,success,正确,,是,0,1,1152,183,57,1392,deepseek-flash,0.866,0.018,
+D09,开发集,2026年9月各地区净销售额环比,比较·环比,success,success,success,正确,,是,0,1,1152,183,57,1392,deepseek-flash,1.018,0.019,
+D10,开发集,上个月西南地区的实付金额,时间表达·上个月,success,success,success,正确,,是,0,1,1152,181,60,1393,deepseek-flash,0.993,0.018,
+D11,开发集,9月华东的订单量是多少,同义问法,success,success,success,正确,,是,0,1,1152,181,51,1384,deepseek-flash,0.742,0.017,
+D12,开发集,9月华东的成交额是多少,同义问法,success,success,success,正确,,是,0,1,1152,181,60,1393,deepseek-flash,0.937,0.019,
+D13,开发集,9月华东有多少人下单,同义问法,success,success,success,正确,,是,0,1,1152,180,62,1394,deepseek-flash,0.786,0.017,
+D14,开发集,9月华东的净销是多少,同义问法,success,success,success,正确,,是,0,1,1152,181,61,1394,deepseek-flash,0.914,0.018,
+D15,开发集,9月华东退了多少钱,同义问法,success,success,success,正确,,是,0,1,1152,179,61,1392,deepseek-flash,0.952,0.016,
+D16,开发集,9月的销售额是多少,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,178,52,1382,deepseek-flash,1.062,0.001,"候选=['net_sales', 'paid_amount']"
+D17,开发集,9月的营业额是多少,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,178,52,1382,deepseek-flash,0.668,0.001,"候选=['net_sales', 'paid_amount']"
+D18,开发集,哪个地区最好,需澄清·评价标准,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,177,42,1371,deepseek-flash,1.127,0.001,"候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
+D19,开发集,最近的订单情况怎么样,需澄清·多重缺失,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,178,40,1370,deepseek-flash,0.793,0.001,"候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
+D20,开发集,这段时间华东的实付金额,需澄清·时间范围,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,180,48,1380,deepseek-flash,0.836,0.001,"候选=['2026-06', '2026-07', '2026-08', '2026-09']"
+D21,开发集,退款多不多,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,177,40,1369,deepseek-flash,0.786,0.001,"候选=['refund_amount', 'paid_order_count']"
+D22,开发集,帮我看看业绩,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,177,40,1369,deepseek-flash,0.857,0.001,"候选=['net_sales', 'paid_amount']"
+D23,开发集,为什么华东地区9月净销售额下降了,数据不足·因果,insufficient_data,insufficient_data,insufficient_data,正确,,是,0,0,0,0,0,0,,0.0,0.001,
+D24,开发集,2026年3月的净销售额是多少,数据不足·超出数据覆盖（正式库覆盖内，改判 success）,success,success,success,正确,,是,0,1,1152,182,55,1389,deepseek-flash,0.657,0.017,
+D25,开发集,华东地区9月净销售额下降的主要原因是什么,数据不足·因果,insufficient_data,insufficient_data,insufficient_data,正确,,是,0,0,0,0,0,0,,0.0,0.001,
+D26,开发集,预测一下2026年10月的净销售额,超出范围·未来预测,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.0,0.0,
+D27,开发集,华东地区的退款率是多少,需澄清·时间范围,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,179,49,1380,deepseek-flash,0.578,0.001,"候选=['2026-06', '2026-07', '2026-08', '2026-09']"
+D28,开发集,把订单表里9月的记录删掉,超出范围·写操作,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.001,0.001,
+D29,开发集,帮我更新华东地区的客户类型,超出范围·写操作,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.001,0.001,
+D30,开发集,2026年9月包含取消订单的实付金额,陷阱·口径冲突,out_of_scope或need_clarification,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.001,0.0,
+D31,开发集,8月华北有多少笔订单,同义问法,success,success,success,正确,,是,0,1,1152,180,61,1393,deepseek-flash,0.874,0.017,
+D32,开发集,8月华北一共退了多少,同义问法,success,success,success,正确,,是,0,1,1152,180,49,1381,deepseek-flash,0.767,0.016,
+D33,开发集,8月华北扣掉退款后卖了多少钱,同义问法,success,success,success,正确,,是,0,1,1152,183,61,1396,deepseek-flash,0.99,0.017,
+D34,开发集,帮我估算下个月华北能卖多少,超出范围·未来预测,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.001,0.001,
+D35,开发集,把8月华北的实付金额改成300万,超出范围·写操作,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.0,0.0,
+D36,开发集,2026年6月到8月华东地区的净销售额合计,明确可答·多期,success,success,success,正确,,是,0,1,1152,187,61,1400,deepseek-flash,0.969,0.018,
+D37,开发集,2026年8月华东和华南的净销售额分别是多少,明确可答·多值筛选,success,success,success,正确,,是,0,1,1152,187,66,1405,deepseek-flash,0.906,0.019,
+H01,保留集,2026年9月华中地区净销售额是多少,明确可答·筛选,success,success,success,正确,,是,0,1,1152,184,61,1397,deepseek-flash,0.917,0.016,
+H02,保留集,2026年7月各地区的支付人数,明确可答·分组,success,success,success,正确,,是,0,1,1152,183,58,1393,deepseek-flash,0.984,0.02,
+H03,保留集,2026年9月华北地区的成功退款金额,明确可答·筛选,success,success,success,正确,,是,0,1,1152,184,51,1387,deepseek-flash,0.898,0.017,
+H04,保留集,2026年6月西南地区的支付订单数,明确可答·单值,success,success,success,正确,,是,0,1,1152,184,51,1387,deepseek-flash,0.998,0.017,
+H05,保留集,2026年9月老客户的实付金额,明确可答·筛选,success,success,success,正确,,是,0,1,1152,184,62,1398,deepseek-flash,0.834,0.02,
+H06,保留集,2026年8月各客户类型的支付订单数,明确可答·分组,success,success,success,正确,,是,0,1,1152,185,58,1395,deepseek-flash,0.872,0.018,
+H07,保留集,2026年9月净销售额最低的地区,排序/排名,success,success,success,正确,,是,0,1,1152,183,57,1392,deepseek-flash,0.865,0.024,
+H08,保留集,2026年8月各地区实付金额环比,比较·环比,success,success,success,正确,,是,0,1,1152,184,56,1392,deepseek-flash,0.695,0.017,
+H09,保留集,2026年7月到9月华东地区的净销售额合计,明确可答·多期,success,success,success,正确,,是,0,1,1152,187,61,1400,deepseek-flash,0.999,0.019,
+H10,保留集,2026年9月华东和华南的净销售额分别是多少,明确可答·多值筛选,success,success,success,正确,,是,0,1,1152,187,66,1405,deepseek-flash,0.973,0.017,
+H11,保留集,9月华南的实付是多少钱,同义问法,success,success,success,正确,,是,0,1,1152,182,60,1394,deepseek-flash,0.695,0.018,
+H12,保留集,9月华南有多少笔订单,同义问法,success,success,success,正确,,是,0,1,1152,180,61,1393,deepseek-flash,0.953,0.015,
+H13,保留集,9月华南一共退了多少,同义问法,success,success,success,正确,,是,0,1,1152,180,61,1393,deepseek-flash,0.934,0.016,
+H14,保留集,今年9月华中地区扣掉退款后卖了多少钱,同义问法,success,success,success,正确,,是,0,1,1152,185,61,1398,deepseek-flash,1.057,0.019,
+H15,保留集,9月华中有多少客户付过款,同义问法,success,success,success,正确,,是,0,1,1152,183,52,1387,deepseek-flash,0.828,0.015,
+H16,保留集,9月的营收是多少,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,178,52,1382,deepseek-flash,0.799,0.001,"候选=['net_sales', 'paid_amount']"
+H17,保留集,9月收入怎么样,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,178,52,1382,deepseek-flash,0.734,0.001,"候选=['net_sales', 'paid_amount']"
+H18,保留集,哪个地区的经营表现最强,需澄清·评价标准,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,179,42,1373,deepseek-flash,0.576,0.001,"候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
+H19,保留集,近一个月华东的净销售额,时间表达·近一个月,need_clarification或success,need_clarification,need_clarification,正确,,是,0,1,1152,180,49,1381,deepseek-flash,0.95,0.001,"候选=['2026-06', '2026-07', '2026-08', '2026-09']"
+H20,保留集,近期华东的实付金额是多少,需澄清·时间范围,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,181,48,1381,deepseek-flash,0.88,0.001,"候选=['2026-06', '2026-07', '2026-08', '2026-09']"
+H21,保留集,9月退款情况如何,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,179,52,1383,deepseek-flash,0.446,0.001,"候选=['refund_amount', 'paid_order_count']"
+H22,保留集,看看9月的经营数据,需澄清·指标口径,need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,179,52,1383,deepseek-flash,0.972,0.001,"候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
+H23,保留集,华东9月净销售额下滑是什么因素造成的,数据不足·因果,insufficient_data,insufficient_data,insufficient_data,正确,,是,0,0,0,0,0,0,,0.001,0.001,
+H24,保留集,2026年5月各地区的实付金额,数据不足·超出数据覆盖（正式库覆盖内，改判 success）,success,success,success,正确,,是,0,1,1152,184,47,1383,deepseek-flash,1.0,0.015,
+H25,保留集,为什么华南9月还在涨,数据不足·因果,insufficient_data,insufficient_data,insufficient_data,正确,,是,0,0,0,0,0,0,,0.0,0.001,
+H26,保留集,帮我估算下个月华东能卖多少,超出范围·未来预测,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.0,0.0,
+H27,保留集,9月华东的客单价是多少,明确可答·单值,success,success,success,正确,,是,1,2,1152,181,61,1394,deepseek-flash,3.674,0.033,
+H28,保留集,请清空退款表,超出范围·写操作,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.001,0.001,
+H29,保留集,把9月西南的实付金额改成200万,超出范围·写操作,out_of_scope,out_of_scope,out_of_scope,正确,,是,0,0,0,0,0,0,,0.0,0.001,
+H30,保留集,9月华东地区所有订单的金额总和(含未支付成功的),陷阱·口径冲突,out_of_scope或need_clarification,need_clarification,need_clarification,正确,,是,0,1,1152,188,58,1398,deepseek-flash,0.745,0.001,"候选=['paid_order_count', 'paid_customer_count', 'paid_amount', 'refund_amount', 'net_sales', 'refund_rate', 'avg_order_value', 'paid_per_customer']"
