@@ -47,7 +47,8 @@ LINES: list = []
 
 def log(msg: str = "") -> None:
     LINES.append(str(msg))
-    OUT_TXT.write_text("\n".join(LINES), encoding="utf-8")
+    # 显式 LF：text 模式默认 newline=None 会在 Windows 上把 \n 转成 CRLF
+    OUT_TXT.write_text("\n".join(LINES), encoding="utf-8", newline="\n")
 
 
 def _base_frames(tables: dict, region_from_orders: bool = False):
@@ -251,8 +252,9 @@ def main_formal() -> None:
 
 def _write_csv(mat_a, mat_b, diff, months) -> None:
     # 写 CSV
+    # newline="" 交给 csv 模块控制行尾，并显式锁定 LF（仓库 .gitattributes 约定）
     with open(OUT_CSV, "w", encoding="utf-8-sig", newline="") as fh:
-        w = csv.writer(fh)
+        w = csv.writer(fh, lineterminator="\n")
         w.writerow(["月份", "地区", "方案A_refund_time归属", "方案B_pay_time归属", "差异A-B"])
         for m in months:
             for r in REGIONS:
