@@ -8,24 +8,24 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
-# 测试产生的中间输出（可随时重新生成）
-tests/_*_out.txt
-tests/_diag*.txt
-tests/_probe.txt
-tests/_cleanup.txt
+# 测试产生的中间输出（可随时重新生成，任意深度）
+**/tests/_*_out.txt
+**/tests/_diag*.txt
+**/tests/_probe.txt
+**/tests/_cleanup.txt
 
 # 评测结果 CSV 属于交付证据，不忽略，需要提交
 
-# 数据与密钥
-data/*.csv
+# 数据与密钥（任意深度）
+**/data/*.csv
 *.env
 .env
 config.local.py
 
 # 成员 1 后端构建数据库、查询记录与 HTTP 验证输出；源 CSV 在 data/ 子目录中需入库
 # 保留 .gitkeep，使 outputs/ 目录在全新克隆时即存在（其测试脚本假定目录已存在）
-outputs/*
-!outputs/.gitkeep
+**/outputs/*
+!**/outputs/.gitkeep
 
 # 个人工作笔记 / Agent 记忆
 .workbuddy/
