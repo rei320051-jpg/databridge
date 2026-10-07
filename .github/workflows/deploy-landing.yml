@@ -31,6 +31,9 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # 工作流自动启用 Pages 站点并锁定为 Actions 构建，无需手动在设置页开通
+          enablement: true
 
       - name: Assemble site（落地页 -> index.html，海报 -> poster.html）
         run: |
