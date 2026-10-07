@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>朋友圈海报 · DataClawHub 制品引流</title>
+<style>
+/* 竖版手机海报：浏览器打开后整页截图（建议视口 750×1334）或打印为 PDF/图片 */
+:root{
+  --bg:#FAF8F4;--ink:#1A1815;--muted:#6F685E;--line:#E5DFD3;
+  --accent:#D8452A;--accent-dark:#B93721;--accent-soft:#FBEAE5;
+  --serif:'Noto Serif SC',Georgia,'Microsoft YaHei',serif;
+  --sans:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#ECE7DD;font-family:var(--sans);display:flex;justify-content:center;padding:24px 0}
+.poster{width:750px;min-height:1334px;background:var(--bg);padding:64px 56px 48px;position:relative;
+  display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(26,24,21,.18)}
+
+.top{display:flex;justify-content:space-between;align-items:center;font-size:22px;color:var(--muted)}
+.top .brand{font-weight:700;color:var(--ink);font-size:24px}
+.top .brand span{color:var(--muted);font-weight:400;margin-left:10px}
+.top .pill{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent-dark);
+  border:2px solid var(--accent);border-radius:8px;padding:8px 16px}
+
+.hero{margin-top:70px}
+.kicker{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--accent)}
+h1{font-family:var(--serif);font-size:76px;font-weight:700;line-height:1.22;margin:26px 0 24px;letter-spacing:.01em}
+h1 em{font-style:normal;color:var(--accent)}
+.lead{font-size:28px;line-height:1.65;color:var(--muted)}
+.lead b{color:var(--ink)}
+
+.taskcard{margin-top:44px;background:#fff;border:3px solid var(--accent);border-radius:18px;padding:34px 32px}
+.taskcard .tag{display:inline-block;font-family:var(--mono);font-size:19px;font-weight:700;color:#fff;
+  background:var(--accent);border-radius:7px;padding:7px 16px;margin-bottom:18px}
+.taskcard h2{font-size:34px;font-weight:900;line-height:1.4}
+.taskcard p{font-size:23px;color:var(--muted);margin-top:12px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.chips span{font-family:var(--mono);font-size:19px;border:1px solid var(--line);border-radius:30px;padding:9px 20px}
+
+.stats{display:flex;gap:1px;margin-top:44px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--line)}
+.stats .s{flex:1;background:#fff;text-align:center;padding:28px 10px}
+.stats .v{font-family:var(--mono);font-size:46px;font-weight:700;color:var(--accent);line-height:1.1}
+.stats .l{font-size:19px;color:var(--muted);margin-top:10px}
+
+/* 底部：CTA + 二维码占位 */
+.bottom{margin-top:auto;padding-top:44px;display:flex;align-items:center;gap:30px}
+.cta-box{flex:1}
+.cta-box .big{font-size:30px;font-weight:900;line-height:1.4}
+.cta-box .sm{font-size:20px;color:var(--muted);margin-top:12px;line-height:1.6}
+.cta-box .code{display:inline-block;margin-top:16px;font-family:var(--mono);font-size:22px;font-weight:700;
+  color:var(--accent-dark);border:2px dashed var(--accent);border-radius:8px;padding:10px 18px}
+.qr{width:210px;height:210px;border:3px dashed #B9B1A2;border-radius:14px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;color:#9A9388;text-align:center;flex:0 0 auto;background:#fff}
+.qr .q{font-size:54px;line-height:1}
+.qr span{font-size:17px;line-height:1.4;padding:0 12px}
+
+.foot{margin-top:36px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;
+  font-size:18px;color:var(--muted)}
+
+@media print{body{background:#fff;padding:0}.poster{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<div class="poster">
+  <div class="top">
+    <div class="brand">数桥 DataBridge<span>· DataClawHub 制品</span></div>
+    <div class="pill">黑客松参赛作品</div>
+  </div>
+
+  <div class="hero">
+    <div class="kicker">一个真实可认领的任务</div>
+    <h1>免费 fork 一个<br><em>不胡说八道</em>的<br>AI 取数 Agent</h1>
+    <p class="lead">问它「9 月销售额」，它会先反问你要哪个口径；<br>问它「为什么下降」，它会<b>明确拒绝编造</b>。<br>数据集 + 提示词 + 可运行 Demo，注册即可 fork。</p>
+  </div>
+
+  <div class="taskcard">
+    <span class="tag">立即认领</span>
+    <h2>让 AI 查业务数据：先确认口径、安全聚合、结果可追溯</h2>
+    <p>同一个问题，普通 AI 报错为零、数字却虚高 96.8 万元；本制品给出逐题可复现的治理方案。</p>
+    <div class="chips">
+      <span>20,000 订单</span><span>5+3 冻结指标</span><span>Python 可运行</span><span>内容哈希锁定</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="s"><div class="v">37/37</div><div class="l">业务题全对</div></div>
+    <div class="s"><div class="v">67/67</div><div class="l">真实模型复测一致</div></div>
+    <div class="s"><div class="v">0</div><div class="l">无依据编造</div></div>
+  </div>
+
+  <div class="bottom">
+    <div class="cta-box">
+      <div class="big">注册 DataClawHub<br>免费把制品 fork 走</div>
+      <div class="sm">注册后即可 fork：数据集 / Prompt / Demo<br><span style="font-size:18px">（专属邀请入口 10-08 开通）</span></div>
+      <!-- 邀请码到手后把下一行替换为真实队伍邀请码 -->
+      <div class="code">邀请码：TEAM-XXXX（待替换）</div>
+    </div>
+    <!-- 二维码到手后：把整个 .qr 替换为 <img>，建议 210×210 -->
+    <div class="qr">
+      <div class="q">▣</div>
+      <span>专属二维码<br>10-08 替换</span>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>中国数联物流 · DataClawHub 任务市场</span>
+    <span>数联 × 华师大 AI 智能体黑客松</span>
+  </div>
+</div>
+
+</body>
+</html>
