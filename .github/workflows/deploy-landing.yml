@@ -1,6 +1,7 @@
 name: Deploy 赛题一落地页到 GitHub Pages
 
-# 单一数据源：赛题一/物料/ 下的落地页与海报；push 后自动发布，避免在仓库根维护副本
+# 经典分支部署：从 赛题一/物料/ 单源构建静态站点，推送到独立的 gh-pages 分支。
+# 需要在 Settings → Pages 选择 Source=Deploy from a branch、Branch=gh-pages/(root)。
 on:
   push:
     branches: [main]
@@ -11,41 +12,32 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: pages-deploy
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        with:
-          # 工作流自动启用 Pages 站点并锁定为 Actions 构建，无需手动在设置页开通
-          enablement: true
 
       - name: Assemble site（落地页 -> index.html，海报 -> poster.html）
         run: |
           mkdir _site
           cp '赛题一/物料/落地页_index.html' _site/index.html
           cp '赛题一/物料/海报_朋友圈.html' _site/poster.html
+          printf 'User-agent: *\nAllow: /\n' > _site/robots.txt
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: '_site'
-
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
