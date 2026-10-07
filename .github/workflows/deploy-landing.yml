@@ -1,0 +1,48 @@
+name: Deploy 赛题一落地页到 GitHub Pages
+
+# 单一数据源：赛题一/物料/ 下的落地页与海报；push 后自动发布，避免在仓库根维护副本
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-landing.yml'
+      - '赛题一/物料/落地页_index.html'
+      - '赛题一/物料/海报_朋友圈.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Assemble site（落地页 -> index.html，海报 -> poster.html）
+        run: |
+          mkdir _site
+          cp '赛题一/物料/落地页_index.html' _site/index.html
+          cp '赛题一/物料/海报_朋友圈.html' _site/poster.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
