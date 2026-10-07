@@ -31,6 +31,9 @@ outputs/*
 .workbuddy/
 .gh_tmp
 
+# 最终提交包产物（由 scripts/build_submission.py 生成，不入库）
+dist/
+
 # 编辑器与系统
 .vscode/
 .idea/
