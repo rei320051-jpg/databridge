@@ -83,6 +83,7 @@ def build_manifest(commit: str, n_files: int) -> str:
 > 生成日期：{date.today().isoformat()}　·　代码版本：`{commit}`　·　文件数：{n_files}
 > 对应赛事：数联科技 × 华东师范大学 AI 智能体校园黑客松 · 赛题二（A：AI 使用的大数据平台方向）
 > 初赛提交截止：2026-10-14 24:00（DataClawHub 赛事专区线上提交）
+> PPTX 由 scripts/build_pptx.mjs 生成（需 Node.js：`npm --prefix outputs/_pptx install pptxgenjs` 后 `node scripts/build_pptx.mjs`）
 
 ## 一、赛题二最低交付物对照
 
@@ -91,7 +92,7 @@ def build_manifest(commit: str, n_files: int) -> str:
 | 问题与方案（目标用户 / 痛点 / 场景 / 技术路线 / 数据来源 / 预期价值） | `README.md`、`AI智能体校园黑客松_A赛题_三人分工.md`、`docs/答辩PPT初稿.md`、`docs/data_dictionary.md` |
 | 交付成果：可运行的 AI 智能体 / 轻量应用原型（允许模拟数据） | Streamlit 产品页 `app/app.py`；FastAPI 只读查询服务 `databridge/`；自然语言 Agent `agent/`；模拟数据集 `data/demo/`（2 万订单 / 2026-01~09） |
 | 验证材料（输入、输出、关键指标、已知限制） | `docs/测试报告.md`（§4 实验结论 / §5 缺陷登记 / §6 结论与限制）、`docs/测试集与对照实验说明.md`、`tests/_评测结果_*.csv`、`tests/_LLM真实模型复测明细.csv`、`tests/_对照实验记录表_formal.csv` |
-| 路演展示（≤5 分钟演示视频或现场演示）＋使用说明 | `docs/答辩幻灯片.html`（17 页，浏览器直接放映）、`docs/演示脚本大纲_formal.md`；使用说明见 `docs/产品使用说明.md`。**演示视频待录制**（亦可采用现场演示） |
+| 路演展示（≤5 分钟演示视频或现场演示）＋使用说明 | `docs/答辩幻灯片.pptx`（17 页可编辑 PowerPoint，PptxGenJS 由 `scripts/build_pptx.mjs` 生成）、`docs/答辩幻灯片.html`（浏览器直接放映）、`docs/演示脚本大纲_formal.md`；使用说明见 `docs/产品使用说明.md`。**演示视频待录制**（亦可采用现场演示） |
 
 ## 二、目录速览
 
