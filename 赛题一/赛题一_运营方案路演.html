@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataClawHub 平台宣传运营方案 · 落地版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF8F4;
+  --ink:#1A1815;
+  --muted:#6F685E;
+  --line:#E5DFD3;
+  --accent:#D8452A;
+  --accent-dark:#B93721;
+  --accent-soft:#FBEAE5;
+  --serif:'Noto Serif SC',Georgia,serif;
+  --sans:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--sans);line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 24px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(250,248,244,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.hd{display:flex;align-items:center;justify-content:space-between;
+  height:56px;font-size:13px;}
+.hd .brand{font-weight:700;letter-spacing:.02em}
+.hd .brand span{color:var(--muted);font-weight:400;margin-left:8px}
+.hd .due{font-family:var(--mono);font-size:12px;font-weight:700;
+  border:1px solid var(--accent);color:var(--accent-dark);
+  padding:5px 12px;border-radius:4px;white-space:nowrap}
+
+/* ---------- hero ---------- */
+.hero{padding:88px 0 56px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--mono);font-size:12px;font-weight:700;
+  letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.hero h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(38px,6.5vw,62px);line-height:1.2;margin:18px 0 20px;
+  letter-spacing:.01em;
+}
+.hero h1 em{font-style:normal;color:var(--accent);
+  background:linear-gradient(transparent 68%,var(--accent-soft) 68%)}
+.hero .sub{font-size:17px;color:var(--muted);max-width:48ch}
+.hero .sub b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--line);border:1px solid var(--line);
+  margin-top:44px;border-radius:8px;overflow:hidden}
+.stat{background:var(--bg);padding:22px 20px}
+.stat .v{font-family:var(--mono);font-weight:700;font-size:34px;
+  line-height:1.1;color:var(--ink);letter-spacing:-.02em}
+.stat .v.txt{font-family:var(--sans);font-size:18px;line-height:1.35;letter-spacing:0}
+.stat.key .v{color:var(--accent)}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* ---------- sections ---------- */
+section.block{padding:60px 0;border-bottom:1px solid var(--line)}
+.sec-hd{display:flex;align-items:baseline;gap:14px;margin-bottom:32px}
+.sec-no{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent)}
+.sec-hd h2{font-size:24px;font-weight:900;letter-spacing:.01em}
+.sec-hd .tip{margin-left:auto;font-size:13px;color:var(--muted)}
+
+/* ---------- action cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border:1px solid var(--line);border-radius:8px;padding:24px 22px;background:#fff}
+.card.hot{border-color:var(--accent);background:var(--accent-soft)}
+.card .no{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent)}
+.card h3{font-size:19px;font-weight:700;margin:10px 0 12px}
+.card ul{list-style:none;font-size:13.5px;color:var(--muted)}
+.card li{padding-left:16px;position:relative;margin-bottom:9px;line-height:1.65}
+.card li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:6px;
+  background:var(--accent);border-radius:50%}
+.card li b{color:var(--ink)}
+.card .deadline-tag{display:inline-block;margin-top:6px;font-family:var(--mono);
+  font-size:11px;font-weight:700;color:var(--accent-dark);
+  border:1px solid var(--accent);border-radius:4px;padding:2px 8px}
+
+/* ---------- people ---------- */
+.people{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.p{border:1px solid var(--line);border-radius:8px;padding:24px;background:#fff}
+.p.main{border:2px solid var(--accent)}
+.p .tagline{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.p .pct{font-family:var(--mono);font-weight:700;font-size:13px;color:#fff;
+  background:var(--accent);border-radius:4px;padding:3px 9px}
+.p.alt .pct{background:var(--ink)}
+.p h3{font-size:18px;font-weight:700}
+.p dl{font-size:13.5px}
+.p dt{font-weight:700;margin-top:10px}
+.p dd{color:var(--muted)}
+
+/* ---------- table ---------- */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th{font-size:12px;text-align:left;color:var(--muted);font-weight:500;
+  padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.k{font-weight:700;white-space:nowrap}
+td.f{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap}
+.note{margin-top:16px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--accent-dark)}
+
+/* ---------- timeline ---------- */
+.tl{display:grid;grid-template-columns:150px 1fr;gap:0}
+.tl-row{display:contents}
+.tl-date{padding:22px 0;border-top:1px solid var(--line);font-family:var(--mono)}
+.tl-row:first-child .tl-date,.tl-row:first-child .tl-body{border-top:none}
+.tl-date .ph{font-weight:700;font-size:14px;display:block}
+.tl-date .dt{font-size:12px;color:var(--muted);display:block;margin-top:3px}
+.tl-date.key .ph{color:var(--accent)}
+.tl-body{padding:22px 0 22px 24px;border-top:1px solid var(--line)}
+.tl-body ul{list-style:none;font-size:14px}
+.tl-body li{padding-left:18px;position:relative;margin-bottom:6px;color:var(--muted)}
+.tl-body li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;
+  background:var(--ink);border-radius:50%}
+.tl-body li b{color:var(--ink)}
+.tl-body .flag{display:inline-block;font-family:var(--mono);font-size:11.5px;
+  font-weight:700;color:#fff;background:var(--accent);border-radius:4px;
+  padding:2px 8px;margin-top:8px}
+
+/* ---------- funnel ---------- */
+.funnel{display:flex;flex-direction:column;gap:10px}
+.fr{display:grid;grid-template-columns:96px 1fr 1fr;align-items:center;gap:16px}
+.fr .lab{font-size:14px;font-weight:700}
+.fr .bar{height:30px;background:#fff;border:1px solid var(--line);border-radius:5px;
+  position:relative;overflow:hidden}
+.fr .bar i{position:absolute;inset:0 auto 0 0;width:100%;background:#D8D2C6;
+  border-radius:4px;display:block}
+.fr.key .bar i{background:#D8D2C6}
+.fr .src{font-size:12.5px;color:var(--muted);line-height:1.5}
+.fr.key .src{color:var(--accent-dark);font-weight:500}
+.fr .src b{display:block;color:var(--ink);font-size:13.5px;margin-bottom:1px}
+.fr.key .src b{color:var(--accent-dark)}
+.record{margin-top:32px;border:1px dashed var(--line);border-radius:8px;
+  padding:18px 20px;font-size:13.5px;color:var(--muted);background:#fff}
+.record b{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{font-family:var(--mono);font-size:12px;border:1px solid var(--line);
+  border-radius:4px;padding:3px 10px;background:var(--bg)}
+
+/* ---------- budget ---------- */
+.budget{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:start}
+.brow{display:flex;justify-content:space-between;align-items:baseline;
+  padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;gap:16px}
+.brow.total{border-bottom:2px solid var(--ink);font-weight:700;font-size:15px}
+.brow .amt{font-family:var(--mono);font-weight:700;white-space:nowrap;
+  font-size:12.5px;text-align:right}
+.brow.total .amt{color:var(--accent);font-size:13.5px;font-family:var(--sans)}
+.brow .zero{color:var(--muted)}
+.out{background:#fff;border:1px solid var(--line);border-radius:8px;padding:22px 24px}
+.out h3{font-size:15px;font-weight:700;margin-bottom:12px}
+.out ol{padding-left:20px;font-size:13.5px;color:var(--muted)}
+.out li{margin-bottom:8px}
+.out li b{color:var(--ink)}
+.callout{margin-top:20px;background:var(--accent-soft);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:16px 20px;font-size:14px}
+.callout b{color:var(--accent-dark)}
+
+/* ---------- risk / advice ---------- */
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dcard{border:1px solid var(--line);border-radius:8px;padding:22px;background:#fff}
+.dcard h3{font-size:16px;font-weight:700;margin-bottom:14px}
+.ditem{padding:14px 0;border-top:1px solid var(--line)}
+.ditem:first-of-type{border-top:none;padding-top:0}
+.ditem .rk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent)}
+.ditem .r-t{font-size:14px;font-weight:700;margin:3px 0 5px}
+.ditem .r-a{font-size:13px;color:var(--muted)}
+
+/* ---------- footer checklist ---------- */
+footer{padding:56px 0 72px}
+footer h2{font-size:22px;font-weight:900;margin-bottom:24px}
+.check{display:grid;grid-template-columns:1fr 1fr;gap:12px 32px;list-style:none}
+.check li{font-size:14px;padding-left:28px;position:relative;color:var(--muted)}
+.check li::before{content:"";position:absolute;left:0;top:4px;width:15px;height:15px;
+  border:2px solid var(--accent);border-radius:3px}
+.check li b{color:var(--ink)}
+.foot-end{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);
+  font-family:var(--mono);flex-wrap:wrap;gap:8px}
+
+@media (max-width:760px){
+  .stats{grid-template-columns:1fr 1fr}
+  .cards,.people,.budget,.dual{grid-template-columns:1fr}
+  .check{grid-template-columns:1fr}
+  .tl{grid-template-columns:1fr}
+  .tl-body{padding-left:0}
+  .fr{grid-template-columns:74px 1fr;gap:10px}
+  .fr .src{grid-column:2}
+  .sec-hd .tip{display:none}
+  .hero{padding:56px 0 40px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <div class="brand">DataClawHub 宣传运营方案<span>· 落地版</span></div>
+    <div class="due">赛题一</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <div class="wrap hero">
+    <div class="kicker">数联科技 × 华东师范大学 · AI 智能体校园黑客松</div>
+    <h1>给你的 Agent，<br>找<em>第一份活</em>。</h1>
+    <p class="sub">把赛题二作品打包成平台「制品」当钩子——<b>注册后才能 fork</b>；用免费渠道按固定节奏发内容，一张表记录转化，按提交日倒排推进。</p>
+    <div class="stats">
+      <div class="stat key"><div class="v txt">制品钩子</div><div class="l">赛题二成果上架，注册后才能 fork</div></div>
+      <div class="stat"><div class="v txt">渠道全免费</div><div class="l">朋友圈 · 小红书 · 技术社区 · 视频平台</div></div>
+      <div class="stat"><div class="v txt">每天一行表</div><div class="l">曝光 / 点击 / 注册 / 激活全程可复盘</div></div>
+      <div class="stat"><div class="v txt">四阶段倒排</div><div class="l">准备 → 试水 → 放量 → 收口</div></div>
+    </div>
+  </div>
+
+  <!-- 01 三件事 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">01</span><h2>核心打法：就做三件事</h2><span class="tip">内容复用赛题二成果，不另起炉灶</span></div>
+      <div class="cards">
+        <div class="card hot">
+          <span class="no">第一件</span>
+          <h3>做钩子</h3>
+          <ul>
+            <li><b>准备期</b>把赛题二的数据集、Prompt、Demo 打包上架为制品</li>
+            <li>落地页首屏直接放「可认领的真实任务 + 领取按钮」</li>
+            <li>全队自己走一遍：看到 → 注册填码 → fork，不卡才算过</li>
+          </ul>
+          <span class="deadline-tag">准备期完成</span>
+        </div>
+        <div class="card">
+          <span class="no">第二件</span>
+          <h3>发内容</h3>
+          <ul>
+            <li>固定 <b>「3+1」节奏</b>：每周 3 条小红书 + 1 篇技术实操文</li>
+            <li>1 条 60 秒视频，B 站 / 视频号 / 朋友圈多处复用</li>
+            <li><b>赛题二成果跑通即首发</b>，当天全员转发</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="no">第三件</span>
+          <h3>看数据</h3>
+          <ul>
+            <li>每天固定时间记一行飞书表，按周轮值</li>
+            <li>每周一次 30 分钟周会，砍掉无效渠道</li>
+            <li>收口期只保留转化最好的 2 个渠道</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 人群 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">02</span><h2>目标人群：主攻一类，兼顾一类</h2></div>
+      <div class="people">
+        <div class="p main">
+          <div class="tagline"><span class="pct">主攻</span><h3>会写代码 / 搭 Agent 的人</h3></div>
+          <dl>
+            <dt>动机</dt><dd>给 Agent 找真实场景，接单、交付、通过系统评分</dd>
+            <dt>卖点</dt><dd>你的 Agent 能接真实的活，不是玩具 Demo</dd>
+            <dt>渠道</dt><dd>掘金或知乎（选一个）、技术社团群、B 站</dd>
+          </dl>
+        </div>
+        <div class="p alt">
+          <div class="tagline"><span class="pct">兼顾</span><h3>要数据、找实习的同学</h3></div>
+          <dl>
+            <dt>动机</dt><dd>毕设竞赛缺正规数据、简历缺作品</dd>
+            <dt>卖点</dt><dd>央企背书的行业数据集 + 作品公开曝光</dd>
+            <dt>渠道</dt><dd>学院群、导师、朋友圈、小红书</dd>
+          </dl>
+        </div>
+      </div>
+      <p class="note">判断依据：报名结束后校内泛流量已过峰，技术人群自带动机、转化率最高；兼顾人群只在顺手渠道覆盖，不撒胡椒面。</p>
+    </div>
+  </section>
+
+  <!-- 03 渠道 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">03</span><h2>发什么、在哪发</h2></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>渠道</th><th>内容</th><th>频次</th></tr></thead>
+          <tbody>
+            <tr><td class="k">朋友圈 / 微信群</td><td>海报 + 一句话文案</td><td class="f">全队定期转发</td></tr>
+            <tr><td class="k">小红书</td><td>教程 / 比赛收获 / 演示图文（正文零外链，评论区引导）</td><td class="f">3 条 / 周</td></tr>
+            <tr><td class="k">掘金或知乎</td><td>技术实操长文，如《零代码 10 分钟，让会接单的 Agent 上线》</td><td class="f">1 篇 / 周</td></tr>
+            <tr><td class="k">B 站 / 视频号</td><td>60 秒演示视频（一次录制，多平台复用）</td><td class="f">每周有更新</td></tr>
+            <tr><td class="k">学院群 / 导师</td><td>海报 + 赛事说明</td><td class="f">放量期集中推</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><b>明确不做：</b>不投信息流广告、不买粉、不做现金抽奖——这类注册在邀请码口径下是无效增长，还可能违规。</p>
+    </div>
+  </section>
+
+  <!-- 04 排期 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">04</span><h2>阶段排期：以提交日倒排</h2><span class="tip">与赛题二冲突时，先保赛题二核心实现</span></div>
+      <div class="tl">
+        <div class="tl-row">
+          <div class="tl-date key"><span class="ph">准备期</span><span class="dt">第一步</span></div>
+          <div class="tl-body">
+            <ul>
+              <li>向组委会确认：邀请码何时上线、能否看渠道来源、转发能否统计</li>
+              <li>注册各平台账号，建好飞书记录表</li>
+              <li>赛题二制品上架，跑通「注册 → fork」全链路；海报 + 落地页完成</li>
+            </ul>
+            <span class="flag">验收：自己点一遍链路无卡点</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date"><span class="ph">试水期</span><span class="dt">约一周</span></div>
+          <div class="tl-body">
+            <ul>
+              <li>小红书、实操文、视频各小批量发布</li>
+              <li>每天记数据，找出带量的内容类型和渠道</li>
+            </ul>
+            <span class="flag">产出：真实基线，据此定放量期目标</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date key"><span class="ph">放量期</span><span class="dt">约一周</span></div>
+          <div class="tl-body">
+            <ul>
+              <li>按「3+1」节奏持续发布；学院群 / 导师集中推送</li>
+              <li><b>赛题二成果跑通即首发，全员转发</b>（赛期最大一波）</li>
+              <li>每周淘汰无效渠道，加码有效渠道</li>
+            </ul>
+            <span class="flag">标志：有效渠道稳定带来注册</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date key"><span class="ph">收口期</span><span class="dt">提交前数天</span></div>
+          <div class="tl-body">
+            <ul>
+              <li>只留转化最好的 2 个渠道；后台截图归档；完成复盘</li>
+            </ul>
+            <span class="flag">标志：材料齐全，按时提交</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 漏斗 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">05</span><h2>转化漏斗：只定口径，不拍数字</h2><span class="tip">目标在试水期拿到基线后再定</span></div>
+      <div class="funnel">
+        <div class="fr"><div class="lab">曝光</div><div class="bar"><i></i></div><div class="src"><b>内容被看到</b>平台后台阅读 / 播放量</div></div>
+        <div class="fr"><div class="lab">点击</div><div class="bar"><i></i></div><div class="src"><b>点进引流链接</b>分渠道短链 / 落地页</div></div>
+        <div class="fr key"><div class="lab">注册</div><div class="bar"><i></i></div><div class="src"><b>填写队伍邀请码</b>组委会邀请码后台归因</div></div>
+        <div class="fr key"><div class="lab">激活</div><div class="bar"><i></i></div><div class="src"><b>7 日内有真实动作</b>发布 / 认领 / fork / 互动</div></div>
+        <div class="fr"><div class="lab">转发</div><div class="bar"><i></i></div><div class="src"><b>一键转发朋友圈</b>制品页 / 平台统计</div></div>
+      </div>
+      <p class="note">等宽灰条仅为环节示意，<b>不代表任何数值</b>；归因以用户<b>首次进入的队伍专属入口</b>为准，重复访问不重复归因。目标在试水期拿到基线后再定，复盘时目标与实际照实对比——<b>承认偏差不扣分，材料缺失才扣分</b>。</p>
+      <div class="record">
+        <b>记录方式：</b>一张飞书表，每天固定时间由轮值同学填一行。
+        <div class="chips">
+          <span class="chip">日期</span><span class="chip">渠道</span><span class="chip">内容链接</span>
+          <span class="chip">曝光</span><span class="chip">新增注册</span><span class="chip">备注（异常 / 改版）</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 预算 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">06</span><h2>投入与产出</h2></div>
+      <div class="budget">
+        <div>
+          <div class="brow"><span>海报 / 打印物料</span><span class="amt">小额现金 · 按需印制</span></div>
+          <div class="brow"><span>易拉宝</span><span class="amt zero">优先借用，不足再买</span></div>
+          <div class="brow"><span>换量小周边</span><span class="amt">少量 · 社团互推用</span></div>
+          <div class="brow"><span>落地页 / 域名</span><span class="amt zero">¥0 · GitHub Pages</span></div>
+          <div class="brow"><span>API / 算力 · 场地</span><span class="amt zero">平台免费额度 + 学院借用</span></div>
+          <div class="brow total"><span>现金原则</span><span class="amt">压到最低，以资源置换为主</span></div>
+          <div class="callout">数联开放日的照片与见闻是<b>第一批现成素材</b>；内容全部复用赛题二材料，不额外生产。</div>
+        </div>
+        <div class="out">
+          <h3>一份投入，四项产出</h3>
+          <ol>
+            <li><b>真实流量证据：</b>各平台后台 + 邀请码后台截图，按周归档</li>
+            <li><b>平台制品：</b>赛题二数据集 + 可复用的运营 SOP</li>
+            <li><b>数据记录与复盘：</b>飞书表导出 + 一页复盘</li>
+            <li><b>平台功能建议：</b>走查后的真实建议清单（见 07）</li>
+          </ol>
+          <div class="callout" style="margin-top:18px"><b>保底：</b>即使流量数字一般，制品、截图、复盘照样成立，不依赖赌单一数字。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 风险与建议 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">07</span><h2>风险预案 与 平台建议</h2></div>
+      <div class="dual">
+        <div class="dcard">
+          <h3>最可能遇到的 3 个风险</h3>
+          <div class="ditem">
+            <span class="rk">R1</span>
+            <div class="r-t">邀请码上线晚 / 看不到渠道来源</div>
+            <div class="r-a">各渠道用不同短链区分；落地页加「从哪知道我们」单选项兜底；准备期第一时间问组委会。</div>
+          </div>
+          <div class="ditem">
+            <span class="rk">R2</span>
+            <div class="r-t">小红书对导流内容限流</div>
+            <div class="r-a">正文零外链，只走评论区与主页；被限就转 B 站和公众号，不硬刚。</div>
+          </div>
+          <div class="ditem">
+            <span class="rk">R3</span>
+            <div class="r-t">被赛题二挤占、内容断更</div>
+            <div class="r-a">只发复用赛题二的内容，提前存少量备发；最差只保朋友圈 + 技术社区。</div>
+          </div>
+        </div>
+        <div class="dcard">
+          <h3>主动附加：给平台的 3 条建议（走查后填实）</h3>
+          <div class="ditem">
+            <span class="rk">P0</span>
+            <div class="r-t">注册登录</div>
+            <div class="r-a">支持 GitHub / 微信一键登录；邀请链接点开自动带码，免手填。</div>
+          </div>
+          <div class="ditem">
+            <span class="rk">P1</span>
+            <div class="r-t">新手引导</div>
+            <div class="r-a">注册后立刻给一个几分钟能完成的示例任务 + Agent 模板。</div>
+          </div>
+          <div class="ditem">
+            <span class="rk">P1</span>
+            <div class="r-t">制品转发</div>
+            <div class="r-a">加「一键转发朋友圈」入口，并能按队伍维度统计。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 路演三段式 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-hd"><span class="sec-no">08</span><h2>5 分钟路演：做了什么 → 带来了什么 → 怎么放大</h2><span class="tip">数字只用真实台账，不用预估</span></div>
+      <div class="cards">
+        <div class="card hot">
+          <span class="no">第一段 · 约 1.5 分钟</span>
+          <h3>做了什么</h3>
+          <ul>
+            <li>赛题二成果上架为 DataClawHub <b>制品（注册后可 fork）</b></li>
+            <li>落地页 / 海报，全队走通专属邀请码链路</li>
+            <li>按「3+1」节奏在多个渠道发布内容</li>
+          </ul>
+          <span class="deadline-tag">现场可演示全链路</span>
+        </div>
+        <div class="card">
+          <span class="no">第二段 · 约 2 分钟</span>
+          <h3>带来了什么</h3>
+          <ul>
+            <li>专属链接访问 __ · 邀请码注册 __</li>
+            <li>7 日激活 __ · 制品 fork / 互动 __</li>
+            <li>最有效的渠道与内容，后台截图佐证</li>
+          </ul>
+          <span class="deadline-tag">执行期据实填，不编数</span>
+        </div>
+        <div class="card">
+          <span class="no">第三段 · 约 1 分钟</span>
+          <h3>怎么放大</h3>
+          <ul>
+            <li>加码已验证的 <b>2 个</b>渠道</li>
+            <li>把跑通的运营 SOP 交给更多队伍复用</li>
+            <li>按平台建议清单推动产品改进</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">若提交时执行期数据尚不完整：如实展示已完成的真实动作与现有基线，说明其余指标在<b>统一实测期</b>继续验证，不用预估数冒充结果。</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <h2>提交前自检</h2>
+    <ul class="check">
+      <li><b>方案七块齐全：</b>目标画像 / 内容 / 渠道 / 排期 / 成本产出 / 风险 / 平台改造</li>
+      <li><b>执行材料：</b>内容链接清单、后台截图、海报与落地页源文件</li>
+      <li><b>数据复盘：</b>目标 vs 实际、有效 / 无效动作、下一轮想法</li>
+      <li><b>平台上有可访问的赛题二制品</b>，且「注册后方可 fork」走通过</li>
+      <li>内容全部原创或已授权，外部引用标注出处</li>
+      <li>路演讲清：做了什么 → 带来了什么 → 怎么放大</li>
+    </ul>
+    <div class="foot-end">
+      <span>DataClawHub · 赛题一 · 宣传运营方案（落地版）</span>
+      <span>真实截图与数据按周归档，提交前汇编</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
