@@ -1,0 +1,410 @@
+{
+  "engine": "Windows SAPI / Chinese system voice",
+  "cues": [
+    {
+      "scene_id": "B01",
+      "start_sec": 0.6,
+      "end_sec": 5.114875,
+      "scene_start_sec": 0,
+      "scene_end_sec": 10,
+      "text": "数桥 DataBridge，让 AI Agent 可信取数。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B02",
+      "start_sec": 10.6,
+      "end_sec": 17.0939375,
+      "scene_start_sec": 10,
+      "scene_end_sec": 22,
+      "text": "演示库有 2 万订单、3,492 退款和 2,000 客户。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B03",
+      "start_sec": 22.6,
+      "end_sec": 29.084270833333335,
+      "scene_start_sec": 22,
+      "scene_end_sec": 34,
+      "text": "选定正式演示数据源，覆盖 9 个月，全部为模拟数据。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B04",
+      "start_sec": 34.6,
+      "end_sec": 40.873937500000004,
+      "scene_start_sec": 34,
+      "scene_end_sec": 45,
+      "text": "内容哈希标识数据版本，避免不同数据源的答案混用。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B05",
+      "start_sec": 45.6,
+      "end_sec": 52.209125,
+      "scene_start_sec": 45,
+      "scene_end_sec": 57,
+      "text": "先问：9月销售额是多少？系统不擅自选择口径。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B06",
+      "start_sec": 57.6,
+      "end_sec": 64.9186875,
+      "scene_start_sec": 57,
+      "scene_end_sec": 71,
+      "text": "销售额是否扣除成功退款？先确认口径，再执行查询。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B07",
+      "start_sec": 71.6,
+      "end_sec": 78.48875,
+      "scene_start_sec": 71,
+      "scene_end_sec": 83,
+      "text": "这里选择净销售额，扣除成功退款，不把退款算成收入。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B08",
+      "start_sec": 83.6,
+      "end_sec": 90.638875,
+      "scene_start_sec": 83,
+      "scene_end_sec": 97,
+      "text": "自然语言转换成结构化计划，指标、时间和条件都可检查。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B09",
+      "start_sec": 97.6,
+      "end_sec": 105.63799999999999,
+      "scene_start_sec": 97,
+      "scene_end_sec": 109,
+      "text": "模拟数据中，9月净销售额为 17,198,835.91 元。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B10",
+      "start_sec": 109.6,
+      "end_sec": 116.69895833333332,
+      "scene_start_sec": 109,
+      "scene_end_sec": 121,
+      "text": "答案附带口径、来源、版本和查询记录，不只是一个数字。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B11",
+      "start_sec": 121.6,
+      "end_sec": 127.86893749999999,
+      "scene_start_sec": 121,
+      "scene_end_sec": 133,
+      "text": "接着问下降原因，检验系统会不会凭订单数据编故事。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B12",
+      "start_sec": 133.6,
+      "end_sec": 140.06389583333333,
+      "scene_start_sec": 133,
+      "scene_end_sec": 149,
+      "text": "系统明确阻断无依据归因：订单数据不能证明变化原因。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B13",
+      "start_sec": 149.6,
+      "end_sec": 156.58372916666667,
+      "scene_start_sec": 149,
+      "scene_end_sec": 161,
+      "text": "缺少营销、价格与外部环境证据，系统说明限制与下一步。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B14",
+      "start_sec": 161.6,
+      "end_sec": 167.08404166666665,
+      "scene_start_sec": 161,
+      "scene_end_sec": 171,
+      "text": "可以查询变化幅度，不等于能够证明变化原因。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B15",
+      "start_sec": 171.6,
+      "end_sec": 179.2585,
+      "scene_start_sec": 171,
+      "scene_end_sec": 181,
+      "text": "现场采用规则模式，下面展示已归档测试，而非现场模型调用。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B16",
+      "start_sec": 181.6,
+      "end_sec": 188.5139375,
+      "scene_start_sec": 181,
+      "scene_end_sec": 197,
+      "text": "归档业务题验收为 37/37，包含正确澄清与拒答。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B17",
+      "start_sec": 197.6,
+      "end_sec": 204.204,
+      "scene_start_sec": 197,
+      "scene_end_sec": 213,
+      "text": "归档真实模型复测 67/67，与规则结果逐字段一致。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B18",
+      "start_sec": 213.6,
+      "end_sec": 219.65891666666667,
+      "scene_start_sec": 213,
+      "scene_end_sec": 225,
+      "text": "归档复测记录为 0 无依据编造，不代表无限场景保证。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B19",
+      "start_sec": 225.6,
+      "end_sec": 231.83927083333333,
+      "scene_start_sec": 225,
+      "scene_end_sec": 240,
+      "text": "确定性 Text-to-SQL 对照曾虚高 96.8 万元。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B20",
+      "start_sec": 240.6,
+      "end_sec": 247.64389583333332,
+      "scene_start_sec": 240,
+      "scene_end_sec": 254,
+      "text": "可信来自澄清、治理和可追溯执行，而不是只让 SQL 跑通。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "B21",
+      "start_sec": 254.6,
+      "end_sec": 259.5945208333333,
+      "scene_start_sec": 254,
+      "scene_end_sec": 270,
+      "text": "数据集为模拟数据，仓库已开源可复现。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A01",
+      "start_sec": 0.6,
+      "end_sec": 7.708895833333333,
+      "scene_start_sec": 0,
+      "scene_end_sec": 10,
+      "text": "DataClawHub 平台运营方案，让可信取数制品被看见、被使用。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A02",
+      "start_sec": 10.6,
+      "end_sec": 17.318604166666667,
+      "scene_start_sec": 10,
+      "scene_end_sec": 20,
+      "text": "方案以数桥制品为内容钩子，把产品价值连接到平台使用。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A03",
+      "start_sec": 20.6,
+      "end_sec": 27.723958333333336,
+      "scene_start_sec": 20,
+      "scene_end_sec": 32,
+      "text": "先提供可体验的制品，再传播实操内容，最后依据数据复盘。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A04",
+      "start_sec": 32.6,
+      "end_sec": 38.9638125,
+      "scene_start_sec": 32,
+      "scene_end_sec": 44,
+      "text": "主攻开发者与 Agent 搭建者，兼顾有数据实践需求的学生。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A05",
+      "start_sec": 44.6,
+      "end_sec": 52.338770833333335,
+      "scene_start_sec": 44,
+      "scene_end_sec": 56,
+      "text": "技术社区讲实操，图文渠道讲场景，短视频展示可信取数过程。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A06",
+      "start_sec": 56.6,
+      "end_sec": 64.39379166666667,
+      "scene_start_sec": 56,
+      "scene_end_sec": 68,
+      "text": "按准备、试水、放量和收口推进，先取得基线，再确定目标。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A07",
+      "start_sec": 68.6,
+      "end_sec": 75.98372916666666,
+      "scene_start_sec": 68,
+      "scene_end_sec": 80,
+      "text": "目前物料已备齐；邀请码、制品上架和全链路走查仍待完成。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A08",
+      "start_sec": 80.6,
+      "end_sec": 87.92902083333333,
+      "scene_start_sec": 80,
+      "scene_end_sec": 92,
+      "text": "曝光、点击、注册和激活分别记录，归因以平台后台为准。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A09",
+      "start_sec": 92.6,
+      "end_sec": 100.2489375,
+      "scene_start_sec": 92,
+      "scene_end_sec": 104,
+      "text": "复用产品、教程和演示素材，减少重复制作，明确协作责任。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A10",
+      "start_sec": 104.6,
+      "end_sec": 112.31343749999999,
+      "scene_start_sec": 104,
+      "scene_end_sec": 116,
+      "text": "入口未就绪就说明限制，渠道无效就调整，平台建议需走查验证。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A11",
+      "start_sec": 116.6,
+      "end_sec": 123.67845833333332,
+      "scene_start_sec": 116,
+      "scene_end_sec": 128,
+      "text": "当前能展示方案和物料，增长效果必须等待真实执行后回填。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A12",
+      "start_sec": 128.6,
+      "end_sec": 133.15954166666666,
+      "scene_start_sec": 128,
+      "scene_end_sec": 135,
+      "text": "接下来，查看已经准备好的线上物料。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A13",
+      "start_sec": 135.6,
+      "end_sec": 142.23387499999998,
+      "scene_start_sec": 135,
+      "scene_end_sec": 150,
+      "text": "线上落地页讲清制品价值与使用路径，邀请入口仍待配置。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A14",
+      "start_sec": 150.6,
+      "end_sec": 157.11414583333334,
+      "scene_start_sec": 150,
+      "scene_end_sec": 165,
+      "text": "移动视口检查阅读与按钮布局，展示适合社交传播的页面。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A15",
+      "start_sec": 165.6,
+      "end_sec": 172.98839583333333,
+      "scene_start_sec": 165,
+      "scene_end_sec": 177,
+      "text": "海报聚焦可信取数和可体验制品，不把占位邀请码当作可用入口。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A16",
+      "start_sec": 177.6,
+      "end_sec": 184.4438125,
+      "scene_start_sec": 177,
+      "scene_end_sec": 189,
+      "text": "移动视口继续检查海报信息层次，保留当前线上真实状态。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A17",
+      "start_sec": 189.6,
+      "end_sec": 195.624,
+      "scene_start_sec": 189,
+      "scene_end_sec": 199,
+      "text": "这是归档的桌面落地页实拍，用于留存物料上线证据。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A18",
+      "start_sec": 199.6,
+      "end_sec": 205.82920833333333,
+      "scene_start_sec": 199,
+      "scene_end_sec": 209,
+      "text": "移动视口证据展示已归档页面，方便复核内容与布局。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A19",
+      "start_sec": 209.6,
+      "end_sec": 216.3585,
+      "scene_start_sec": 209,
+      "scene_end_sec": 220,
+      "text": "海报证据证明物料已准备，不代表已经发布或取得传播效果。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A20",
+      "start_sec": 220.6,
+      "end_sec": 228.06358333333333,
+      "scene_start_sec": 220,
+      "scene_end_sec": 235,
+      "text": "执行台账记录发布、入口和后台截图，未发生的事项保持空白。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A21",
+      "start_sec": 235.6,
+      "end_sec": 242.73895833333333,
+      "scene_start_sec": 235,
+      "scene_end_sec": 250,
+      "text": "复盘表区分基线、目标和实际，依据真实后台证据解释差异。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A22",
+      "start_sec": 250.6,
+      "end_sec": 258.1985625,
+      "scene_start_sec": 250,
+      "scene_end_sec": 265,
+      "text": "后续逐日真实发布与回填，试水建立基线，再调整渠道并收口。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A23",
+      "start_sec": 265.6,
+      "end_sec": 271.85910416666667,
+      "scene_start_sec": 265,
+      "scene_end_sec": 275,
+      "text": "邀请码和上架完成后，再真实走通注册到 fork 的链路。",
+      "tempo": 1.0
+    },
+    {
+      "scene_id": "A24",
+      "start_sec": 275.6,
+      "end_sec": 282.06912500000004,
+      "scene_start_sec": 275,
+      "scene_end_sec": 285,
+      "text": "注册 DataClawHub 免费 fork 制品；专属入口就绪后开放体验。",
+      "tempo": 1.0
+    }
+  ]
+}

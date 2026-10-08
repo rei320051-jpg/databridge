@@ -1,0 +1,112 @@
+{
+  "user_approved_storyboards": true,
+  "approval_message": "那你继续",
+  "checks": [
+    {
+      "video": "赛题二",
+      "three_subtitle_samples": [
+        {
+          "scene_id": "B06",
+          "time_sec": 67.5,
+          "cue_start": 57.0,
+          "cue_end": 71.0,
+          "image": "qa/赛题二_B06_硬字幕.jpg"
+        },
+        {
+          "scene_id": "B09",
+          "time_sec": 106.0,
+          "cue_start": 97.0,
+          "cue_end": 109.0,
+          "image": "qa/赛题二_B09_硬字幕.jpg"
+        },
+        {
+          "scene_id": "B12",
+          "time_sec": 145.0,
+          "cue_start": 133.0,
+          "cue_end": 149.0,
+          "image": "qa/赛题二_B12_硬字幕.jpg"
+        }
+      ],
+      "timing": "PASS"
+    },
+    {
+      "video": "赛题一",
+      "three_subtitle_samples": [
+        {
+          "scene_id": "A03",
+          "time_sec": 29.0,
+          "cue_start": 20.0,
+          "cue_end": 32.0,
+          "image": "qa/赛题一_A03_硬字幕.jpg"
+        },
+        {
+          "scene_id": "A14",
+          "time_sec": 161.25,
+          "cue_start": 150.0,
+          "cue_end": 165.0,
+          "image": "qa/赛题一_A14_硬字幕.jpg"
+        },
+        {
+          "scene_id": "A20",
+          "time_sec": 231.25,
+          "cue_start": 220.0,
+          "cue_end": 235.0,
+          "image": "qa/赛题一_A20_硬字幕.jpg"
+        }
+      ],
+      "timing": "PASS"
+    }
+  ],
+  "videos": [
+    {
+      "file": "赛题二_演示视频_软字幕.mp4",
+      "duration_sec": 270.0,
+      "width": 1920,
+      "height": 1080,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "mean_volume_db": -23.2,
+      "bytes": 6693616,
+      "sha256": "0b1abc8c810630e37720de6079f1dae105d47fc4c2f4bb3b8ad7f320dd6aaec3",
+      "subtitle_track": true
+    },
+    {
+      "file": "赛题二_演示视频_硬字幕.mp4",
+      "duration_sec": 270.0,
+      "width": 1920,
+      "height": 1080,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "mean_volume_db": -23.2,
+      "bytes": 7417662,
+      "sha256": "7bcd47a6825b52207c67d204f82b7a607b68853c1aaa910c901cb40e05f812e3",
+      "subtitle_track": false
+    },
+    {
+      "file": "赛题一_演示视频_软字幕.mp4",
+      "duration_sec": 285.0,
+      "width": 1920,
+      "height": 1080,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "mean_volume_db": -22.6,
+      "bytes": 7118424,
+      "sha256": "8e010124294ec3eb51c1201e5894f91a62cb9c170743e85eaa29a574f31bfce0",
+      "subtitle_track": true
+    },
+    {
+      "file": "赛题一_演示视频_硬字幕.mp4",
+      "duration_sec": 285.0,
+      "width": 1920,
+      "height": 1080,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "mean_volume_db": -22.6,
+      "bytes": 8131809,
+      "sha256": "ddbfefff3c2e98c3077e3373d380e02c0f2075ccb68e8a63a3aee2891472a7dd",
+      "subtitle_track": false
+    }
+  ],
+  "visual_review": "PASS：已查看两片各三张成片字幕抽查图，字幕清晰、未被画面裁切，精确金额和拒答原因可见。",
+  "original_files_review": "PASS：上传前 git diff 与暂存区均确认原已跟踪文件无修改；全部交付新增文件位于本目录，未操作原压缩包。"
+}

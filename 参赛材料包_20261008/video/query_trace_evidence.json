@@ -1,0 +1,100 @@
+{
+  "query_id": "0a2bfb40-cb0c-4c97-bba5-bdbeeb3afb77",
+  "request": {
+    "metric": "net_sales",
+    "date_start": "2026-09-01",
+    "date_end": "2026-09-30",
+    "dataset_version": "demo-v1.1",
+    "group_by": [],
+    "filters": {},
+    "sort": "desc",
+    "limit": 100
+  },
+  "sql": [
+    {
+      "template": "SELECT * FROM dataset_metadata",
+      "parameters": []
+    },
+    {
+      "template": "SELECT 1 FROM orders WHERE dataset_version != ? LIMIT 1",
+      "parameters": [
+        "demo-v1.1"
+      ]
+    },
+    {
+      "template": "SELECT 1 FROM refunds WHERE dataset_version != ? LIMIT 1",
+      "parameters": [
+        "demo-v1.1"
+      ]
+    },
+    {
+      "template": "SELECT 1 FROM customers WHERE dataset_version != ? LIMIT 1",
+      "parameters": [
+        "demo-v1.1"
+      ]
+    },
+    {
+      "template": "SELECT code, message, table_name, row_number, field_name FROM data_quality_issues WHERE severity = 'warning' ORDER BY issue_id LIMIT 100",
+      "parameters": []
+    },
+    {
+      "template": "SELECT COALESCE(SUM(o.paid_amount_fen), 0) AS value FROM orders o WHERE o.payment_status = 'paid' AND o.paid_at >= ? AND o.paid_at < ?",
+      "parameters": [
+        "2026-09-01T00:00:00",
+        "2026-10-01T00:00:00"
+      ]
+    },
+    {
+      "template": "SELECT COALESCE(SUM(r.refund_amount_fen), 0) AS value FROM refunds r JOIN orders o ON o.order_id = r.order_id WHERE r.refund_status = 'success' AND r.refunded_at >= ? AND r.refunded_at < ?",
+      "parameters": [
+        "2026-09-01T00:00:00",
+        "2026-10-01T00:00:00"
+      ]
+    }
+  ],
+  "plan": {
+    "metric": "net_sales",
+    "date_start": "2026-09-01",
+    "date_end": "2026-09-30",
+    "dataset_version": "demo-v1.1",
+    "group_by": [],
+    "filters": {},
+    "sort": "desc",
+    "limit": 100
+  },
+  "status": "success",
+  "response": {
+    "status": "success",
+    "query_id": "0a2bfb40-cb0c-4c97-bba5-bdbeeb3afb77",
+    "metric": "net_sales",
+    "data": [
+      {
+        "net_sales": 1719883591
+      }
+    ],
+    "definition": "所选期间实付金额减去同期成功退款金额，两部分独立按各自事件时间计算；允许负数",
+    "unit": "分",
+    "display_unit": "元",
+    "display_divisor": 100,
+    "date_start": "2026-09-01",
+    "date_end": "2026-09-30",
+    "compare": null,
+    "timezone": "Asia/Shanghai",
+    "group_by": [],
+    "filters": {},
+    "source_tables": [
+      "orders",
+      "refunds"
+    ],
+    "dataset_version": "demo-v1.1",
+    "dictionary_version": "0.1.0",
+    "warnings": [
+      {
+        "code": "SIMULATED_DATA",
+        "message": "当前数据集为虚构模拟数据"
+      }
+    ],
+    "truncated": false
+  },
+  "elapsed_ms": 62.908
+}

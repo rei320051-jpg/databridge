@@ -1,0 +1,19 @@
+{
+  "python": "E:\\databridge-remote-inspect-20261002\\赛题二\\.venv\\Scripts\\python.exe",
+  "ffmpeg": "C:\\Users\\Bejiang\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-9.0.2-full_build\\bin\\ffmpeg.exe",
+  "ffprobe": "C:\\Users\\Bejiang\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-9.0.2-full_build\\bin\\ffprobe.exe",
+  "mode": "rules",
+  "browser": "msedge",
+  "online_pages": {
+    "landing": {
+      "url": "https://rei320051-jpg.github.io/databridge/?capture_ts=1791467663578149600",
+      "status": 200,
+      "sha256": "c243243c3dbf749442658c5b63f26de1bc4a1053200b28f280d6a6d3d5fa528a"
+    },
+    "poster": {
+      "url": "https://rei320051-jpg.github.io/databridge/poster.html?capture_ts=1791467663578149600",
+      "status": 200,
+      "sha256": "b26e19df8cf56514895bb8f0e0d8021a8639cf1146cbfdb7cd375c5f48468be7"
+    }
+  }
+}

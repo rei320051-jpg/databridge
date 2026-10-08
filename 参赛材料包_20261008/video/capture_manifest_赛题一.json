@@ -1,0 +1,224 @@
+{
+  "video": "赛题一",
+  "capture": "Playwright screenshots at 100ms",
+  "mode": "not_applicable",
+  "scenes": [
+    {
+      "scene_id": "A01",
+      "start_sec": 0.0,
+      "end_sec": 10.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A01.html",
+      "observed_text_sha256": "3d4722aa30e814eb31c225460f11fa82cd5f4716e4f23e9fac02806e0660b35f",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A02",
+      "start_sec": 10.0,
+      "end_sec": 20.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A03",
+      "start_sec": 20.0,
+      "end_sec": 32.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A04",
+      "start_sec": 32.0,
+      "end_sec": 44.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A05",
+      "start_sec": 44.0,
+      "end_sec": 56.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A06",
+      "start_sec": 56.0,
+      "end_sec": 68.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A07",
+      "start_sec": 68.0,
+      "end_sec": 80.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A08",
+      "start_sec": 80.0,
+      "end_sec": 92.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A09",
+      "start_sec": 92.0,
+      "end_sec": 104.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A10",
+      "start_sec": 104.0,
+      "end_sec": 116.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A11",
+      "start_sec": 116.0,
+      "end_sec": 128.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A12",
+      "start_sec": 128.0,
+      "end_sec": 135.0,
+      "frame_count": 70,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E8%B5%9B%E9%A2%98%E4%B8%80/%E8%B5%9B%E9%A2%98%E4%B8%80_%E8%BF%90%E8%90%A5%E6%96%B9%E6%A1%88%E8%B7%AF%E6%BC%94.html",
+      "observed_text_sha256": "fd337a5d3321274b588bcd050b692baf207530669196349e7f842b442aeba0fa",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A13",
+      "start_sec": 135.0,
+      "end_sec": 150.0,
+      "frame_count": 150,
+      "page_url": "https://rei320051-jpg.github.io/databridge/?capture_ts=1791468389088060700",
+      "observed_text_sha256": "e413c08a0fdde0753aef46b3b1595674dd259b4e9fc1360e7d40bb476a22896b",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A14",
+      "start_sec": 150.0,
+      "end_sec": 165.0,
+      "frame_count": 150,
+      "page_url": "https://rei320051-jpg.github.io/databridge/?capture_ts=1791468389088060700",
+      "observed_text_sha256": "e413c08a0fdde0753aef46b3b1595674dd259b4e9fc1360e7d40bb476a22896b",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A15",
+      "start_sec": 165.0,
+      "end_sec": 177.0,
+      "frame_count": 120,
+      "page_url": "https://rei320051-jpg.github.io/databridge/poster.html?capture_ts=1791468389088060700",
+      "observed_text_sha256": "f86578fae4a635eaffde18927cbb8ef91a99ef51c5a2810046061df587465037",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A16",
+      "start_sec": 177.0,
+      "end_sec": 189.0,
+      "frame_count": 120,
+      "page_url": "https://rei320051-jpg.github.io/databridge/poster.html?capture_ts=1791468389088060700",
+      "observed_text_sha256": "f86578fae4a635eaffde18927cbb8ef91a99ef51c5a2810046061df587465037",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A17",
+      "start_sec": 189.0,
+      "end_sec": 199.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A17.html",
+      "observed_text_sha256": "080493e28777aff293c4493cdde313506ec1923419e1a802d24de6227060c3b7",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A18",
+      "start_sec": 199.0,
+      "end_sec": 209.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A18.html",
+      "observed_text_sha256": "080493e28777aff293c4493cdde313506ec1923419e1a802d24de6227060c3b7",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A19",
+      "start_sec": 209.0,
+      "end_sec": 220.0,
+      "frame_count": 110,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A19.html",
+      "observed_text_sha256": "080493e28777aff293c4493cdde313506ec1923419e1a802d24de6227060c3b7",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A20",
+      "start_sec": 220.0,
+      "end_sec": 235.0,
+      "frame_count": 150,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A20.html",
+      "observed_text_sha256": "201ec3e901838d8e300f62ed2019ee47a422d3b3ea46f3cf5b3dddc55f90db38",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A21",
+      "start_sec": 235.0,
+      "end_sec": 250.0,
+      "frame_count": 150,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A21.html",
+      "observed_text_sha256": "a67f05ad29264b167e4a1f030e8ab8b4fd9255de3b01d4a7ca2888f45441d654",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A22",
+      "start_sec": 250.0,
+      "end_sec": 265.0,
+      "frame_count": 150,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A22.html",
+      "observed_text_sha256": "fe89acd0a541836809f04572bf70d2038c6472f6cab2e07a21de13f760dc0795",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A23",
+      "start_sec": 265.0,
+      "end_sec": 275.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A23.html",
+      "observed_text_sha256": "0b2eabff74324e31cde4437eab63eca68c3132ccaa4640abc3c50169492441e1",
+      "mode": "not_applicable"
+    },
+    {
+      "scene_id": "A24",
+      "start_sec": 275.0,
+      "end_sec": 285.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/A24.html",
+      "observed_text_sha256": "2d44d9000a981961d19f95f33034bfa2fac801ed80bb779ea91b66945e04b71f",
+      "mode": "not_applicable"
+    }
+  ],
+  "browser": "msedge"
+}

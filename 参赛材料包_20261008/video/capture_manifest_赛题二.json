@@ -1,0 +1,198 @@
+{
+  "video": "赛题二",
+  "capture": "Playwright screenshots at 100ms",
+  "mode": "rules",
+  "scenes": [
+    {
+      "scene_id": "B01",
+      "start_sec": 0.0,
+      "end_sec": 10.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B01.html",
+      "observed_text_sha256": "a1b89be44d81fdc5c3a86e3799af548a8d9b3c20c72b5cf8d69b311ad82e7ae6",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B02",
+      "start_sec": 10.0,
+      "end_sec": 22.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B02.html",
+      "observed_text_sha256": "ed48465c106e1125ff78c1dd4ba621ca2faca6f5f890dbdaa59b7d2326239980",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B03",
+      "start_sec": 22.0,
+      "end_sec": 34.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "eb0fd5b82998772826f4f5dbc0882e3f36c7900ee63687ec8f6469a1b914c05a",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B04",
+      "start_sec": 34.0,
+      "end_sec": 45.0,
+      "frame_count": 110,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "a301f430de9299c0183bbc68840d6aa119f4fed693f3bee46228b1bc8d1bc863",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B05",
+      "start_sec": 45.0,
+      "end_sec": 57.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "4f5f92c5734f36543ba352f7434e5515092dc0e896de2a3cc05e1cbad9ebecb9",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B06",
+      "start_sec": 57.0,
+      "end_sec": 71.0,
+      "frame_count": 140,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "4f5f92c5734f36543ba352f7434e5515092dc0e896de2a3cc05e1cbad9ebecb9",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B07",
+      "start_sec": 71.0,
+      "end_sec": 83.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "e4b932ac00220d1a27de5080dfb105509715524c6b01c18d3124f8ab967b9f5c",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B08",
+      "start_sec": 83.0,
+      "end_sec": 97.0,
+      "frame_count": 140,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "2deae332d11b5e666bf7e63170081f8b2eff2329c5813f623f7311c88793dc5f",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B09",
+      "start_sec": 97.0,
+      "end_sec": 109.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "e4b932ac00220d1a27de5080dfb105509715524c6b01c18d3124f8ab967b9f5c",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B10",
+      "start_sec": 109.0,
+      "end_sec": 121.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "2deae332d11b5e666bf7e63170081f8b2eff2329c5813f623f7311c88793dc5f",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B11",
+      "start_sec": 121.0,
+      "end_sec": 133.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "9d8411654d32c79835619bf51613825d6fd8628b56105422a2708cf7b4258f67",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B12",
+      "start_sec": 133.0,
+      "end_sec": 149.0,
+      "frame_count": 160,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "4445e5d0bf37ace3444659cc53ea22eadb8324a9e170f47c8af9d3e15f660a76",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B13",
+      "start_sec": 149.0,
+      "end_sec": 161.0,
+      "frame_count": 120,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "4445e5d0bf37ace3444659cc53ea22eadb8324a9e170f47c8af9d3e15f660a76",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B14",
+      "start_sec": 161.0,
+      "end_sec": 171.0,
+      "frame_count": 100,
+      "page_url": "http://127.0.0.1:8501/",
+      "observed_text_sha256": "4445e5d0bf37ace3444659cc53ea22eadb8324a9e170f47c8af9d3e15f660a76",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B15",
+      "start_sec": 171.0,
+      "end_sec": 181.0,
+      "frame_count": 100,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B15.html",
+      "observed_text_sha256": "370a498917ddef1d815789cd5cacafc76026d75300d131adb689ecd3f12a0c8d",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B16",
+      "start_sec": 181.0,
+      "end_sec": 197.0,
+      "frame_count": 160,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B16.html",
+      "observed_text_sha256": "032052d5a668c0f2f614559d372ba98390b1e26f3e82e0eb3e00723652f6f36b",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B17",
+      "start_sec": 197.0,
+      "end_sec": 213.0,
+      "frame_count": 160,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B17.html",
+      "observed_text_sha256": "6fc8f00242c2f1486c7ab53a16d06262514f4e69b7a50ea61ba0b74f7c6fde66",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B18",
+      "start_sec": 213.0,
+      "end_sec": 225.0,
+      "frame_count": 120,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B18.html",
+      "observed_text_sha256": "b26a0fb919f510720a68b4d9fce9fcefec7b83a92cb3c0e4dd10f4289f3ec20c",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B19",
+      "start_sec": 225.0,
+      "end_sec": 240.0,
+      "frame_count": 150,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B19.html",
+      "observed_text_sha256": "6791d30d04adf3b7b1a5b58ec4244c685567a50c4ad6b7518f9a0beec00ea04b",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B20",
+      "start_sec": 240.0,
+      "end_sec": 254.0,
+      "frame_count": 140,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B20.html",
+      "observed_text_sha256": "ffc93e3795498051a9c8f87add22f4c0d31aaac833c65d94103533bb784aa030",
+      "mode": "rules"
+    },
+    {
+      "scene_id": "B21",
+      "start_sec": 254.0,
+      "end_sec": 270.0,
+      "frame_count": 160,
+      "page_url": "file:///E:/databridge-remote-inspect-20261002/%E5%8F%82%E8%B5%9B%E6%9D%90%E6%96%99%E5%8C%85_20261008/video/_work/pages/B21.html",
+      "observed_text_sha256": "804201d6b711db671975f736c36231b4c23b3dc8935ad668d0f7b6a8fefba920",
+      "mode": "rules"
+    }
+  ],
+  "browser": "msedge",
+  "pickup_note": "查询计划完整入画，结果明细局部放大；查询、计划、SQL 同次查询留证。"
+}

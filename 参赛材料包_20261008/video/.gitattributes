@@ -1,0 +1,4 @@
+*.mp4 -text
+*.jpg -text
+*.wav -text
+*.srt text eol=lf

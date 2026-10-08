@@ -1,0 +1,21 @@
+{
+  "service": "databridge",
+  "version": "0.1.0",
+  "status": "ok",
+  "database_available": true,
+  "dataset_version": "demo-v1.1",
+  "is_simulated": 1,
+  "timezone": "Asia/Shanghai",
+  "coverage_start": "2026-01-01T00:00:00",
+  "coverage_end_exclusive": "2026-10-01T00:00:00",
+  "tables": [
+    "orders",
+    "refunds",
+    "customers"
+  ],
+  "row_counts": {
+    "orders": 20000,
+    "refunds": 3492,
+    "customers": 2000
+  }
+}
