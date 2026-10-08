@@ -1,0 +1,302 @@
+{
+  "title": "DataClawHub 平台运营方案路演",
+  "review_status": "pending_user_review",
+  "source_commit": "f773e88dcdef7b7adf255b10d6501f2e9e481cf3",
+  "total_duration_sec": 285,
+  "organizer_text": "数联科技 × 华东师范大学（阿里云赛事冠名赞助）",
+  "status_notice": "已有方案、线上物料与实拍证据；邀请码、制品上架、全链路走查和增长回填尚待真实执行。",
+  "url_source": {
+    "file": "赛题一/D1执行记录_20261008.md",
+    "section": "二、今日已完成",
+    "landing": "https://rei320051-jpg.github.io/databridge/",
+    "poster": "https://rei320051-jpg.github.io/databridge/poster.html",
+    "cache_busting": "录制时从该节重新读取 URL，并附加 capture_ts=实际录制时间戳；不使用过去缓存截图冒充当前线上录屏。"
+  },
+  "recording": {
+    "python": "E:/databridge-remote-inspect-20261002/赛题二/.venv/Scripts/python.exe",
+    "browser_channel_order": ["msedge", "chrome", "chromium"],
+    "capture_method": "每 100ms 截图并逐镜合成",
+    "output_resolution": [1920, 1080],
+    "desktop_viewport": [1280, 900],
+    "mobile_viewport": [390, 844],
+    "minimum_action_interval_ms": 800,
+    "voice": "zh-CN-YunxiNeural",
+    "subtitle_rule": "subtitle_text 原文即配音稿；每镜时间为累计 duration_sec，操作提前完成则保持画面。",
+    "write_scope": "参赛材料包_20261008/video/",
+    "prerequisites": [
+      "审核通过后才开始录制；优先完成赛题二产品演示。",
+      "本地路演页按原文件只读打开，逐节慢速滚动，不修改 HTML。",
+      "线上物料桌面和移动视口均实录；移动画面等比居中，不拉伸。",
+      "已有证据图标注为归档实拍证据，与本次线上实录分开。",
+      "台账和复盘 CSV 只读渲染，保持空白数据，不代填任何成果。",
+      "路演页中上架、账号登记与全链路验收等条目属于方案要求，不表述为已完成。",
+      "沿用当前 CSV 执行方式，不把旧路演页的飞书建表规划说成已实施。",
+      "线上占位邀请码不点击注册，不假扮真实邀请码、不代发内容、不操作平台上架。",
+      "不得改动跟踪源码、模板和已有压缩包；全部新文件仅输出至 video 目录。"
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "A01",
+      "duration_sec": 10,
+      "action": {
+        "type": "title_card",
+        "background": "black",
+        "foreground": "white",
+        "lines": ["DataClawHub 平台运营方案", "赛题一 · 平台运营方案", "数联科技 × 华东师范大学（阿里云赛事冠名赞助）"],
+        "note": "本片路演运营方案和物料准备，不宣称已经取得增长成绩。"
+      },
+      "subtitle_text": "DataClawHub 平台运营方案，让可信取数制品被看见、被使用。"
+    },
+    {
+      "scene_id": "A02",
+      "duration_sec": 10,
+      "action": {
+        "type": "open_local_roadshow",
+        "source": "赛题一/赛题一_运营方案路演.html",
+        "steps": ["按桌面视口打开本地 HTML", "展示首页主标题与价值主张", "保持页面原文不变"]
+      },
+      "subtitle_text": "方案以数桥制品为内容钩子，把产品价值连接到平台使用。"
+    },
+    {
+      "scene_id": "A03",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "核心打法：就做三件事",
+        "steps": ["慢速滚动到完整章节", "展示做钩子、发内容、看数据卡片"]
+      },
+      "subtitle_text": "先提供可体验的制品，再传播实操内容，最后依据数据复盘。"
+    },
+    {
+      "scene_id": "A04",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "目标人群：主攻一类，兼顾一类",
+        "steps": ["展示开发者与学生人群卡片", "停留在各自需求和吸引点"]
+      },
+      "subtitle_text": "主攻开发者与 Agent 搭建者，兼顾有数据实践需求的学生。"
+    },
+    {
+      "scene_id": "A05",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "发什么、在哪发",
+        "steps": ["展示渠道与内容匹配关系", "强调实操内容复用，不展示尚未发布的帖子为发布证据"]
+      },
+      "subtitle_text": "技术社区讲实操，图文渠道讲场景，短视频展示可信取数过程。"
+    },
+    {
+      "scene_id": "A06",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "阶段排期：以提交日倒排",
+        "steps": ["展示准备、试水、放量和收口阶段", "停留在试水期建立真实基线的条目"],
+        "overlay_text": "方案排期 · 非已完成成绩"
+      },
+      "subtitle_text": "按准备、试水、放量和收口推进，先取得基线，再确定目标。"
+    },
+    {
+      "scene_id": "A07",
+      "duration_sec": 12,
+      "action": {
+        "type": "hold_plan_with_status",
+        "steps": ["保持阶段排期页可见", "加状态说明，不修改原始路演页", "明确上架、专属邀请码与全链路走查尚未完成"],
+        "overlay_text": "已备齐物料 · 邀请码与制品上架待完成"
+      },
+      "subtitle_text": "目前物料已备齐；邀请码、制品上架和全链路走查仍待完成。"
+    },
+    {
+      "scene_id": "A08",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "转化漏斗：只定口径，不拍数字",
+        "steps": ["依次展示曝光、点击、注册、激活和制品互动", "说明归因以平台后台为准，静态网页参数不等于后台统计"]
+      },
+      "subtitle_text": "曝光、点击、注册和激活分别记录，归因以平台后台为准。"
+    },
+    {
+      "scene_id": "A09",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "投入与产出",
+        "steps": ["展示团队分工和内容复用方式", "不朗读尚未实测的预算、时间或收益数字"]
+      },
+      "subtitle_text": "复用产品、教程和演示素材，减少重复制作，明确协作责任。"
+    },
+    {
+      "scene_id": "A10",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_heading",
+        "heading": "风险预案 与 平台建议",
+        "steps": ["展示邀请码、渠道效果和协作风险预案", "将平台建议标注为真实走查后填实"]
+      },
+      "subtitle_text": "入口未就绪就说明限制，渠道无效就调整，平台建议需走查验证。"
+    },
+    {
+      "scene_id": "A11",
+      "duration_sec": 12,
+      "action": {
+        "type": "scroll_to_section",
+        "section_heading_suffix": "做了什么 → 带来了什么 → 怎么放大",
+        "steps": ["展示路演总结章节", "仅展示做了什么的现有材料，带来了什么保留为后续真实回填"],
+        "overlay_text": "方案已备 · 增长成绩未回填"
+      },
+      "subtitle_text": "当前能展示方案和物料，增长效果必须等待真实执行后回填。"
+    },
+    {
+      "scene_id": "A12",
+      "duration_sec": 7,
+      "action": {
+        "type": "hold_transition",
+        "steps": ["保持方案页底部自检区域", "切换到线上物料实录章节"],
+        "overlay_text": "接下来展示线上物料与归档证据"
+      },
+      "subtitle_text": "接下来，查看已经准备好的线上物料。"
+    },
+    {
+      "scene_id": "A13",
+      "duration_sec": 15,
+      "action": {
+        "type": "record_online_landing_desktop",
+        "url_key": "landing",
+        "viewport": [1280, 900],
+        "steps": ["从 D1 记录第二节读取落地页 URL，并加当前时间戳参数", "验证线上加载成功，慢速展示标题和制品价值", "不点击仍为占位的邀请入口"],
+        "overlay_text": "线上落地页实录 · 邀请入口待配置"
+      },
+      "subtitle_text": "线上落地页讲清制品价值与使用路径，邀请入口仍待配置。"
+    },
+    {
+      "scene_id": "A14",
+      "duration_sec": 15,
+      "action": {
+        "type": "record_online_landing_mobile",
+        "url_key": "landing",
+        "viewport": [390, 844],
+        "steps": ["用移动视口重新打开带时间戳的线上 URL", "慢速滚动标题、价值说明和操作指引", "等比居中展示，不将视口模拟称为实体手机测试"],
+        "overlay_text": "移动视口实录 · 邀请入口待配置"
+      },
+      "subtitle_text": "移动视口检查阅读与按钮布局，展示适合社交传播的页面。"
+    },
+    {
+      "scene_id": "A15",
+      "duration_sec": 12,
+      "action": {
+        "type": "record_online_poster_desktop",
+        "url_key": "poster",
+        "viewport": [1280, 900],
+        "steps": ["从 D1 记录第二节读取海报 URL，并加当前时间戳参数", "展示海报主标题与价值信息", "对邀请占位文字保持真实，禁止替换为伪造邀请码"],
+        "overlay_text": "线上海报实录 · 邀请码占位"
+      },
+      "subtitle_text": "海报聚焦可信取数和可体验制品，不把占位邀请码当作可用入口。"
+    },
+    {
+      "scene_id": "A16",
+      "duration_sec": 12,
+      "action": {
+        "type": "record_online_poster_mobile",
+        "url_key": "poster",
+        "viewport": [390, 844],
+        "steps": ["用移动视口打开带时间戳的线上海报", "慢速滚动到入口说明和页脚", "真实呈现当前布局，发现不适配则说明问题，不伪造修复"],
+        "overlay_text": "移动视口实录 · 当前线上布局"
+      },
+      "subtitle_text": "移动视口继续检查海报信息层次，保留当前线上真实状态。"
+    },
+    {
+      "scene_id": "A17",
+      "duration_sec": 10,
+      "action": {
+        "type": "show_archived_image",
+        "source": "赛题一/物料/执行证据/20261008/20261008_落地页_桌面.png",
+        "steps": ["等比展示原始证据图", "标注归档线上实拍，不称为本次即时录制"],
+        "overlay_text": "归档证据 · 落地页桌面"
+      },
+      "subtitle_text": "这是归档的桌面落地页实拍，用于留存物料上线证据。"
+    },
+    {
+      "scene_id": "A18",
+      "duration_sec": 10,
+      "action": {
+        "type": "show_archived_image",
+        "source": "赛题一/物料/执行证据/20261008/20261008_落地页_移动.png",
+        "steps": ["等比展示移动视口原始证据图", "保持归档证据标签可见"],
+        "overlay_text": "归档证据 · 落地页移动视口"
+      },
+      "subtitle_text": "移动视口证据展示已归档页面，方便复核内容与布局。"
+    },
+    {
+      "scene_id": "A19",
+      "duration_sec": 11,
+      "action": {
+        "type": "show_archived_image",
+        "source": "赛题一/物料/执行证据/20261008/20261008_海报_朋友圈.png",
+        "steps": ["等比展示海报证据图", "分段平移查看，避免整图缩小后不可读", "标明它证明线上物料存在，不证明朋友圈已经发帖"],
+        "overlay_text": "归档证据 · 海报页面 · 非发布成绩"
+      },
+      "subtitle_text": "海报证据证明物料已准备，不代表已经发布或取得传播效果。"
+    },
+    {
+      "scene_id": "A20",
+      "duration_sec": 15,
+      "action": {
+        "type": "show_csv_table",
+        "source": "赛题一/物料/执行台账_模板.csv",
+        "steps": ["用 UTF-8 BOM 只读解析 CSV，渲染为大字表格", "突出渠道、内容链接、专属入口、数据截图与备注列", "保留待发布和空白单元格，不代填曝光或注册数据"],
+        "overlay_text": "执行台账模板 · 待真实执行回填"
+      },
+      "subtitle_text": "执行台账记录发布、入口和后台截图，未发生的事项保持空白。"
+    },
+    {
+      "scene_id": "A21",
+      "duration_sec": 15,
+      "action": {
+        "type": "show_csv_table",
+        "source": "赛题一/物料/数据复盘_模板.csv",
+        "steps": ["只读渲染复盘表，保留空白基线、目标和实际列", "突出指标口径、数据来源、差异及原因分析", "不把静态页参数当作已采集的注册数据"],
+        "overlay_text": "数据复盘模板 · 口径先行，真实回填"
+      },
+      "subtitle_text": "复盘表区分基线、目标和实际，依据真实后台证据解释差异。"
+    },
+    {
+      "scene_id": "A22",
+      "duration_sec": 15,
+      "action": {
+        "type": "show_future_execution_plan",
+        "source": "赛题一/D1执行记录_20261008.md",
+        "source_section": "五、轮值表",
+        "plan_scope": "D2–D7 真实回填计划",
+        "steps": ["仅摘录未来执行安排，不展示整份记录中的历史审核用语", "展示试水首发、收集基线、调整渠道、归档和收口的计划", "明确当前使用 CSV，轮值人名与固定填表时间仍待确认"],
+        "overlay_text": "后续执行计划 · 先试水，再复盘与收口"
+      },
+      "subtitle_text": "后续逐日真实发布与回填，试水建立基线，再调整渠道并收口。"
+    },
+    {
+      "scene_id": "A23",
+      "duration_sec": 10,
+      "action": {
+        "type": "show_external_dependencies",
+        "steps": ["展示领取邀请码、制品上架、全链路走查的待办卡片", "不进入真实账号代领邀请码、代注册或发布制品"],
+        "overlay_text": "待完成：邀请码 · 制品上架 · 全链路走查"
+      },
+      "subtitle_text": "邀请码和上架完成后，再真实走通注册到 fork 的链路。"
+    },
+    {
+      "scene_id": "A24",
+      "duration_sec": 10,
+      "action": {
+        "type": "title_card",
+        "background": "black",
+        "foreground": "white",
+        "lines": ["注册 DataClawHub 免费 fork 制品", "专属入口与制品上架完成后开放体验", "数联科技 × 华东师范大学（阿里云赛事冠名赞助）"],
+        "note": "不展示具体 URL，不暗示占位入口或未上架制品当前可用。"
+      },
+      "subtitle_text": "注册 DataClawHub 免费 fork 制品；专属入口就绪后开放体验。"
+    }
+  ]
+}

@@ -1,0 +1,282 @@
+{
+  "title": "数桥 DataBridge 产品演示",
+  "review_status": "pending_user_review",
+  "source_commit": "f773e88dcdef7b7adf255b10d6501f2e9e481cf3",
+  "priority": "先录制本片，再录制运营方案",
+  "mode": "rules",
+  "total_duration_sec": 270,
+  "organizer_text": "数联科技 × 华东师范大学（阿里云赛事冠名赞助）",
+  "data_notice": "演示数据全部为模拟数据，不代表真实经营。",
+  "recording": {
+    "python": "E:/databridge-remote-inspect-20261002/赛题二/.venv/Scripts/python.exe",
+    "python_selection_note": "按顺序检查的仓库根虚拟环境均不存在，系统 python3 无法执行，故使用 README 对应项目目录内已验证可用的现有虚拟环境。",
+    "browser_channel_order": ["msedge", "chrome", "chromium"],
+    "capture_method": "每 100ms 截图并逐镜合成，保留同一页面会话的澄清上下文",
+    "output_resolution": [1920, 1080],
+    "minimum_action_interval_ms": 800,
+    "voice": "zh-CN-YunxiNeural",
+    "subtitle_rule": "subtitle_text 原文即配音稿；每镜时间为累计 duration_sec，操作提前完成则保持画面。",
+    "write_scope": "参赛材料包_20261008/video/",
+    "prerequisites": [
+      "审核通过后才启动录制、生成字幕、配音和视频。",
+      "在赛题二目录按 README 启动 FastAPI 与 Streamlit，使用同一个已选解释器。",
+      "FastAPI 绑定 127.0.0.1:8001；Streamlit 使用 127.0.0.1:8501。",
+      "进程环境显式设置 DATABRIDGE_AGENT_MODE=rules，禁止继承 model 模式。",
+      "DATABRIDGE_DATABASE 指向现有 outputs/demo-v1.1.sqlite3；不重建或改写演示库。",
+      "DATABRIDGE_RECORDS、日志、截图、音频与临时渲染页均指向本片产物目录。",
+      "页面选择 live 后端与正式联调库 demo-v1.1；health 版本和行数不匹配则停止。",
+      "归档报告采用只读摘录展示，保留出处与范围，不运行会改写仓库测试报告的脚本。"
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "B01",
+      "duration_sec": 10,
+      "mode": "rules",
+      "action": {
+        "type": "title_card",
+        "background": "black",
+        "foreground": "white",
+        "lines": ["数桥 DataBridge", "面向 AI Agent 的可信取数平台", "数联科技 × 华东师范大学（阿里云赛事冠名赞助）", "AI 智能体校园黑客松参赛作品"],
+        "note": "标题板仅介绍作品，不呈现真实经营或新测试成绩。"
+      },
+      "subtitle_text": "数桥 DataBridge，让 AI Agent 可信取数。"
+    },
+    {
+      "scene_id": "B02",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "show_health",
+        "url": "http://127.0.0.1:8001/health",
+        "steps": ["读取真实 health 响应，渲染为大字体 JSON", "聚焦 status、dataset_version、row_counts", "验证订单、退款和客户数量，与正式库不符则停止"],
+        "expected": {"status": "ok", "dataset_version": "demo-v1.1", "row_counts": {"orders": 20000, "refunds": 3492, "customers": 2000}}
+      },
+      "subtitle_text": "演示库有 2 万订单、3,492 退款和 2,000 客户。"
+    },
+    {
+      "scene_id": "B03",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "open_app_and_select_source",
+        "url": "http://127.0.0.1:8501",
+        "steps": ["选择 live 后端，地址为 http://127.0.0.1:8001", "在数据接入页选择正式联调库 demo-v1.1", "展示页面的数据源、行数和数据期间"],
+        "overlay_text": "模拟数据 · 正式演示库"
+      },
+      "subtitle_text": "选定正式演示数据源，覆盖 9 个月，全部为模拟数据。"
+    },
+    {
+      "scene_id": "B04",
+      "duration_sec": 11,
+      "mode": "rules",
+      "action": {
+        "type": "show_dataset_identity",
+        "steps": ["在数据接入页定位数据集版本及内容哈希", "滚动稳定停留，确保字段清晰", "只呈现实际页面已有字段，不编造哈希或版本"],
+        "overlay_text": "内容哈希用于标识数据集"
+      },
+      "subtitle_text": "内容哈希标识数据版本，避免不同数据源的答案混用。"
+    },
+    {
+      "scene_id": "B05",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "submit_question",
+        "steps": ["进入智能取数页", "在用自然语言提问输入框缓慢输入问题", "点击提问并等待实际返回"],
+        "question": "9月销售额是多少"
+      },
+      "subtitle_text": "先问：9月销售额是多少？系统不擅自选择口径。"
+    },
+    {
+      "scene_id": "B06",
+      "duration_sec": 14,
+      "mode": "rules",
+      "action": {
+        "type": "show_clarification",
+        "steps": ["定位需要补充信息区域", "展示实返口径问题及选项", "比较净销售额与支付金额，先不提交选择"],
+        "note": "若出现附加时间澄清，先按正式数据覆盖期间选择对应九月，保留全过程；不得剪成无需澄清的直接作答。"
+      },
+      "subtitle_text": "销售额是否扣除成功退款？先确认口径，再执行查询。"
+    },
+    {
+      "scene_id": "B07",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "resolve_clarification",
+        "steps": ["选择净销售额，值为 net_sales", "点击提交选择，保留澄清上下文", "等待 success 返回，截取真实响应供后续校验"],
+        "expected_metric": "net_sales"
+      },
+      "subtitle_text": "这里选择净销售额，扣除成功退款，不把退款算成收入。"
+    },
+    {
+      "scene_id": "B08",
+      "duration_sec": 14,
+      "mode": "rules",
+      "action": {
+        "type": "show_query_plan",
+        "steps": ["进入结果依据页", "展开查看结构化查询计划", "展示实际 resp.plan JSON 中的指标、时间范围和筛选字段"],
+        "note": "展示真实返回的计划，不能用预写示例代替本次查询。"
+      },
+      "subtitle_text": "自然语言转换成结构化计划，指标、时间和条件都可检查。"
+    },
+    {
+      "scene_id": "B09",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "show_exact_result",
+        "steps": ["返回智能取数页的查询结果明细", "聚焦保留小数的明细及下方精确金额文字", "校验实际返回数据中的净销售额等于预期金额；不一致则停止"],
+        "expected_amount_yuan": "17198835.91",
+        "overlay_text": "模拟数据查询结果 · 净销售额",
+        "note": "顶部汇总卡片按整数显示，因此不把该卡片当作精确到分的展示依据；不得修改页面源码或伪造数字。"
+      },
+      "subtitle_text": "模拟数据中，9月净销售额为 17,198,835.91 元。"
+    },
+    {
+      "scene_id": "B10",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "show_traceability",
+        "steps": ["进入结果依据页", "依次展示指标定义、来源表、时间范围、数据集版本", "滚动到本次实际 SQL 和查询编号"],
+        "overlay_text": "口径 · 来源 · 版本 · 查询记录"
+      },
+      "subtitle_text": "答案附带口径、来源、版本和查询记录，不只是一个数字。"
+    },
+    {
+      "scene_id": "B11",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "submit_question",
+        "steps": ["回到智能取数页", "输入因果问题并点击提问", "等待 rules 工作流真实返回"],
+        "question": "为什么9月净销售额下降了"
+      },
+      "subtitle_text": "接着问下降原因，检验系统会不会凭订单数据编故事。"
+    },
+    {
+      "scene_id": "B12",
+      "duration_sec": 16,
+      "mode": "rules",
+      "action": {
+        "type": "show_refusal",
+        "steps": ["展示数据不足状态和订单数据不能证明变化原因的实返信息", "进入结果依据页，聚焦原因码", "核验没有成功查询结果或凭空归因"],
+        "expected_status": "insufficient_data",
+        "expected_blocked_reason": "causal_reasoning_unsupported",
+        "note": "契约实际字段名为 reason，实际状态为 insufficient_data；画面不可伪造为名叫 blocked 的返回状态。"
+      },
+      "subtitle_text": "系统明确阻断无依据归因：订单数据不能证明变化原因。"
+    },
+    {
+      "scene_id": "B13",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "show_missing_evidence",
+        "steps": ["在结果依据页展示 missing 与 suggestion", "聚焦营销活动数据、价格调整记录、外部环境数据", "保持原因和建议同时可读"]
+      },
+      "subtitle_text": "缺少营销、价格与外部环境证据，系统说明限制与下一步。"
+    },
+    {
+      "scene_id": "B14",
+      "duration_sec": 10,
+      "mode": "rules",
+      "action": {
+        "type": "hold_refusal",
+        "steps": ["保持原因码和限制信息可见", "不补充虚构的经营解释"],
+        "overlay_text": "能算变化，不等于能证明原因"
+      },
+      "subtitle_text": "可以查询变化幅度，不等于能够证明变化原因。"
+    },
+    {
+      "scene_id": "B15",
+      "duration_sec": 10,
+      "mode": "rules",
+      "action": {
+        "type": "show_archived_evidence_intro",
+        "source": "赛题二/docs/测试报告.md",
+        "steps": ["打开从归档报告只读生成的证据页", "明确标注归档测试证据与本次规则演示的区别"],
+        "overlay_text": "以下为已归档测试证据 · 本片现场为 rules"
+      },
+      "subtitle_text": "现场采用规则模式，下面展示已归档测试，而非现场模型调用。"
+    },
+    {
+      "scene_id": "B16",
+      "duration_sec": 16,
+      "mode": "rules",
+      "action": {
+        "type": "show_archived_business_test",
+        "source": "赛题二/docs/测试报告.md",
+        "source_section": "4.1 正式库 S2 完成率",
+        "steps": ["只读摘录正式库 S2 验收结论", "展示出处与正确澄清、正确拒答也属于判定正确的说明"],
+        "overlay_text": "37/37 业务题验收通过 · 含正确澄清与拒答"
+      },
+      "subtitle_text": "归档业务题验收为 37/37，包含正确澄清与拒答。"
+    },
+    {
+      "scene_id": "B17",
+      "duration_sec": 16,
+      "mode": "rules",
+      "action": {
+        "type": "show_archived_model_retest",
+        "source": "赛题二/docs/测试报告.md",
+        "source_section": "4.2 真实大模型全量复测",
+        "steps": ["只读展示 model 与 rules 信封逐字段一致结论", "标注真实模型只解析结构化槽位，非直接生成 SQL", "不启动模型、不读取或展示密钥"],
+        "overlay_text": "67/67 归档真实模型复测与 rules 一致"
+      },
+      "subtitle_text": "归档真实模型复测 67/67，与规则结果逐字段一致。"
+    },
+    {
+      "scene_id": "B18",
+      "duration_sec": 12,
+      "mode": "rules",
+      "action": {
+        "type": "show_archived_fabrication_count",
+        "source": "赛题二/docs/测试报告.md",
+        "source_section": "4.2 无依据编造",
+        "steps": ["展示归档复测的无依据编造记录", "同时保留测试范围说明，避免全场景保证"],
+        "overlay_text": "0 无依据编造 · 限归档复测范围"
+      },
+      "subtitle_text": "归档复测记录为 0 无依据编造，不代表无限场景保证。"
+    },
+    {
+      "scene_id": "B19",
+      "duration_sec": 15,
+      "mode": "rules",
+      "action": {
+        "type": "show_archived_baseline_comparison",
+        "source": "赛题二/docs/测试报告.md",
+        "source_section": "4.1 正式库 S1 虚高实例与诚实声明",
+        "steps": ["展示归档确定性 Text-to-SQL 行为基线的虚高结论", "明确标注该对照未调用真实模型", "仅用允许的近似虚高金额作讲解，不把基线表述为新跑的真实模型实验"],
+        "overlay_text": "确定性 Text-to-SQL 行为基线 · 虚高 96.8 万元"
+      },
+      "subtitle_text": "确定性 Text-to-SQL 对照曾虚高 96.8 万元。"
+    },
+    {
+      "scene_id": "B20",
+      "duration_sec": 14,
+      "mode": "rules",
+      "action": {
+        "type": "show_trust_chain",
+        "steps": ["在证据页展示澄清、结构化计划、只读执行、结果追溯的流程", "说明流程来自已演示的真实接口和页面", "不把示意流程冒充额外现场测试"],
+        "overlay_text": "澄清 → 计划 → 只读执行 → 追溯"
+      },
+      "subtitle_text": "可信来自澄清、治理和可追溯执行，而不是只让 SQL 跑通。"
+    },
+    {
+      "scene_id": "B21",
+      "duration_sec": 16,
+      "mode": "rules",
+      "action": {
+        "type": "title_card",
+        "background": "black",
+        "foreground": "white",
+        "lines": ["数桥 DataBridge", "数据集为模拟数据 · 仓库已开源可复现", "数联科技 × 华东师范大学（阿里云赛事冠名赞助）"],
+        "note": "不展示具体 GitHub 地址；开源状态在正式录制前只读复核。"
+      },
+      "subtitle_text": "数据集为模拟数据，仓库已开源可复现。"
+    }
+  ]
+}
