@@ -20,10 +20,10 @@
 python -m venv .venv
 
 # 安装依赖
-.venv\Scripts\python.exe -m pip install -r app/requirements.txt
+.venv\Scripts\python.exe -m pip install -r app/requirements.txt -r requirements.txt
 ```
 
-上述仅为页面依赖：`streamlit` 和 `pandas`。运行成员 1 正式后端时另需安装本目录的 `requirements.txt`。
+上述同时安装页面与正式后端依赖，包括 multipart 上传解析。所有命令在本目录（赛题二）执行。
 
 ### 1.2 运行
 
@@ -44,11 +44,10 @@ python -m venv .venv
 .venv\Scripts\python.exe app\mock_server.py --port 8000
 ```
 
-然后把页面切到 live 模式（页面左侧栏切换，或运行前设置环境变量）：
+参考 HTTP 服务供 `tests/live_mode_test.py` 和 QueryClient 协议测试使用；页面正式演示请使用下一节的 FastAPI。参考服务不是正式数据库，不能把其结果冒充正式数据。
 
 ```powershell
-$env:DATABRIDGE_BACKEND = "live"
-$env:DATABRIDGE_API = "http://127.0.0.1:8000"
+.venv\Scripts\python.exe tests/live_mode_test.py
 ```
 
 > 它不是正式后端。成员 1 的 FastAPI 执行层已独立交付；自然语言入口与页面响应仍须在三方联调时逐字段对齐。
@@ -77,7 +76,10 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 通过真实 HTTP 调用平台。自然语言入口支持共享 v1.2 的八个指标，三项派生指标在 Agent 层组合可信基础查询。
 
 页面内置 85,018 单的模拟数据与正式后端 20,000 单演示数据不能混用答案或版本；
-`/datasets/inspect` 仍未在正式后端实现，页面 live 还不能声称完整联调。
+正式演示请在页面选择 **live + http://127.0.0.1:8001 + 正式联调库 demo-v1.1**。
+`/health` 必须返回 `status=ok`、`dataset_version=demo-v1.1`、`row_counts.orders=20000`。
+API 默认读取正式库，不再误用 small 测试库；环境变量可显式覆盖。`/datasets/inspect` 已按冻结契约实现，
+检查正式 CSV 但**不导入、不激活**。页面支持发起后端质检并阻止混库查询；自定义数据导入后通过 API/CLI 查询。
 成员 2 的交付和运行/边界见 `docs/member2_delivery.md`；成员 1 的对齐项见
 `docs/member1_integration_status.md`，结构化请求样例见 `docs/api_usage.md`。
 
@@ -91,6 +93,7 @@ python -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 .venv\Scripts\python.exe tests\run_testset.py 开发集  # 测试集自动评分（37 题）
 .venv\Scripts\python.exe tests\run_testset.py 保留集  # 只读基线检查（最终测试才正式跑）
 .venv\Scripts\python.exe tests\formal_dataset_test.py # 正式库 demo-v1.1 × 页面管线一致性（35 项）
+.venv\Scripts\python.exe tests\formal_delivery_test.py # 正式启动、上传质检、真实 Streamlit→HTTP 连查三次
 .venv\Scripts\python.exe tests\run_experiment.py      # S1 vs S2 对照实验（37 题 × 2 方案）
 .venv\Scripts\python.exe tests\is001_refund_timing.py # IS-001 退款时间归属两口径对比
 .venv\Scripts\python.exe tests\export_showcase_data.py  # 导出展示页数据
@@ -294,8 +297,21 @@ $env:DATABRIDGE_API = "http://127.0.0.1:8000"
 
 ## 8. 当前限制
 
-1. 页面默认仍使用页面侧参考实现；成员 1 正式查询服务已并入源码，但自然语言入口、数据上传与统一数据集尚未完成三方联调。
+1. 页面默认为本地参考实现；live 可查询内置正式 demo-v1.1，已验证真实 Streamlit→HTTP 连续三次取数。上传可调用正式质检，但不会激活数据库；自定义数据目前通过导入脚本与 API/CLI 使用，不宣称页面上传后即可正式查询。
 2. 页面 Agent 回放与正式运营 Agent 分别保留；正式 Agent 已支持本地与 HTTP 调用，同一正式数据版本下可复现简报。
 3. 页面与正式自然语言入口支持 5 个基础指标及退款率、客单价、支付人均消费；结构化 `/v1/query` 仍为 5 个基础指标，派生指标由 Agent 层组合分子分母，不是执行层原生接口。
 4. 净销售额按退款完成时间归属期间（IS-001 方案 A，见 `docs/口径冻结确认单_2026-10-04.md`）；自然语言比较仍仅支持完整自然月环比，同比/任意两期比较明确拒答。
 5. 演示数据为模拟数据，任何结论都不代表真实经营情况。
+
+## 9. 打包与独立解包验收
+
+确保 git 改动已提交（仅暂存不够），并按 §1.3.1 构建 demo 与 small 数据库。随后：
+
+```powershell
+.venv\Scripts\python.exe scripts/build_submission.py
+.venv\Scripts\python.exe scripts/verify_submission.py dist/DataBridge_最终提交包_20261008.zip
+```
+
+替换 zip 文件名为当天生成的名称。打包前检查两份数据库的完整性、元数据、业务表与源 CSV 逐行一致性；
+解包验收逐文件核对 SHA256，并在临时独立目录运行正式交付测试，包括真实 Streamlit→HTTP 连查三次。
+临时验收目录在结束后清理。没有录制演示视频或代替赛事平台提交。

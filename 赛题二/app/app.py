@@ -233,6 +233,7 @@ def _reset_query() -> None:
     ss["pending_question"] = ""
     ss["resolved_context"] = {}
     ss["history"] = []
+    ss["agent_result"] = None
 
 
 def _register_dataset(tables: dict, source: str,
@@ -275,10 +276,9 @@ with st.sidebar:
     backend_mode = "mock" if mode_label.startswith("mock") else "live"
 
     if backend_mode == "live":
-        st.warning(
-            "成员 2 已提供正式 `/agent/query` 自然语言入口，但当前页面数据版本与正式库不同，"
-            "正式 `/datasets/inspect` 和数据集激活尚未完成。"
-            "切换 live 前请先完成三方数据集联调，避免混用模拟与正式结果。"
+        st.info(
+            "正式查询请在数据接入区选择 demo-v1.1，并连接 8001 端口。"
+            "上传文件可做后端质检，但不会自动替换数据库；新数据须通过导入脚本启用。"
         )
 
     api_url = st.text_input("后端地址", value=app_config.API_BASE_URL,
@@ -291,11 +291,17 @@ with st.sidebar:
         _c = client_mod.QueryClient(mode="live", base_url=api_url,
                                     timeout=app_config.API_TIMEOUT)
         health = _c.health()
+        if health.get("status") == "ok":
+            st.caption(f"后端数据版本：{health.get('dataset_version')} · "
+                       f"覆盖：{health.get('coverage_start', '')[:10]} ~ "
+                       f"{health.get('coverage_end_exclusive', '')[:10]}（右端不含）")
+        else:
+            st.warning("正式后端未就绪，请检查启动命令、端口与数据库。")
 
     st.divider()
     st.markdown("### 契约状态")
     st.caption(f"接口契约版本：v{MODULE_VERSION}（{CONTRACT_DATE}）")
-    st.caption(f"数据集版本：{DATASET_VERSION}")
+    st.caption(f"参考模拟数据版本：{DATASET_VERSION}（当前版本见数据接入区）")
     st.caption(f"业务基准日：{DATASET_COVERAGE['end']}")
     st.caption(f"数据覆盖：{DATASET_COVERAGE['start']} ~ {DATASET_COVERAGE['end']}")
     st.caption("功能冻结日：2026-10-08")
@@ -330,8 +336,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.caption(
-    "模拟业务数据 · 数据覆盖 2026-06-01 ~ 2026-09-30 · 数据集版本 "
-    f"{DATASET_VERSION} · 接口契约 v{MODULE_VERSION}"
+    f"模拟业务数据 · 当前版本与覆盖以数据接入区为准 · 接口契约 v{MODULE_VERSION}"
 )
 
 tab_data, tab_dict, tab_query, tab_evidence, tab_agent = st.tabs(
@@ -347,8 +352,8 @@ def render_data_zone() -> dict:
     st.subheader("数据接入区")
     st.caption(
         "对应分工文档 §5.2.2「数据接入区」。"
-        "正式的数据导入与质量检查由成员 1 的 `/datasets/inspect` 提供，"
-        "此处为页面侧对照实现，用于接口未就绪时演示与交叉验证。"
+        "mock 使用本地对照质检；live 上传可点击正式后端质检。"
+        "质检不等于导入或激活，正式 CSV 格式见 docs/data_dictionary.md。"
     )
 
     uploaded = st.file_uploader(
@@ -373,6 +378,13 @@ def render_data_zone() -> dict:
 
     # 切换内置数据源时清空历史查询，避免把旧数据集的结论当成新数据集的
     source_key = ("formal" if use_formal else "demo") + ("-anomaly" if use_anomaly else "")
+    if uploaded:
+        import hashlib
+        source_key = "upload-" + hashlib.sha256(b"".join(
+            f.name.encode() + b"\0" + f.getvalue() for f in uploaded)).hexdigest()
+    source_key += f"|{backend_mode}|{api_url}"
+    if backend_mode == "live":
+        source_key += f"|{(health or {}).get('status')}|{(health or {}).get('dataset_version')}"
     if st.session_state.get("active_source_key") != source_key:
         _reset_query()
         st.session_state["active_source_key"] = source_key
@@ -415,6 +427,31 @@ def render_data_zone() -> dict:
     rec = _register_dataset(tables, source, explicit_version=explicit_version,
                             coverage_months=coverage_months)
     report = quality_mod.inspect_datasets(tables, version=explicit_version or rec["version"])
+    _client.query_block_reason = None
+    if backend_mode == "live":
+        if uploaded:
+            _client.query_block_reason = "上传不会切换正式数据库，禁止用旧库回答新数据问题。自定义数据请按使用说明导入后通过 API/CLI 查询；页面 live 首版仅支持内置正式库。"
+            inspect_key = source_key
+            if st.button("运行正式后端质检"):
+                try:
+                    st.session_state["formal_inspection"] = (inspect_key, _client.inspect_files(
+                        {f.name: f.getvalue() for f in uploaded}))
+                except client_mod.BackendError as exc:
+                    st.error(str(exc))
+            saved = st.session_state.get("formal_inspection")
+            if saved and saved[0] == inspect_key:
+                report = saved[1]
+                st.caption("以下为正式后端质检结果；此操作未导入或激活任何数据。")
+        elif not use_formal:
+            _client.query_block_reason = "live 模式请选择正式联调库 demo-v1.1，不可将 85k 模拟数据交给 20k 正式库查询。"
+        elif not health or health.get("status") != "ok":
+            _client.query_block_reason = "正式后端未就绪，请启动服务并确认健康检查通过。"
+        elif health.get("dataset_version") != explicit_version:
+            _client.query_block_reason = f"页面版本 {explicit_version} 与后端版本 {health.get('dataset_version')} 不一致，已阻止混库查询。"
+        if _client.query_block_reason:
+            st.warning(_client.query_block_reason)
+        else:
+            st.success(f"正式查询已就绪：页面与后端版本均为 {explicit_version}。")
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("数据表数量", len(tables))
@@ -425,7 +462,7 @@ def render_data_zone() -> dict:
     st.markdown(
         '<div class="db-card"><h4>当前数据集（第 1 步·注册结果）</h4>'
         '<p><span class="db-note">数据集版本</span> <code>'
-        + rec["version"] +
+        + (_client.dataset_version or rec["version"]) +
         '</code>　<span class="db-note">更新时间</span> '
         + rec["created_at"] +
         '<br><span class="db-note">数据来源</span> ' + source +
@@ -437,7 +474,7 @@ def render_data_zone() -> dict:
     )
     st.caption(
         "版本号由**数据内容哈希**生成，不是时间戳：内容变化则版本变化，"
-        "同一份数据重复上传版本保持不变。该版本号会随每次查询结果一起返回，"
+        "同一份数据重复上传版本保持不变；正式库使用 demo-v1.1 版本，内容哈希保留在历史中。查询版本会随结果返回，"
         "使得「结果依据区」里的来源真正可追溯（分工文档 §5.4）。"
     )
 
@@ -466,7 +503,7 @@ def render_data_zone() -> dict:
 
     st.markdown("**数据质量问题**")
     if not report["issues"]:
-        st.success("未发现数据质量问题。可直接进行查询。")
+        st.success("未发现数据质量问题。能否正式查询以数据版本匹配与导入状态为准。")
     else:
         issues_df = pd.DataFrame([{
             "级别": {"error": "严重", "warning": "警告", "info": "提示"}[i["level"]],
@@ -515,8 +552,8 @@ def render_dictionary_zone() -> None:
     st.subheader("业务字典区")
     st.caption(
         "对应分工文档 §5.2.2「业务字典区」。"
-        "本页内容直接来自 `shared/contracts.py`。成员 1 的正式执行层已独立交付，"
-        "但其对外编码、金额单位及数据集仍须与本页对齐；成员 2 的提示词尚待接入。"
+        "本页内容直接来自 `shared/contracts.py`。正式执行层与自然语言入口已接入，"
+        "正式 demo-v1.1 通过适配层统一字段与单位；不同数据源数字不可混用。"
     )
 
     st.markdown("**核心指标（5 个基础指标 + 3 个派生比率指标）**")
@@ -768,6 +805,9 @@ def _render_success(resp: dict) -> None:
 def render_query_zone() -> None:
     st.subheader("智能取数区")
     st.caption("对应分工文档 §5.2.2「智能取数区」与 §5.2.1 的第 4~7 步。")
+    if _client.query_block_reason:
+        st.warning(_client.query_block_reason)
+        return
 
     # 第 3 步确认状态的温和提醒（不阻断查询；与业务字典区的承诺一致）
     n_confirmed = len(st.session_state.get("confirmed_metrics") or ())

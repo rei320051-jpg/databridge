@@ -81,7 +81,12 @@ class OpenAIPlanModel:
     def _post(self, request, timeout: int):
         try:
             with self.transport(request, timeout=timeout) as response:
-                return json.load(response)
+                body = json.load(response)
+            if not isinstance(body, dict):
+                raise ModelOutputInvalid("模型服务响应不是 JSON 对象")
+            return body
+        except (UnicodeError, json.JSONDecodeError) as exc:
+            raise ModelOutputInvalid("模型服务返回的 JSON 无效") from exc
         except urllib.error.HTTPError as exc:
             # 不回显响应体，避免把鉴权信息带进异常/日志
             raise ModelFailure(f"模型服务返回 HTTP {exc.code}，请检查密钥、模型名与权限") from exc
@@ -93,6 +98,7 @@ class OpenAIPlanModel:
             raise ModelFailure("模型模式缺少 OPENAI_API_KEY 或 DATABRIDGE_MODEL 配置")
         self.calls += 1
         self.last_usage = None
+        self.last_model = None
         context = self._context(question)
         if self.base_url:
             return self._propose_chat_completions(context)
@@ -176,7 +182,7 @@ class OpenAIPlanModel:
             if len(chunks) != 1:
                 raise ModelOutputInvalid("模型没有返回唯一的 JSON 文本")
             result = json.loads(chunks[0])
-        except (UnicodeError, json.JSONDecodeError) as exc:
+        except (KeyError, TypeError, UnicodeError, json.JSONDecodeError) as exc:
             raise ModelOutputInvalid("模型返回的 JSON 无效") from exc
         if not isinstance(result, dict):
             raise ModelOutputInvalid("模型输出不是 JSON 对象")

@@ -18,12 +18,17 @@ from __future__ import annotations
 
 import hashlib
 import re
+import sqlite3
 import subprocess
 import zipfile
+from contextlib import closing
 from datetime import date
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from databridge.importer import PRIMARY_KEYS, TABLE_FIELDS, QualityAudit
 
 PREBUILT_DBS = ["outputs/demo-v1.1.sqlite3", "outputs/small-v0.1.sqlite3"]
 FORBIDDEN_NAMES = {".env"}
@@ -46,6 +51,38 @@ def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def validate_prebuilt_database(database: Path, source: Path) -> None:
+    """Refuse stale/corrupt ignored databases, even if their version and size match."""
+    audit = QualityAudit(source)
+    report = audit.run()
+    if report['error_count']:
+        raise SystemExit(f'源 CSV 质检失败：{source}')
+    try:
+        with closing(sqlite3.connect(database.resolve().as_uri() + '?mode=ro', uri=True)) as connection:
+            connection.execute('PRAGMA query_only=ON')
+            if connection.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
+                raise ValueError('integrity check failed')
+            if connection.execute('PRAGMA foreign_key_check').fetchall():
+                raise ValueError('foreign key check failed')
+            meta = audit.metadata
+            expected = [(meta['dataset_version'], int(meta['is_simulated']), meta['timezone'],
+                         meta['coverage_start'], meta['coverage_end_exclusive'])]
+            if connection.execute('SELECT * FROM dataset_metadata').fetchall() != expected:
+                raise ValueError('metadata mismatch')
+            for table, fields in TABLE_FIELDS.items():
+                expected = sorted(tuple(row[field] for field in fields) for _, row in audit.rows[table])
+                actual = connection.execute(f"SELECT {','.join(fields)} FROM {table} ORDER BY {PRIMARY_KEYS[table]}").fetchall()
+                if actual != expected:
+                    raise ValueError(f'{table} content mismatch')
+            warnings = connection.execute('SELECT code, message, table_name, row_number, field_name FROM data_quality_issues ORDER BY issue_id').fetchall()
+            expected = [(item['code'], item['message'], item.get('table'), item.get('row'), item.get('field'))
+                        for item in report['issues'] if item['severity'] == 'warning']
+            if warnings != expected:
+                raise ValueError('quality warnings mismatch')
+    except (sqlite3.Error, OSError, ValueError) as exc:
+        raise SystemExit(f'预构建库无效或与源 CSV 不一致：{database.name}（{exc}），请用导入脚本重新构建') from None
+
+
 def collect_entries(commit: str) -> dict[str, bytes]:
     """arcname(相对包根) -> 文件字节。"""
     tracked = [p for p in git("ls-files", "-z").split("\0") if p]
@@ -62,6 +99,8 @@ def collect_entries(commit: str) -> dict[str, bytes]:
         db = ROOT / rel
         if not db.is_file():
             raise SystemExit(f"缺少预构建库 {db}，请先运行 scripts/import_dataset.py（见 README）")
+        source = ROOT / 'data' / ('demo' if db.name.startswith('demo-') else 'small')
+        validate_prebuilt_database(db, source)
         entries[rel] = db.read_bytes()
 
     # 密钥内容扫描（仅文本形态文件；sqlite 为二进制不参与）
@@ -120,6 +159,10 @@ python -m venv .venv
 ```powershell
 .venv\\Scripts\\python.exe -m uvicorn databridge.api:app --host 127.0.0.1 --port 8001
 # 健康检查：GET http://127.0.0.1:8001/health
+# 必须显示 status=ok、dataset_version=demo-v1.1、orders=20000；默认读取正式演示库。
+# 页面侧选择 live、地址 http://127.0.0.1:8001、数据源「正式联调库 demo-v1.1」。
+# 若终端残留 DATABRIDGE_DATABASE，请显式设为本包的正式库：
+# $env:DATABRIDGE_DATABASE = (Resolve-Path outputs/demo-v1.1.sqlite3).Path
 # 自然语言：POST http://127.0.0.1:8001/agent/query  body: {{"question":"2026年9月净销售额"}}
 # 重新建库（可选）：
 # .venv\\Scripts\\python.exe scripts/import_dataset.py data/demo --database outputs/demo-v1.1.sqlite3
@@ -165,7 +208,7 @@ python -m venv .venv
 def main() -> int:
     dirty = git("status", "--porcelain").strip()
     if dirty:
-        raise SystemExit("[安全闸] git 工作区不干净，请先提交或暂存改动，保证提交包 == 已提交版本：\n" + dirty)
+        raise SystemExit("[安全闸] git 工作区不干净，请先提交改动（仅暂存不够），保证提交包 == 已提交版本：\n" + dirty)
     commit = git("rev-parse", "HEAD").strip()
 
     entries = collect_entries(commit)
@@ -199,6 +242,9 @@ def main() -> int:
         for m in must_have:
             if m not in names:
                 raise SystemExit(f"zip 缺少关键文件：{m}")
+        for rel, data in entries.items():
+            if sha256_bytes(zf.read(f'{PKG_DIR}/{rel}')) != sha256_bytes(data):
+                raise SystemExit(f'zip 回读 SHA256 失配：{rel}')
 
     size_mb = ZIP_PATH.stat().st_size / 1024 / 1024
     print(f"[2/4] 已生成《提交清单.md》与 SHA256SUMS.txt（{len(entries)} 个文件参与校验）")

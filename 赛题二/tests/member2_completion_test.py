@@ -144,7 +144,7 @@ class CompletionTests(unittest.TestCase):
                 self.assertNotIn('data', result)
 
     def test_model_response_shape_is_normalized(self):
-        for body in [[], {'status': 'completed', 'output': [None]},
+        for body in [[], None, 3, {'status': 'completed'}, {'status': 'completed', 'output': [None]},
                      {'status': 'completed', 'output': [{'type': 'message', 'content': [None]}]}]:
             with self.subTest(body=body):
                 model = OpenAIPlanModel(api_key='test-only', model='test-only',
@@ -156,6 +156,15 @@ class CompletionTests(unittest.TestCase):
                 except Exception as exc:
                     self.fail(f'Invalid model response escaped adapter: {exc}')
                 self.fail('Invalid response accepted')
+
+    def test_model_invalid_json_is_normalized_in_both_channels(self):
+        for base in ('', 'https://example.invalid'):
+            for raw in (b'not json', b'\xff', b'[]', b'null'):
+                with self.subTest(base=base, raw=raw):
+                    model = OpenAIPlanModel(api_key='test-only', model='test-only', base_url=base,
+                                            transport=lambda *a, **kw: io.BytesIO(raw))
+                    with self.assertRaises(ModelOutputInvalid):
+                        model.propose('9月净销售额')
 
     def test_model_plan_validation_before_local_override(self):
         class Model:

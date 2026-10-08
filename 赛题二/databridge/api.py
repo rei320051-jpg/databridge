@@ -1,10 +1,14 @@
 """Local FastAPI entry point; bind to 127.0.0.1 for this development stage."""
 import os
-from fastapi import Body, FastAPI
+import sqlite3
+from contextlib import closing
+from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
-from databridge.service import QueryError, QueryService
+from databridge.service import ROOT, QueryError, QueryService, connect_readonly
+from databridge.inspection import inspect_csv_files
 from agent.workflow import AgentWorkflow
 from shared.contracts import API_ENDPOINTS
 
@@ -21,10 +25,38 @@ def create_app(service=None):
 
     @app.get('/health')
     def health():
-        available = query_service.database.is_file()
-        return JSONResponse({'service': 'databridge', 'version': '0.1.0',
-                             'status': 'ready' if available else 'not_ready',
-                             'database_available': available}, status_code=200 if available else 503)
+        try:
+            with closing(connect_readonly(query_service.database)) as connection:
+                metadata = connection.execute('SELECT * FROM dataset_metadata').fetchall()
+                if len(metadata) != 1:
+                    raise ValueError('invalid metadata')
+                tables = ['orders', 'refunds', 'customers']
+                counts = {name: connection.execute(f'SELECT COUNT(*) FROM {name}').fetchone()[0]
+                          for name in tables}
+            return {'service': 'databridge', 'version': '0.1.0', 'status': 'ok',
+                    'database_available': True, **dict(metadata[0]),
+                    'tables': tables, 'row_counts': counts}
+        except (QueryError, sqlite3.Error, ValueError, OSError):
+            return JSONResponse({'service': 'databridge', 'status': 'not_ready',
+                                 'database_available': False, 'dataset_version': 'unavailable',
+                                 'tables': []}, status_code=503)
+
+    @app.post(API_ENDPOINTS['inspect']['path'])
+    async def inspect(files: list[UploadFile] = File(...)):
+        """Inspection is read-only: never register or activate the uploaded data."""
+        try:
+            if len(files) > 3:
+                raise HTTPException(422, '最多上传三张 CSV 表，每张业务表一份')
+            uploads = []
+            for file in files:
+                raw = await file.read(20 * 1024 * 1024 + 1)
+                if len(raw) > 20 * 1024 * 1024:
+                    raise HTTPException(413, '单份 CSV 不得超过 20 MiB')
+                uploads.append((file.filename or '', raw))
+            return await run_in_threadpool(inspect_csv_files, uploads)
+        finally:
+            for file in files:
+                await file.close()
 
     @app.post('/v1/query')
     def query(plan: dict = Body(...)):
@@ -46,5 +78,6 @@ def create_app(service=None):
     return app
 
 
-app = create_app(QueryService(database=os.environ.get('DATABRIDGE_DATABASE'),
+app = create_app(QueryService(database=os.environ.get('DATABRIDGE_DATABASE') or
+                              ROOT / 'outputs' / 'demo-v1.1.sqlite3',
                               records=os.environ.get('DATABRIDGE_RECORDS')))

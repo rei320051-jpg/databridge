@@ -14,7 +14,7 @@ import os
 BACKEND_MODE = os.environ.get("DATABRIDGE_BACKEND", "mock")
 
 #: 成员 1 的 FastAPI 服务地址
-API_BASE_URL = os.environ.get("DATABRIDGE_API", "http://127.0.0.1:8000")
+API_BASE_URL = os.environ.get("DATABRIDGE_API", "http://127.0.0.1:8001")
 
 #: 单次请求超时（秒）。页面不得因为后端卡住而无限等待。
 API_TIMEOUT = 20

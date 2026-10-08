@@ -1,6 +1,6 @@
 # 成员二智能流程交付（2026-10-05）
 
-基线 main `83c9f40`；分工 §4 对应模块已在独立功能分支补齐。规则模式、正式只读执行层及真实 HTTP 运营 Agent 已验证。模型接口仅做协议与失败测试，未进行真实模型调用。
+基线 main `83c9f40`；分工 §4 对应模块已在独立功能分支补齐。规则模式、正式只读执行层及真实 HTTP 运营 Agent 已验证。10 月 5 日交付时仅做模型协议与失败测试；团队已于 10 月 6 日补做真实模型 67 题复测，详见 `docs/测试报告.md` §4.2。
 
 ## 现有成果与本次补齐
 
@@ -73,8 +73,8 @@ $env:DATABRIDGE_AGENT_MODE = "rules"
 
 ## 已知限制与交接
 
-- 未配置模型密钥与模型名称，未测真实调用、准确率、成本和时延。模型输出格式错返回 `model_output_invalid`，服务错返回 `execution_failed`；由调用方按 `retryable` 重试或显式切规则模式，不静默回退。协议参考 [OpenAI 官方 JSON 模式说明](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses)。
+- 10 月 5 日交付尚未测真实模型；10 月 6 日团队复测已补证，不能将 67 道固定零售题的通过率泛化为任意问题准确率。模型输出格式错返回 `model_output_invalid`，服务错返回 `execution_failed`；由调用方按 `retryable` 重试或显式切规则模式，不静默回退。协议参考 [OpenAI 官方 JSON 模式说明](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses)。
 - 同比和任意两期比较未进入冻结的自然语言比较枚举，明确拒答并建议分别查询；结构化执行层本身支持显式 compare。
-- `/datasets/inspect` 与正式库页面上传/激活仍需成员一、三交接，本次不修改页面或上传接口。
+- 10 月 8 日修复分支已补 `/datasets/inspect` 和页面后端质检入口；质检不激活数据。页面 live 仅支持内置正式库；自定义数据通过导入脚本与 API/CLI 使用。没有新增或更改冻结的核心接口。
 - 规则解析支持已说明的表达，不保证任意自然语言。结论仅针对模拟库，不包含因果与预测。
 - 本次未代签三人确认单，未发送团队消息；以 PR 和文档提供可复核变更，由团队按流程审查合入 main。

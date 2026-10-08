@@ -35,6 +35,7 @@ class QueryClient:
         self.dataset_version: str | None = None
         #: 当前数据集覆盖月份（YYYY-MM）；None 时用 mock 参考实现的内置覆盖区间。
         self.coverage_months: list | None = None
+        self.query_block_reason: str | None = None
 
     # -- 数据源 ------------------------------------------------------------
     def set_tables(self, tables: dict, coverage_months: list | None = None) -> None:
@@ -79,6 +80,8 @@ class QueryClient:
     # -- 统一入口 ----------------------------------------------------------
     def submit(self, question: str, context: dict | None = None) -> dict:
         """首次提问。"""
+        if self.query_block_reason:
+            raise BackendError(self.query_block_reason)
         if self.mode == "mock":
             import mock_backend
             return mock_backend.handle(question, context=context,
@@ -94,6 +97,8 @@ class QueryClient:
                               question: str, context: dict | None = None,
                               free_text: str | None = None) -> dict:
         """回答澄清问题后重新提交。原问题必须一起带上。"""
+        if self.query_block_reason:
+            raise BackendError(self.query_block_reason)
         ctx = dict(context or {})
         payload_clr = {
             "id": clarification.get("id"),

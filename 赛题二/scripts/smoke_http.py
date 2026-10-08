@@ -1,5 +1,6 @@
 """Start a short-lived local server, call it over HTTP, save actual evidence, stop it."""
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -22,10 +23,13 @@ def main():
         probe.bind(('127.0.0.1', 0))
         port = probe.getsockname()[1]
     base = f'http://127.0.0.1:{port}'
+    environment = os.environ.copy()
+    environment['DATABRIDGE_DATABASE'] = str(ROOT / 'outputs/small-v0.1.sqlite3')
+    environment['DATABRIDGE_AGENT_MODE'] = 'rules'
     process = subprocess.Popen(
         [sys.executable, '-m', 'uvicorn', 'databridge.api:app', '--host', '127.0.0.1',
          '--port', str(port), '--log-level', 'warning'],
-        cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        cwd=ROOT, env=environment, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0,
     )
     evidence = {'transport': 'actual HTTP over localhost', 'base_url': base, 'responses': {}}
