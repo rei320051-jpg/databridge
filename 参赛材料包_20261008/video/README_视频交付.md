@@ -6,10 +6,12 @@
 
 | 作品 | 软字幕版 | 硬字幕版 | 外挂字幕 | 计划时长 |
 | --- | --- | --- | --- | --- |
-| 数桥 DataBridge 产品演示 | `赛题二_演示视频_软字幕.mp4` | `赛题二_演示视频_硬字幕.mp4` | `赛题二_演示视频.srt` | 270 秒 |
-| DataClawHub 平台运营方案 | `赛题一_演示视频_软字幕.mp4` | `赛题一_演示视频_硬字幕.mp4` | `赛题一_演示视频.srt` | 285 秒 |
+| 数桥 DataBridge 产品演示 | `赛题二_演示视频_自然配音_软字幕.mp4` | `赛题二_演示视频_自然配音_硬字幕.mp4` | `赛题二_演示视频_自然配音.srt` | 270 秒 |
+| DataClawHub 平台运营方案 | `赛题一_演示视频_自然配音_软字幕.mp4` | `赛题一_演示视频_自然配音_硬字幕.mp4` | `赛题一_演示视频_自然配音.srt` | 285 秒 |
 
 播放兼容性优先时用硬字幕版。软字幕版含中文 `mov_text` 字幕轨；播放器若没有默认显示字幕，请选择中文字幕轨，或加载同名 SRT。
+
+当前只交付自然配音版。旧 Windows 系统配音的四个 MP4 已按用户要求移除，不再保留在本分支文件列表中；删除可从 Git 历史恢复。原 SRT 保留为分镜时间轴依据，文本与自然配音版字幕一致。
 
 ## 事实与状态边界
 
@@ -23,13 +25,13 @@
 
 - Playwright + 本机 Edge（`msedge`），使用独立无头浏览器会话，不操作用户已登录的浏览器标签页。
 - 每 100ms 截图，逐镜编码，再由 ffmpeg 拼接。最终输出 1920×1080、H.264 视频和 AAC 音频。
-- 在线 `edge-tts` 出现连接/无音频返回故障，统一使用 Windows 中文 SAPI 兜底；每条配音归一化并置入分镜累计时间轴，音色与时间同步保持一致。
+- 当前采用 AI 生成的 Edge 神经语音 `zh-CN-XiaoxiaoNeural`，语速 `-8%`，逐条对齐原字幕与分镜，不使用 SAPI 系统声。旧录制曾因网络问题使用 SAPI，旧成片现已移除。
 - ffmpeg 经 winget 安装到系统用户目录。没有将工具二进制或字体复制到仓库；现有 requirements 文件未修改。
-- `验收报告.json` 记录时长、编码、分辨率、声音强度、字幕轨、字幕抽样时间和文件哈希。`qa/` 保存最终字幕抽查图片。
+- `自然配音_验收报告.json` 是当前成片的验收报告，记录时长、编码、分辨率、声音强度、字幕轨、字幕与画面一致性和文件哈希。`验收报告.json`、`voice_manifest.json` 是旧录制阶段的历史记录，不作为当前配音依据。`qa/` 保存字幕抽查图片，新版与旧版画面相同。
 
-## 可复现脚本
+## 录制与复现资料
 
-使用分镜记录的同一个解释器，在仓库根目录运行以下命令。不要使用另一个环境或改写 requirements：
+使用分镜记录的同一个解释器，不另建环境或改写 requirements。`video_pipeline.py` 保留原画面采集与旧配音阶段的历史流程；下列命令仅用于重新采集画面，不会重新生成旧系统配音成片：
 
 ```powershell
 $videoPython = (Resolve-Path '赛题二/.venv/Scripts/python.exe').Path
@@ -37,14 +39,10 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 & $videoPython '参赛材料包_20261008/video/video_pipeline.py' start
 & $videoPython '参赛材料包_20261008/video/video_pipeline.py' preflight
 & $videoPython '参赛材料包_20261008/video/video_pipeline.py' subtitles
-& $videoPython '参赛材料包_20261008/video/video_pipeline.py' narrate
 & $videoPython '参赛材料包_20261008/video/video_pipeline.py' record --video 赛题二
 & $videoPython '参赛材料包_20261008/video/video_pipeline.py' record --video 赛题一
-& $videoPython '参赛材料包_20261008/video/video_pipeline.py' compose --video 赛题二
-& $videoPython '参赛材料包_20261008/video/video_pipeline.py' compose --video 赛题一
-& $videoPython '参赛材料包_20261008/video/video_pipeline.py' check
 ```
 
-命令会生成或覆盖本目录视频产物；请在要重录时使用，不要与正在运行的录制进程重复启动。已上传的原始分镜和仓库源代码均不修改。
+请在确实需要重录时使用，不要与正在运行的录制进程重复启动。当前自然配音配置及最终文件见 `README_自然配音版.md`。`自然配音替换.py` 记录本次替换流程，其原始成片输入已随本次清理移除；不是删除后可直接重跑的独立录制器。不要运行旧流程的 `narrate`、`compose` 来重新发布系统配音版。
 
 所有截图序列、单镜编码、临时 HTML、查询日志与原始 WAV 都留在本目录内，仅作为本地录制中间件，不纳入 Git。GitHub 交付六个成片文件及分镜、脚本、复核证据与验收报告；不提交工具二进制、海量帧或重复音频中间件。
