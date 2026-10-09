@@ -33,6 +33,69 @@ APP = "http://127.0.0.1:8501"
 FPS = 10
 SIZE = (1920, 1080)
 FLAGS = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+SUBTITLE_STYLE_V2 = {
+    "version": "v2", "play_res_x": 1920, "play_res_y": 1080,
+    "font_name": "Microsoft YaHei", "font_size_px": 40,
+    # libass FontSize measures ascent+descent, not the raster EM size. This system
+    # font at 40px has 43px ascent + 11px descent; use 54 ASS units for a 40px EM.
+    "ass_font_size_units": 54,
+    "text_color": "#FFFFFF", "outline_color": "#000000", "outline_px": 2.5,
+    "alignment": "bottom_center", "margin_bottom_px": 28,
+    "bar_height_px": 100, "bar_opacity": .70, "emphasis_color": "#F5B800",
+    "emphasis_whitelist": ["17,198,835.91 元", "20,000 订单", "3,492", "2,000",
+                           "96.8 万元", "37/37", "67/67", "0"],
+}
+
+
+def subtitle_highlights_v2(text):
+    # Exact approved forms only: do not turn the existing "2 万订单" into "20,000".
+    pattern = (r"(?<![\d.,/])(?:17,198,835\.91\s*元|20,000\s*订单|"
+               r"3,492(?:\s*退款)?|2,000(?:\s*客户)?|96\.8\s*万元|37/37|67/67|0)(?![\d.,/])")
+    return [match.group(0) for match in re.finditer(pattern, text)]
+
+
+def write_subtitles_ass_v2(srt_path, ass_path):
+    style = SUBTITLE_STYLE_V2
+    cues = parse_srt(srt_path.read_text(encoding="utf-8-sig"))
+    def stamp(seconds):
+        centiseconds = round(seconds * 100)
+        hours, remainder = divmod(centiseconds, 360000)
+        minutes, remainder = divmod(remainder, 6000)
+        secs, fraction = divmod(remainder, 100)
+        return f"{hours}:{minutes:02}:{secs:02}.{fraction:02}"
+    def markup(text):
+        if any(char in text for char in "{}\\"):
+            raise ValueError("Subtitle contains ASS control characters; stop rather than change text")
+        # ASS uses BGR, so RGB #F5B800 is &H00B8F5&.
+        pattern = (r"(?<![\d.,/])(?:17,198,835\.91\s*元|20,000\s*订单|"
+                   r"3,492(?:\s*退款)?|2,000(?:\s*客户)?|96\.8\s*万元|37/37|67/67|0)(?![\d.,/])")
+        return re.sub(pattern, lambda m: r"{\1c&H00B8F5&}" + m.group(0) +
+                      r"{\1c&HFFFFFF&}", text).replace("\n", r"\N")
+    header = (
+        "[Script Info]\nTitle: Subtitle rendering v2\nScriptType: v4.00+\n"
+        f"PlayResX: {style['play_res_x']}\nPlayResY: {style['play_res_y']}\n"
+        "ScaledBorderAndShadow: yes\nWrapStyle: 2\n\n[V4+ Styles]\n"
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, "
+        "BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, "
+        "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
+        f"Style: Default,{style['font_name']},{style['ass_font_size_units']},&H00FFFFFF,&H00FFFFFF,"
+        f"&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,{style['outline_px']},0,2,"
+        f"80,80,{style['margin_bottom_px']},1\n\n[Events]\n"
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+    )
+    ass_path.parent.mkdir(parents=True, exist_ok=True)
+    ass_path.write_text(header + "".join(
+        f"Dialogue: 0,{stamp(cue['start'])},{stamp(cue['end'])},Default,,0,0,0,,"
+        + markup(cue["text"]) + "\n" for cue in cues), encoding="utf-8")
+    return cues
+
+
+def subtitle_filter_v2(ass_path):
+    style = SUBTITLE_STYLE_V2
+    # Call ffmpeg from ass_path.parent to avoid Windows drive-letter escaping.
+    return (f"drawbox=x=0:y=ih-{style['bar_height_px']}:w=iw:h={style['bar_height_px']}:"
+            f"color=black@{style['bar_opacity']:.2f}:t=fill,"
+            f"ass=filename='{ass_path.name}'")
 
 
 def log(message):
@@ -683,11 +746,13 @@ def compose(name):
          "-metadata:s:s:0", "title=中文", "-disposition:s:0", "default", "-t", str(duration),
          "-movflags", "+faststart", soft])
     # Relative filename avoids Windows drive-letter escaping in the subtitle filter.
-    subtitle_filter = "subtitles=filename='" + srt.name + "':force_style='FontName=Microsoft YaHei,FontSize=13,Outline=1.5,Shadow=0,MarginV=12,MarginL=16,MarginR=16,Alignment=2'"
+    ass = directory / (name + "_字幕_v2.ass")
+    write_subtitles_ass_v2(srt, ass)
+    subtitle_filter = subtitle_filter_v2(ass)
     run([ffmpeg, "-y", "-i", visual, "-i", audio, "-map", "0:v:0", "-map", "1:a:0",
          "-vf", subtitle_filter, "-c:v", "libx264", "-threads", "4", "-preset", "fast", "-crf", "21",
          "-maxrate", "2200k", "-bufsize", "4400k", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
-         "-t", str(duration), "-movflags", "+faststart", hard], cwd=HERE, timeout=240)
+         "-t", str(duration), "-movflags", "+faststart", hard], cwd=ass.parent, timeout=240)
     log("[MILESTONE] " + name + " 软字幕与硬字幕视频合成 完成")
 
 

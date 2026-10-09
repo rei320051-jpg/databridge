@@ -38,9 +38,9 @@ def log(text):
     print(text, flush=True)
 
 
-def run(args, timeout=90):
+def run(args, timeout=90, cwd=None):
     result = subprocess.run([str(x) for x in args], capture_output=True,
-                            creationflags=FLAGS, timeout=timeout)
+                            creationflags=FLAGS, timeout=timeout, cwd=cwd)
     if result.returncode:
         raise RuntimeError(result.stderr.decode("utf-8", errors="replace")[-2500:])
     return result.stdout
@@ -260,9 +260,227 @@ def audit():
         raise RuntimeError("Natural voice acceptance failed")
 
 
+def render_v2(preview_only=False):
+    """Compose only: never call synthesize(), record(), or rewrite a storyboard.
+
+    Use the existing soft MP4 as the unburned video/AAC/subtitle source. This also
+    works after obsolete SAPI MP4s were deleted. Copy AAC packets instead of
+    regenerating or re-encoding narration. Stage both works before publication.
+    """
+    from video_pipeline import (SUBTITLE_STYLE_V2, parse_srt, subtitle_filter_v2,
+                                subtitle_highlights_v2, write_subtitles_ass_v2)
+    if Path(sys.executable).resolve() != EXPECTED_PYTHON.resolve():
+        raise RuntimeError("Use the originally selected interpreter only")
+    log("[ENV] python=" + sys.executable)
+    render_work = HERE / "_work" / "subtitle_v2"
+    render_work.mkdir(parents=True, exist_ok=True)
+    report_path = HERE / "自然配音_验收报告.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    baseline_commit = run([GIT, "rev-parse", "HEAD"]).decode().strip()
+    original_report_sha = sha(report_path)
+    protected_paths = [HERE / f"storyboard_{name}.json" for name in ("赛题二", "赛题一")]
+    protected_paths += [HERE / f"{name}_演示视频{suffix}.srt"
+                        for name in ("赛题二", "赛题一") for suffix in ("", "_自然配音")]
+    protected_paths += [HERE / f"capture_manifest_{name}.json" for name in ("赛题二", "赛题一")]
+    protected_paths += list(WORK.glob("*.wav")) + list(WORK.glob("*.mp3"))
+    protected_paths += [HERE / "自然配音_晓晓试听.mp3"]
+    for name in ("赛题二", "赛题一"):
+        protected_paths += [HERE / "_work" / name / "visual.mp4"]
+        protected_paths += sorted((HERE / "_work" / name / "frames").glob("*.jpg"))
+    protected_before = {path.relative_to(HERE).as_posix(): sha(path) for path in protected_paths}
+    allowed = {"2", "3,492", "2,000", "9", "17,198,835.91", "37/37", "67/67", "0", "96.8"}
+    samples = {"赛题二": {"B06": 67.5, "B09": 106.0, "B12": 145.0},
+               "赛题一": {"A03": 29.0, "A14": 161.25, "A20": 231.25}}
+    staged = []
+    acceptance = {}
+    for name in ("赛题二", "赛题一"):
+        board = json.loads((HERE / f"storyboard_{name}.json").read_text(encoding="utf-8"))
+        srt = HERE / f"{name}_演示视频_自然配音.srt"
+        raw_srt = srt.read_text(encoding="utf-8-sig")
+        cues = parse_srt(raw_srt)
+        cursor = 0
+        if len(cues) != len(board["scenes"]):
+            raise RuntimeError("Subtitle count differs from storyboard")
+        for scene, cue in zip(board["scenes"], cues):
+            if cue != {"start": cursor, "end": cursor + scene["duration_sec"],
+                       "text": scene["subtitle_text"]}:
+                raise RuntimeError(f"{name}: subtitle text/time changed")
+            cursor += scene["duration_sec"]
+        text = "\n".join(cue["text"] for cue in cues)
+        number_tokens = set(re.findall(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:/\d+|\.\d+)?", text))
+        if not number_tokens <= allowed:
+            raise RuntimeError(f"{name}: nonwhitelisted factual numbers")
+        if any(word in raw_srt for word in ("中国数联物流", "央企")) or re.search(
+                r"github\s*\.\s*com|github\s*地址|https?://", raw_srt, re.I):
+            raise RuntimeError(f"{name}: prohibited word or URL in SRT")
+        if name == "赛题二":
+            capture = json.loads((HERE / f"capture_manifest_{name}.json").read_text(encoding="utf-8"))
+            if not (board["mode"] == capture["mode"] == "rules" and
+                    all(scene["mode"] == "rules" for scene in board["scenes"]) and
+                    all(scene["mode"] == "rules" for scene in capture["scenes"])):
+                raise RuntimeError("Recorded Agent mode differs from rules")
+        ass = render_work / f"{name}_字幕_v2.ass"
+        write_subtitles_ass_v2(srt, ass)
+        ass_events = [line for line in ass.read_text(encoding="utf-8").splitlines()
+                      if line.startswith("Dialogue:")]
+        restored_text = [re.sub(r"\{[^}]*\}", "", line.split(",", 9)[9]).replace(r"\N", "\n")
+                         for line in ass_events]
+        if restored_text != [cue["text"] for cue in cues]:
+            raise RuntimeError("ASS markup changed visible wording")
+        soft = HERE / f"{name}_演示视频_自然配音_软字幕.mp4"
+        hard = HERE / f"{name}_演示视频_自然配音_硬字幕.mp4"
+        video_hash = packet_hash(soft, "v")
+        audio_hash = packet_hash(soft, "a")
+        subtitle_hash = packet_hash(soft, "s")
+        visual_source = HERE / "_work" / name / "visual.mp4"
+        if packet_hash(visual_source, "v") != video_hash:
+            raise RuntimeError("Soft source does not match archived unburned footage")
+        if preview_only:
+            scene_id = "B09" if name == "赛题二" else "A03"
+            stamp = samples[name][scene_id]
+            preview = render_work / f"{name}_{scene_id}_样式预览.jpg"
+            run([FFMPEG, "-y", "-v", "error", "-i", soft,
+                 "-vf", subtitle_filter_v2(ass), "-ss", str(stamp),
+                 "-frames:v", "1", "-q:v", "2", preview], cwd=render_work, timeout=90)
+            log("[PREVIEW] " + str(preview))
+            continue
+        staged_soft = render_work / soft.name
+        staged_hard = render_work / hard.name
+        staged_srt = render_work / srt.name
+        # Soft subtitles stay removable; mov_text cannot guarantee ASS backgrounds,
+        # outlines or per-word colour across players. Keep their packets/timeline exact.
+        run([FFMPEG, "-y", "-v", "error", "-i", soft,
+             "-map", "0:v:0", "-map", "0:a:0", "-map", "0:s:0", "-c", "copy",
+             "-map_metadata", "0", "-metadata", "comment=Subtitle rendering v2; original soft subtitle timeline",
+             "-metadata:s:s:0", "language=zho", "-disposition:s:0", "default",
+             "-movflags", "+faststart", staged_soft])
+        shutil.copyfile(srt, staged_srt)
+        # Render from UNBURNED soft footage, never burn a second caption over old captions.
+        run([FFMPEG, "-y", "-v", "error", "-i", soft,
+             "-map", "0:v:0", "-map", "0:a:0", "-vf", subtitle_filter_v2(ass),
+             "-c:v", "libx264", "-threads", "4", "-preset", "fast", "-crf", "19",
+             "-maxrate", "3500k", "-bufsize", "7000k", "-pix_fmt", "yuv420p",
+             "-c:a", "copy", "-t", str(cursor),
+             "-metadata", "comment=Subtitle rendering v2; 40px white, gold emphasis, 70 percent black bar",
+             "-movflags", "+faststart", staged_hard], cwd=render_work, timeout=300)
+        log(f"[MILESTONE] {name} v2 字幕重合成 完成")
+        outputs = []
+        for variant, path in (("软字幕", staged_soft), ("硬字幕", staged_hard)):
+            details = probe(path)
+            streams = details["streams"]
+            video = next(stream for stream in streams if stream["codec_type"] == "video")
+            sound = next(stream for stream in streams if stream["codec_type"] == "audio")
+            checks = {"duration_within_limit": abs(float(details["format"]["duration"]) - cursor) < .1
+                                               and cursor <= 300,
+                      "h264_and_aac": video["codec_name"] == "h264" and sound["codec_name"] == "aac",
+                      "resolution_1080p": video["width"] == 1920 and video["height"] == 1080,
+                      "narration_aac_packets_unchanged": packet_hash(path, "a") == audio_hash,
+                      "github_file_size_limit": path.stat().st_size < 100 * 1024 * 1024}
+            if variant == "软字幕":
+                checks["visual_packets_unchanged"] = packet_hash(path, "v") == video_hash
+                checks["soft_subtitle_packets_unchanged"] = packet_hash(path, "s") == subtitle_hash
+                extracted = render_work / f"{name}_内嵌字幕复核.srt"
+                run([FFMPEG, "-y", "-v", "error", "-i", path, "-map", "0:s:0", extracted])
+                checks["embedded_srt_text_and_timeline_unchanged"] = (
+                    parse_srt(extracted.read_text(encoding="utf-8-sig")) == cues)
+                checks["mov_text_track_exists"] = any(s.get("codec_name") == "mov_text" for s in streams)
+            result = subprocess.run([str(FFMPEG), "-hide_banner", "-i", str(path), "-vn", "-sn",
+                                     "-af", "volumedetect", "-f", "null", "NUL"],
+                                    capture_output=True, creationflags=FLAGS, timeout=60)
+            found = re.search(r"mean_volume: ([-\d.]+) dB", result.stderr.decode("utf-8", errors="replace"))
+            mean_db = float(found.group(1)) if found else None
+            checks["audio_non_silent"] = result.returncode == 0 and mean_db is not None and mean_db > -45
+            if not all(checks.values()):
+                raise RuntimeError(f"{path.name}: validation failed {checks}")
+            outputs.append({"file": path.name, "sha256": sha(path), "bytes": path.stat().st_size,
+                            "duration_sec": float(details["format"]["duration"]), "mean_volume_db": mean_db,
+                            "width": video["width"], "height": video["height"],
+                            "video_codec": video["codec_name"], "audio_codec": sound["codec_name"],
+                            "subtitle_track": variant == "软字幕", "checks": checks,
+                            "audio_packet_sha256": audio_hash})
+            for key in checks:
+                log(f"[PASS] {name} {variant}: {key}")
+        # Lossy H.264 encoding may alter pixels slightly outside the changed subtitle band.
+        ssim = subprocess.run([str(FFMPEG), "-hide_banner", "-i", str(soft), "-i", str(staged_hard),
+                               "-filter_complex", "[0:v]crop=1920:980:0:0[a];[1:v]crop=1920:980:0:0[b];[a][b]ssim",
+                               "-an", "-f", "null", "NUL"], capture_output=True,
+                              creationflags=FLAGS, timeout=120)
+        matched = re.search(r"All:([\d.]+)", ssim.stderr.decode("utf-8", errors="replace"))
+        outside_ssim = float(matched.group(1)) if matched else None
+        if ssim.returncode or outside_ssim is None or outside_ssim < .99:
+            raise RuntimeError(f"{name}: footage changed outside subtitle strip")
+        qa = []
+        for scene_id, stamp in samples[name].items():
+            scene_index = next(index for index, scene in enumerate(board["scenes"]) if scene["scene_id"] == scene_id)
+            cue = cues[scene_index]
+            if not cue["start"] <= stamp < cue["end"]:
+                raise RuntimeError("QA frame is outside its subtitle cue")
+            image_name = f"{name}_{scene_id}_硬字幕.jpg"
+            qa_stage = render_work / image_name
+            run([FFMPEG, "-y", "-v", "error", "-ss", str(stamp), "-i", staged_hard,
+                 "-frames:v", "1", "-q:v", "2", qa_stage])
+            qa.append({"scene_id": scene_id, "time_sec": stamp, "cue_start": cue["start"],
+                       "cue_end": cue["end"], "text": cue["text"], "image": "qa/" + image_name,
+                       "image_sha256": sha(qa_stage), "timing_check": "PASS"})
+            staged.append((qa_stage, HERE / "qa" / image_name))
+        record = report["videos"][name]
+        record.update(render_version="v2", outputs=outputs, qa_samples=qa,
+                      source_video_packet_sha256=video_hash, source_audio_packet_sha256=audio_hash,
+                      source_soft_subtitle_packet_sha256=subtitle_hash,
+                      outside_subtitle_band_ssim=outside_ssim,
+                      ass_markup_preserves_text=True, srt_sha256=sha(srt),
+                      subtitle_text_and_timeline_unchanged=True,
+                      emphasis_spans=[{"scene_id": scene["scene_id"], "text": cue["text"],
+                                       "highlighted": subtitle_highlights_v2(cue["text"])}
+                                      for scene, cue in zip(board["scenes"], cues)
+                                      if subtitle_highlights_v2(cue["text"])])
+        acceptance.update({f"{name}_factual_numbers_whitelisted": True,
+                           f"{name}_prohibited_word_and_url_scan": True,
+                           f"{name}_srt_text_and_timeline_unchanged": True,
+                           f"{name}_narration_not_regenerated": True,
+                           f"{name}_three_qa_frames_in_cues": True})
+        staged.extend([(staged_soft, soft), (staged_hard, hard), (staged_srt, srt)])
+        log(f"[MILESTONE] {name} v2 字幕、响度、时间轴与抽帧自检 完成")
+    if any(sha(HERE / name) != checksum for name, checksum in protected_before.items()):
+        raise RuntimeError("Protected footage, storyboard, SRT or narration changed")
+    if preview_only:
+        log("[PASS] 样式预览完成；分镜、素材、配音和 SRT 均未改动")
+        return
+    report["render_version"] = "v2"
+    report["visual_review"] = {"status": "pending", "frame_count": 6,
+                               "note": "Inspect the six newly exported QA images before marking PASS."}
+    report["subtitle_style"] = SUBTITLE_STYLE_V2
+    report["render_scope"] = "compose/burn-in only; reuse existing frames, unburned footage, AAC voice and subtitle timeline"
+    report["style_applies_to"] = "hard-subtitle MP4; soft MP4 preserves original removable mov_text packets"
+    report["soft_subtitle_style_note"] = "mov_text/SRT appearance is player-dependent; colour, outline and strip are guaranteed only in hard-subtitle MP4"
+    report["baseline_commit"] = baseline_commit
+    report["baseline_report_sha256"] = original_report_sha
+    report["previous_generation_invariance_note"] = "Historical original-voice generation protected tracked files; this authorized v2 changes rendering artifacts only."
+    report.pop("all_preexisting_tracked_files_unchanged", None)
+    report["acceptance_checks"] = acceptance | {"赛题二_rules_mode_preserved": True,
+                                               "all_storyboards_footage_voice_and_srt_unchanged": True}
+    report["protected_input_summary"] = {
+        "file_count": len(protected_before), "frame_count": sum("/frames/" in name for name in protected_before),
+        "aggregate_sha256": hashlib.sha256(json.dumps(protected_before, sort_keys=True,
+                                                     ensure_ascii=False).encode()).hexdigest(),
+        "all_unchanged_after_render": True,
+        "storyboard_srt_and_full_voice_sha256": {name: checksum for name, checksum in protected_before.items()
+                                                if "storyboard_" in name or name.endswith(".srt") or
+                                                name.endswith("_自然配音.wav")},
+    }
+    for source, target in staged:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        os.replace(source, target)
+    save_json(report_path, report)
+    log("[PASS] 不重录、不生成配音、不改文案、不改 SRT 或软字幕时间轴")
+    log("[MILESTONE] 两支视频 v2 字幕增强与六张 QA 更新 完成")
+
+
 if __name__ == "__main__":
     try:
-        if "--audit" in sys.argv:
+        if "--compose-v2" in sys.argv or "--preview-v2" in sys.argv:
+            render_v2(preview_only="--preview-v2" in sys.argv)
+        elif "--audit" in sys.argv:
             audit()
         else:
             main()

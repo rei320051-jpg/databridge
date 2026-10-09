@@ -357,30 +357,132 @@
       "outputs": [
         {
           "file": "赛题二_演示视频_自然配音_软字幕.mp4",
-          "sha256": "dd4d1c77deeb4df6b180318dd7fa582a02173605af222a54885f3b17f99096b7",
-          "duration_sec": 270,
+          "sha256": "91a4f61f893570168c6c31e9b09390875c661d8f79d9122c642b2deb42aef357",
+          "bytes": 7467879,
+          "duration_sec": 270.0,
           "mean_volume_db": -21.6,
+          "width": 1920,
+          "height": 1080,
+          "video_codec": "h264",
+          "audio_codec": "aac",
+          "subtitle_track": true,
           "checks": {
             "duration_within_limit": true,
             "h264_and_aac": true,
             "resolution_1080p": true,
+            "narration_aac_packets_unchanged": true,
+            "github_file_size_limit": true,
             "visual_packets_unchanged": true,
-            "soft_subtitle_preserved": true,
+            "soft_subtitle_packets_unchanged": true,
+            "embedded_srt_text_and_timeline_unchanged": true,
+            "mov_text_track_exists": true,
             "audio_non_silent": true
-          }
+          },
+          "audio_packet_sha256": "SHA256=e6b78c0a4963f0b8ccd57b1a60299eb0d742f6ab01acc96698711ec4a12d4aa5"
         },
         {
           "file": "赛题二_演示视频_自然配音_硬字幕.mp4",
-          "sha256": "08e97d96553e82ce2753e9ef1d3d67d5a80fc6b9618fb32192db8190ea62ccc6",
-          "duration_sec": 270,
+          "sha256": "e8773f37f6c09ab28086471ad731dc981c1d97a48f23d6c8addc5dd1812c372a",
+          "bytes": 8730724,
+          "duration_sec": 270.0,
           "mean_volume_db": -21.6,
+          "width": 1920,
+          "height": 1080,
+          "video_codec": "h264",
+          "audio_codec": "aac",
+          "subtitle_track": false,
           "checks": {
             "duration_within_limit": true,
             "h264_and_aac": true,
             "resolution_1080p": true,
-            "visual_packets_unchanged": true,
+            "narration_aac_packets_unchanged": true,
+            "github_file_size_limit": true,
             "audio_non_silent": true
-          }
+          },
+          "audio_packet_sha256": "SHA256=e6b78c0a4963f0b8ccd57b1a60299eb0d742f6ab01acc96698711ec4a12d4aa5"
+        }
+      ],
+      "render_version": "v2",
+      "qa_samples": [
+        {
+          "scene_id": "B06",
+          "time_sec": 67.5,
+          "cue_start": 57.0,
+          "cue_end": 71.0,
+          "text": "销售额是否扣除成功退款？先确认口径，再执行查询。",
+          "image": "qa/赛题二_B06_硬字幕.jpg",
+          "image_sha256": "971d75dc982db80edbc6220df5d0b4e052e570117a0dddc3054bca127a18f2e6",
+          "timing_check": "PASS"
+        },
+        {
+          "scene_id": "B09",
+          "time_sec": 106.0,
+          "cue_start": 97.0,
+          "cue_end": 109.0,
+          "text": "模拟数据中，9月净销售额为 17,198,835.91 元。",
+          "image": "qa/赛题二_B09_硬字幕.jpg",
+          "image_sha256": "23a5ae46836f7c0bfa86cc777777de7bc4840cf0ac7b540d467fe6cab884a6b7",
+          "timing_check": "PASS"
+        },
+        {
+          "scene_id": "B12",
+          "time_sec": 145.0,
+          "cue_start": 133.0,
+          "cue_end": 149.0,
+          "text": "系统明确阻断无依据归因：订单数据不能证明变化原因。",
+          "image": "qa/赛题二_B12_硬字幕.jpg",
+          "image_sha256": "bbe4e20b87f0e2e8de1dc9c200eb69a128fe5e57b8beab5a61475dfc634c1084",
+          "timing_check": "PASS"
+        }
+      ],
+      "source_video_packet_sha256": "SHA256=de839de7f9bb536965a6a5b96d4c2344c41cc97511eeea55b85c896587ccaa87",
+      "source_audio_packet_sha256": "SHA256=e6b78c0a4963f0b8ccd57b1a60299eb0d742f6ab01acc96698711ec4a12d4aa5",
+      "source_soft_subtitle_packet_sha256": "SHA256=73976cc5e08122cf754b7dda6de8a660baf82c507ead939ba3b0dfd1b9a8c67e",
+      "outside_subtitle_band_ssim": 0.999324,
+      "ass_markup_preserves_text": true,
+      "emphasis_spans": [
+        {
+          "scene_id": "B02",
+          "text": "演示库有 2 万订单、3,492 退款和 2,000 客户。",
+          "highlighted": [
+            "3,492 退款",
+            "2,000 客户"
+          ]
+        },
+        {
+          "scene_id": "B09",
+          "text": "模拟数据中，9月净销售额为 17,198,835.91 元。",
+          "highlighted": [
+            "17,198,835.91 元"
+          ]
+        },
+        {
+          "scene_id": "B16",
+          "text": "归档业务题验收为 37/37，包含正确澄清与拒答。",
+          "highlighted": [
+            "37/37"
+          ]
+        },
+        {
+          "scene_id": "B17",
+          "text": "归档真实模型复测 67/67，与规则结果逐字段一致。",
+          "highlighted": [
+            "67/67"
+          ]
+        },
+        {
+          "scene_id": "B18",
+          "text": "归档复测记录为 0 无依据编造，不代表无限场景保证。",
+          "highlighted": [
+            "0"
+          ]
+        },
+        {
+          "scene_id": "B19",
+          "text": "确定性 Text-to-SQL 对照曾虚高 96.8 万元。",
+          "highlighted": [
+            "96.8 万元"
+          ]
         }
       ]
     },
@@ -776,50 +878,165 @@
       "outputs": [
         {
           "file": "赛题一_演示视频_自然配音_软字幕.mp4",
-          "sha256": "e0062b403ee127da477aa55d16a9dd1d0b1e218308bde5c5b9e2c4eb228720aa",
-          "duration_sec": 285,
+          "sha256": "b65d1491dd7f65e40e655f07edd29459fd201ed22167ea1e8601d65aea9a16dc",
+          "bytes": 8147448,
+          "duration_sec": 285.0,
           "mean_volume_db": -20.9,
+          "width": 1920,
+          "height": 1080,
+          "video_codec": "h264",
+          "audio_codec": "aac",
+          "subtitle_track": true,
           "checks": {
             "duration_within_limit": true,
             "h264_and_aac": true,
             "resolution_1080p": true,
+            "narration_aac_packets_unchanged": true,
+            "github_file_size_limit": true,
             "visual_packets_unchanged": true,
-            "soft_subtitle_preserved": true,
+            "soft_subtitle_packets_unchanged": true,
+            "embedded_srt_text_and_timeline_unchanged": true,
+            "mov_text_track_exists": true,
             "audio_non_silent": true
-          }
+          },
+          "audio_packet_sha256": "SHA256=21d874232db3f2b6efac4435f029c9b981d58a55a6db05126f12100f48fb252f"
         },
         {
           "file": "赛题一_演示视频_自然配音_硬字幕.mp4",
-          "sha256": "1eb5cdfe8ac7caf9fd100f74fe035bae45fd508bcf382d79dd615f6e07f7919b",
-          "duration_sec": 285,
+          "sha256": "54ee74ba85b4cf82adef48c59a47a998a791980f269eea58fc85f29c8a698d75",
+          "bytes": 9690720,
+          "duration_sec": 285.0,
           "mean_volume_db": -20.9,
+          "width": 1920,
+          "height": 1080,
+          "video_codec": "h264",
+          "audio_codec": "aac",
+          "subtitle_track": false,
           "checks": {
             "duration_within_limit": true,
             "h264_and_aac": true,
             "resolution_1080p": true,
-            "visual_packets_unchanged": true,
+            "narration_aac_packets_unchanged": true,
+            "github_file_size_limit": true,
             "audio_non_silent": true
-          }
+          },
+          "audio_packet_sha256": "SHA256=21d874232db3f2b6efac4435f029c9b981d58a55a6db05126f12100f48fb252f"
         }
-      ]
+      ],
+      "render_version": "v2",
+      "qa_samples": [
+        {
+          "scene_id": "A03",
+          "time_sec": 29.0,
+          "cue_start": 20.0,
+          "cue_end": 32.0,
+          "text": "先提供可体验的制品，再传播实操内容，最后依据数据复盘。",
+          "image": "qa/赛题一_A03_硬字幕.jpg",
+          "image_sha256": "2c1dad18bd5f0a2bb35658fa7b6aaa6a7e8319781e60865e6a5a9bdac2417549",
+          "timing_check": "PASS"
+        },
+        {
+          "scene_id": "A14",
+          "time_sec": 161.25,
+          "cue_start": 150.0,
+          "cue_end": 165.0,
+          "text": "移动视口检查阅读与按钮布局，展示适合社交传播的页面。",
+          "image": "qa/赛题一_A14_硬字幕.jpg",
+          "image_sha256": "6b9d347d4717c30329f746c943608587403d8ff4acf7ccb9a30e1dcd7bd44ed3",
+          "timing_check": "PASS"
+        },
+        {
+          "scene_id": "A20",
+          "time_sec": 231.25,
+          "cue_start": 220.0,
+          "cue_end": 235.0,
+          "text": "执行台账记录发布、入口和后台截图，未发生的事项保持空白。",
+          "image": "qa/赛题一_A20_硬字幕.jpg",
+          "image_sha256": "396870fc89823e04dc69275bbfea99b8a0a657f5125a99826227034f18b1c217",
+          "timing_check": "PASS"
+        }
+      ],
+      "source_video_packet_sha256": "SHA256=24f3de7e5f02e61a1512dec79b8cc3b12f65c270a83036bec5484a9e8085d700",
+      "source_audio_packet_sha256": "SHA256=21d874232db3f2b6efac4435f029c9b981d58a55a6db05126f12100f48fb252f",
+      "source_soft_subtitle_packet_sha256": "SHA256=01f94b5b037dee7538d0c3c27c07fe041288ef1f531179ba7a65532d49d8c289",
+      "outside_subtitle_band_ssim": 0.999264,
+      "ass_markup_preserves_text": true,
+      "emphasis_spans": []
     }
   },
-  "all_preexisting_tracked_files_unchanged": true,
   "acceptance_checks": {
     "赛题二_factual_numbers_whitelisted": true,
-    "赛题二_prohibited_word_scan": true,
-    "赛题二_subtitles_identical": true,
-    "赛题二_all_narration_text_verbatim": true,
-    "赛题二_three_subtitle_samples_in_scene": true,
-    "赛题二_rules_mode_preserved": true,
-    "赛题二_软字幕_narration_actually_replaced": true,
-    "赛题二_硬字幕_narration_actually_replaced": true,
+    "赛题二_prohibited_word_and_url_scan": true,
+    "赛题二_srt_text_and_timeline_unchanged": true,
+    "赛题二_narration_not_regenerated": true,
+    "赛题二_three_qa_frames_in_cues": true,
     "赛题一_factual_numbers_whitelisted": true,
-    "赛题一_prohibited_word_scan": true,
-    "赛题一_subtitles_identical": true,
-    "赛题一_all_narration_text_verbatim": true,
-    "赛题一_three_subtitle_samples_in_scene": true,
-    "赛题一_软字幕_narration_actually_replaced": true,
-    "赛题一_硬字幕_narration_actually_replaced": true
+    "赛题一_prohibited_word_and_url_scan": true,
+    "赛题一_srt_text_and_timeline_unchanged": true,
+    "赛题一_narration_not_regenerated": true,
+    "赛题一_three_qa_frames_in_cues": true,
+    "赛题二_rules_mode_preserved": true,
+    "all_storyboards_footage_voice_and_srt_unchanged": true
+  },
+  "render_version": "v2",
+  "render_date_local": "2026-10-09",
+  "visual_review": {
+    "status": "PASS",
+    "method": "Assistant visual inspection of all six actual v2 hard-subtitle QA frames",
+    "frame_count": 6,
+    "checks": [
+      "Bottom-centred white captions remain fully visible without clipping or wrapping",
+      "Black outline and 70 percent black strip improve caption contrast",
+      "B09 amount and yuan unit are gold; the sentence and number are unchanged",
+      "Scene content, headers and source information outside the caption strip are preserved"
+    ]
+  },
+  "subtitle_style": {
+    "version": "v2",
+    "play_res_x": 1920,
+    "play_res_y": 1080,
+    "font_name": "Microsoft YaHei",
+    "font_size_px": 40,
+    "ass_font_size_units": 54,
+    "text_color": "#FFFFFF",
+    "outline_color": "#000000",
+    "outline_px": 2.5,
+    "alignment": "bottom_center",
+    "margin_bottom_px": 28,
+    "bar_height_px": 100,
+    "bar_opacity": 0.7,
+    "emphasis_color": "#F5B800",
+    "emphasis_whitelist": [
+      "17,198,835.91 元",
+      "20,000 订单",
+      "3,492",
+      "2,000",
+      "96.8 万元",
+      "37/37",
+      "67/67",
+      "0"
+    ]
+  },
+  "render_scope": "compose/burn-in only; reuse existing frames, unburned footage, AAC voice and subtitle timeline",
+  "style_applies_to": "hard-subtitle MP4; soft MP4 preserves original removable mov_text packets",
+  "soft_subtitle_style_note": "mov_text/SRT appearance is player-dependent; colour, outline and strip are guaranteed only in hard-subtitle MP4",
+  "baseline_commit": "394f295e71073605203ce213920a51f3372b9271",
+  "baseline_report_sha256": "0577180f5e0f93ffd2403d4c2ebe8f318191f415741e0cc10a041b089ed9968e",
+  "previous_generation_invariance_note": "Historical original-voice generation protected tracked files; this authorized v2 changes rendering artifacts only.",
+  "protected_input_summary": {
+    "file_count": 5653,
+    "frame_count": 5550,
+    "aggregate_sha256": "6af74336b89171a46d4f2e00c988349456ecc8e9c9cca08bb77d74a2eeebb321",
+    "all_unchanged_after_render": true,
+    "storyboard_srt_and_full_voice_sha256": {
+      "storyboard_赛题二.json": "2c6e551924b941f9e8f52c51c083e13dc9645cd530d933e647e4049764db4e5e",
+      "storyboard_赛题一.json": "2c20788de9705d1b0a197f85dab303ddf45e89359609409fc73031ddcd981044",
+      "赛题二_演示视频.srt": "efa41b2066e7757890cd3d20f04d64bdeaba5e67e216452b8693df11dff51a26",
+      "赛题二_演示视频_自然配音.srt": "efa41b2066e7757890cd3d20f04d64bdeaba5e67e216452b8693df11dff51a26",
+      "赛题一_演示视频.srt": "e96dfa6517623ae3df4487c05bbbf88285d61effd8d503e90ac581611d8308bf",
+      "赛题一_演示视频_自然配音.srt": "e96dfa6517623ae3df4487c05bbbf88285d61effd8d503e90ac581611d8308bf",
+      "_work/natural_voice/赛题一_自然配音.wav": "f4a69a91feb33ee32a758264b1fb3bc379d959ccc9ab29e30032feb13f19df02",
+      "_work/natural_voice/赛题二_自然配音.wav": "82c00b1133f40053dc7644b7f850b45491f7e98537895fb437585d99f564a729"
+    }
   }
 }
